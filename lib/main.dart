@@ -5,8 +5,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'nestedTabBarView.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'dart:io';
-import 'package:flutterheart/globals.dart' as globals;
+
 //https://oblador.github.io/react-native-vector-icons/
 
 void main() {
@@ -59,7 +58,6 @@ class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
-
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
@@ -911,4 +909,27 @@ class goForCode extends StatelessWidget {
       shape: const StadiumBorder(),
     );
   }
+}
+class _PageTwo extends MaterialPageRoute<Null> {
+  _PageTwo() : super(builder: (BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Code Summary'),
+        elevation: 1.0,
+      ),
+      body: Builder(
+        builder: (BuildContext context) => Column(
+          children: <Widget>[
+            RaisedButton(
+                child: Text('New Code'),
+                onPressed: () {
+                  Navigator.pop(context);
+                }
+            ),
+
+          ],
+        ),
+      ),
+    );
+  });
 }
