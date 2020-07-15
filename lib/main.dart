@@ -128,12 +128,22 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             }
     );
   }
-  var showingPulse = false;
-
 
   _selectedPulse(String selected) {
     Navigator.of(context).pop();
-    showingPulse = false;
+    setState(() {
+      if (selected == "vtach" || selected == "svt") {
+        showShock = true;
+        _shockType = "SYNCRONIZED SHOCK DELIVERED";
+      }else if (selected == "vfib" || selected == "tors") {
+        showShock = true;
+        _shockType = "UN-SYNCRONIZED SHOCK DELIVERED";
+      }else{
+        askForPulse = false;
+        nested.show = false;
+      }
+
+    });
   }
 
   @override
@@ -203,8 +213,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 OpenPulseButton(
                   onPressed: () => setState(() {
                     print('yes pcheck');
-                    askForPulse = false;
-                    nested.show = false;
+
                     showModalBottomSheet(
                         context: context,
                         builder: (context) => Container(
@@ -342,7 +351,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         ],
                                       )
                                   ),
-                                  onTap: () => { _selectedPulse('pea') },
+                                  onTap: () => { _selectedPulse('vfib') },
                                 ),
                                 ListTile(
                                   title: Container(
@@ -523,6 +532,63 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ],
       ),
     );
+    if (showShock) {
+      cP = Container(
+          color: Colors.black54,
+          child: Column(
+            children: <Widget>[
+              Flexible(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  child: Container(
+
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.all(5),
+                            child: Container(
+                              child: AutoSizeText('Continue Compressions While Chargning',
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: 50,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]
+                    ),
+                  ),
+                ),
+              ),
+
+              Flexible(
+                flex: 2,
+                child: Row(
+                  children: <Widget>[
+                    deliveredShock(
+                      onPressed: () => setState(() {
+                        print('Shock Delivered');
+                        askForPulse = false;
+                        nested.show = false;
+                        showShock = false;
+                      }),
+                    ),
+
+                  ],
+                ),
+              ),
+            ],
+          ),
+      );
+
+    }
     var pulseStack = <Widget>[ nested, cP, ];
     var lowStack = <Widget>[nested];
 
@@ -658,18 +724,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
       ],
     );
-    if (showShock) {
-      warning = Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
 
-              child: AutoSizeText('CONTINUE COMPRESSIONS WHILE CHARGING')
-          ),
-        ],
-      );
-
-    }
     var fullStack = <Widget> [full];
     if (!warningDismissed) {
       fullStack = <Widget> [full, warning];
@@ -782,6 +837,51 @@ class NoCeck extends StatelessWidget {
     );
   }
 }
+class deliveredShock extends StatelessWidget {
+  deliveredShock({@required this.onPressed});
+  final GestureTapCallback onPressed;
+
+  Widget build(BuildContext context) {
+    return Expanded (
+        child: Padding(
+            padding: EdgeInsets.all(15),
+            child: RawMaterialButton(
+              fillColor: Colors.red,
+              splashColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                  children: <Widget>[
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Icon(FontAwesome.bolt,
+                          size: 400,
+                          color: Colors.white,),
+                      ),
+                    ),
+                    Expanded(
+                      child: AutoSizeText(
+                        _shockType,
+                        maxLines: 1,
+                        style: TextStyle(color: Colors.white,
+                            fontSize: 60
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              onPressed: onPressed,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            )
+        )
+    );
+  }
+}
+var _shockType = " ";
 class goForCode extends StatelessWidget {
   goForCode({@required this.onPressed});
   final GestureTapCallback onPressed;
