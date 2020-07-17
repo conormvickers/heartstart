@@ -148,6 +148,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    nested = NestedTabBar(parent: this,);
+
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
     globals.log = formattedDate;
@@ -195,14 +197,17 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Container(
-                        padding: EdgeInsets.all(5),
-                        child: Container(
-                          child: AutoSizeText('Check Pulse Now?',
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 50,
-                              color: Colors.white,
+                      Expanded(
+                        child:
+                        Container(
+                          padding: EdgeInsets.all(5),
+                          child: Container(
+                            child: AutoSizeText('Check Pulse Now?',
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 50,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
