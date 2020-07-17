@@ -1,17 +1,23 @@
 import 'dart:async';
+import 'package:flutterheart/main.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:customgauge/customgauge.dart';
+import 'globals.dart' as globals;
+import 'main.dart' as rootFile;
+import 'package:intl/intl.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
   final pass;
-  NestedTabBar({Key key,this.show,this.pass}) : super(key: key);
+  rootFile.MyHomePageState parent;
+
+  NestedTabBar({Key key,this.show,this.pass,this.parent}) : super(key: key);
 
   @override
-  _NestedTabBarState createState() => _NestedTabBarState();
+  _NestedTabBarState createState() => _NestedTabBarState(parent);
 }
 class _ListItem {
   _ListItem(this.value, this.checked);
@@ -78,6 +84,7 @@ const List<Entry> data = <Entry>[
 //"Tamponade (cardiac)", "Tension pneumothorax", "Thrombosis"
 var tapLabel = '';
 
+
 final _medStrings = <String> [
   'Epinephrine',
   'Amiodarone',
@@ -131,6 +138,9 @@ class MedMessageItem implements MedListItem {
 class _NestedTabBarState extends State<NestedTabBar>
     with TickerProviderStateMixin {
   TabController _nestedTabController;
+  MyHomePageState parent;
+
+  _NestedTabBarState(this.parent);
 
   @override
   void initState() {
@@ -265,6 +275,8 @@ class _NestedTabBarState extends State<NestedTabBar>
 
   @override
   Widget build(BuildContext context) {
+
+    print(globals.log);
 
     final _listTiles = _citems.map((item) => CheckboxListTile(
       key: Key(item.value),
@@ -460,14 +472,17 @@ class _NestedTabBarState extends State<NestedTabBar>
                               RaisedButton(
                                 child: Text('Check Pulse Now'),
                                 onPressed: (){
-                                  print('press nested');
-                                  this.widget.show = true;},
+                                  this.parent.setState(() {
+                                    askForPulse = true;
+                                  });
+                                  },
                               ),
                               RaisedButton(
-                                  child: Text('Stop Code Now')
+                                child: Text('Stop Code Now'),
+                                onPressed: () =>  Navigator.push(context, _PageTwo("")) ,
+                                      
                               ),
                             ],
-
                           ),
                         ],
                       ),
@@ -478,7 +493,6 @@ class _NestedTabBarState extends State<NestedTabBar>
                       ),
                     ),
                   ),
-
               ],
             ),
           ),
@@ -506,4 +520,36 @@ class EntryItem extends StatelessWidget {
     return _buildTiles(entry);
   }
 
+}
+class _PageTwo extends MaterialPageRoute<Null> {
+
+  final String log;
+
+  _PageTwo(this.log) : super(builder: (BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Code Summary'),
+        elevation: 1.0,
+      ),
+      body: Builder(
+        builder: (BuildContext context) => Column(
+          children: <Widget>[
+            Text(
+              globals.log,
+            ),
+            RaisedButton(
+                child: Text('New Code'),
+                onPressed: () {
+                  globals.log = "";
+                  globals.reset = true;
+
+                  Navigator.pop(context);
+                }
+            ),
+
+          ],
+        ),
+      ),
+    );
+  });
 }

@@ -1,3 +1,4 @@
 //library globals;
 
-bool _showPNow = false;
+String log = "";
+bool reset = false;

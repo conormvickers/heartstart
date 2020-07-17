@@ -5,6 +5,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'nestedTabBarView.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'globals.dart' as globals;
+import 'package:intl/intl.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -14,7 +16,7 @@ void main() {
 var askForPulse = false;
 var warningDismissed = false;
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatelessWidget  {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -56,10 +58,10 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
 
   double fraction = 0;
@@ -146,6 +148,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    globals.log = formattedDate;
     super.initState();
 
     minPassed = 0;
@@ -157,6 +162,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (globals.reset) {
+      print("reseting now");
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+      globals.log = formattedDate;
+      minPassed = 0;
+      secPassed = 0;
+      dispSec = 0;
+      fraction = 0;
+      globals.reset = false;
+    }
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -909,27 +925,4 @@ class goForCode extends StatelessWidget {
       shape: const StadiumBorder(),
     );
   }
-}
-class _PageTwo extends MaterialPageRoute<Null> {
-  _PageTwo() : super(builder: (BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Code Summary'),
-        elevation: 1.0,
-      ),
-      body: Builder(
-        builder: (BuildContext context) => Column(
-          children: <Widget>[
-            RaisedButton(
-                child: Text('New Code'),
-                onPressed: () {
-                  Navigator.pop(context);
-                }
-            ),
-
-          ],
-        ),
-      ),
-    );
-  });
 }
