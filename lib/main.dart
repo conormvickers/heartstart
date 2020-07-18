@@ -144,7 +144,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         showShock = true;
         _shockType = "UN-SYNCRONIZED SHOCK DELIVERED";
       }else if (selected == "pulse"){
-        
+        DateTime now = DateTime.now();
+        String formattedDate = DateFormat('kk:mm').format(now);
+        String combined = "\n" + formattedDate + "\tCode Stopped";
+        String full = combined.toString() + "\t" + currentTime();
+        globals.log = globals.log + full;
+        Navigator.push(context, PageTwo(""));
         askForPulse = false;
         nested.show = false;
       }
@@ -189,7 +194,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       secPassed = 0;
       dispSec = 0;
       fraction = 0;
-      
+      askForPulse = false;
       globals.reset = false;
     }
     SystemChrome.setPreferredOrientations([

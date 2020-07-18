@@ -281,7 +281,6 @@ class NestedTabBarState extends State<NestedTabBar>
   stopCode() {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
-  
     String combined = "\n" + formattedDate + "\tCode Stopped";
     String full = combined.toString() + "\t" + this.parent.currentTime();
     globals.log = globals.log + full;
@@ -571,6 +570,7 @@ class PageTwo extends MaterialPageRoute<Null> {
                       RaisedButton(
                       child: Text('New Code'),
                       onPressed: () {
+
                         globals.log = "";
                         globals.stopCodeNow = false;
                         timesGiven = <int> [
@@ -580,7 +580,6 @@ class PageTwo extends MaterialPageRoute<Null> {
                           DateTime.now(), DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),
                         ];
                         globals.reset = true;
-
                         Navigator.pop(context);
                       }
                     ),
