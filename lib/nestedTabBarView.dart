@@ -8,6 +8,7 @@ import 'package:customgauge/customgauge.dart';
 import 'globals.dart' as globals;
 import 'main.dart' as rootFile;
 import 'package:intl/intl.dart';
+import 'package:share/share.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -17,7 +18,7 @@ class NestedTabBar extends StatefulWidget {
   NestedTabBar({Key key,this.show,this.pass,this.parent}) : super(key: key);
 
   @override
-  _NestedTabBarState createState() => _NestedTabBarState(parent);
+  NestedTabBarState createState() => NestedTabBarState(parent);
 }
 class _ListItem {
   _ListItem(this.value, this.checked);
@@ -38,7 +39,7 @@ const List<Entry> data = <Entry>[
   ),
   Entry('Hypoxia',
       <Entry>[
-        Entry('oxygen/intubation'),
+        Entry('Oxygen/intubation'),
       ]
 
   ),
@@ -64,7 +65,7 @@ const List<Entry> data = <Entry>[
   ),
   Entry('Tamponade (cardiac)',
       <Entry>[
-        Entry('Pericardiocentesis, electrocardiogram if uncertain'),
+        Entry('Pericardiocentesis, echocardiogram if uncertain'),
       ]
   ),
   Entry('Tension pneumothorax',
@@ -99,7 +100,7 @@ final _doses = <String> [
   '1 ampule',
   '500-1000mL bolus'
 ];
-var _timesGiven = <int> [
+var timesGiven = <int> [
   0,0,0,0,0,0,0,0,
 ];
 var _lastGiven = <DateTime> [
@@ -135,12 +136,12 @@ class MedMessageItem implements MedListItem {
   Widget buildTrailing(BuildContext context) => Text(trailing);
 }
 
-class _NestedTabBarState extends State<NestedTabBar>
+class NestedTabBarState extends State<NestedTabBar>
     with TickerProviderStateMixin {
   TabController _nestedTabController;
   MyHomePageState parent;
 
-  _NestedTabBarState(this.parent);
+  NestedTabBarState(this.parent);
 
   @override
   void initState() {
@@ -254,9 +255,15 @@ class _NestedTabBarState extends State<NestedTabBar>
 
 
   _giveMed(int index) {
+    //print('global code time' + globals.publicCodeTime);
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('kk:mm').format(now);
+    String combined = "\n" + formattedDate + "\t" + _medStrings[index].toString();
+    String full = combined.toString() + "\t" + this.parent.currentTime();
+    globals.log = globals.log + full;
     setState( () => {
       _lastGiven[index] = DateTime.now(),
-      _timesGiven[index]++,
+      timesGiven[index]++,
 
     } );
 
@@ -271,12 +278,22 @@ class _NestedTabBarState extends State<NestedTabBar>
     'Intubation',
     'Capnography',
   ].map((item) => _ListItem(item, false)).toList();
+  stopCode() {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('kk:mm').format(now);
+  
+    String combined = "\n" + formattedDate + "\tCode Stopped";
+    String full = combined.toString() + "\t" + this.parent.currentTime();
+    globals.log = globals.log + full;
+    Navigator.push(context, PageTwo(""));
+
+  }
 
 
   @override
   Widget build(BuildContext context) {
-
-    print(globals.log);
+    
+    print("current log:" + globals.log);
 
     final _listTiles = _citems.map((item) => CheckboxListTile(
       key: Key(item.value),
@@ -350,8 +367,8 @@ class _NestedTabBarState extends State<NestedTabBar>
                           var tx = Text('');
                           var color = Colors.black54;
                           final dif = DateTime.now().difference(_lastGiven[index]).inMinutes.toString();
-                          if ( _timesGiven[index] != 0 ) {
-                            tx = Text('given ' + _timesGiven[index].toString() + ' doses\nlast given ' + dif + ' min ago',
+                          if ( timesGiven[index] != 0 ) {
+                            tx = Text('given ' + timesGiven[index].toString() + ' doses\nlast given ' + dif + ' min ago',
 
                             );
                           }
@@ -368,7 +385,7 @@ class _NestedTabBarState extends State<NestedTabBar>
                               subtitle: item.buildSubtitle(context),
                               trailing: tx,
                               onTap: () {
-                                print(index);
+                                print("med index tapped:" + index.toString());
                                 _giveMed(index);
                               },
                             ),
@@ -479,7 +496,9 @@ class _NestedTabBarState extends State<NestedTabBar>
                               ),
                               RaisedButton(
                                 child: Text('Stop Code Now'),
-                                onPressed: () =>  Navigator.push(context, _PageTwo("")) ,
+                                onPressed: () {
+                                    stopCode();
+                                  },
                                       
                               ),
                             ],
@@ -501,6 +520,7 @@ class _NestedTabBarState extends State<NestedTabBar>
     );
   }
 }
+
 class EntryItem extends StatelessWidget {
   const EntryItem(this.entry);
   final Entry entry;
@@ -521,11 +541,11 @@ class EntryItem extends StatelessWidget {
   }
 
 }
-class _PageTwo extends MaterialPageRoute<Null> {
+class PageTwo extends MaterialPageRoute<Null> {
 
   final String log;
 
-  _PageTwo(this.log) : super(builder: (BuildContext context){
+  PageTwo(this.log) : super(builder: (BuildContext context){
     return Scaffold(
       appBar: AppBar(
         title: Text('Code Summary'),
@@ -534,19 +554,47 @@ class _PageTwo extends MaterialPageRoute<Null> {
       body: Builder(
         builder: (BuildContext context) => Column(
           children: <Widget>[
-            Text(
+            Expanded(
+              flex: 9,
+              child: SingleChildScrollView(child: Text(
               globals.log,
+            ),),
             ),
-            RaisedButton(
-                child: Text('New Code'),
-                onPressed: () {
-                  globals.log = "";
-                  globals.reset = true;
+            Expanded(
+              flex: 1,
+              
+              child: Container( 
+                color: Colors.red,
+                child: ButtonBar(
+                    alignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      RaisedButton(
+                      child: Text('New Code'),
+                      onPressed: () {
+                        globals.log = "";
+                        globals.stopCodeNow = false;
+                        timesGiven = <int> [
+                          0,0,0,0,0,0,0,0,
+                        ];
+                        _lastGiven = <DateTime> [
+                          DateTime.now(), DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),
+                        ];
+                        globals.reset = true;
 
-                  Navigator.pop(context);
-                }
+                        Navigator.pop(context);
+                      }
+                    ),
+                     RaisedButton(
+                       child: Text('Send'),
+                       onPressed: () =>  Share.share(globals.log),
+                     )
+
+
+                  ],)
+                    
+              
+              ), 
             ),
-
           ],
         ),
       ),

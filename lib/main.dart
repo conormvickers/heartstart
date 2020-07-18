@@ -61,6 +61,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
+
 class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
 
@@ -68,13 +69,15 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double minPassed = 0;
   double secPassed = 0;
   double dispSec = 0;
+  
   Color barColor = Colors.red;
   CircularPercentIndicator cycle;
   IconData centerIcon = Icons.arrow_downward;
+  
 
   String inst = "Continue Compressions";
 
-  _currentTime() {
+  currentTime() {
     if (minPassed < 10) {
       if (dispSec < 10) {
         return "0" + minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
@@ -86,7 +89,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     if (dispSec < 10) {
       return minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
     }
-    return minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
+    globals.publicCodeTime = minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
+    return globals.publicCodeTime;
   }
 
   _triggerUpdate() {
@@ -114,7 +118,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       barColor = Colors.blueAccent;
                       inst = "Pulse Check";
                       centerIcon = Ionicons.ios_pulse;
-                      print('pulse check time');
+                      
                       if (secPassed == 110){
                         print('should open');
                         askForPulse = true;
@@ -135,13 +139,24 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (selected == "vtach" || selected == "svt") {
         showShock = true;
         _shockType = "SYNCRONIZED SHOCK DELIVERED";
+        
       }else if (selected == "vfib" || selected == "tors") {
         showShock = true;
         _shockType = "UN-SYNCRONIZED SHOCK DELIVERED";
-      }else{
+      }else if (selected == "pulse"){
+        
         askForPulse = false;
         nested.show = false;
       }
+      else{
+        askForPulse = false;
+        nested.show = false;
+      }
+      DateTime now = DateTime.now();
+        String formattedDate = DateFormat('kk:mm').format(now);
+        String combined = "\n" + formattedDate + "\tPulse check: " + selected.toString() + " identified";
+        String full = combined.toString() + "\t" + currentTime();
+        globals.log = globals.log + full;
 
     });
   }
@@ -152,13 +167,14 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
-    globals.log = formattedDate;
+    globals.log = formattedDate + "\tCode Started\t00:00";
     super.initState();
 
     minPassed = 0;
     secPassed = 0;
     dispSec = 0;
     fraction = 0;
+    
     _triggerUpdate();
   }
 
@@ -168,11 +184,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       print("reseting now");
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
-      globals.log = formattedDate;
+      globals.log = formattedDate + "\tCode Started\t00:00";
       minPassed = 0;
       secPassed = 0;
       dispSec = 0;
       fraction = 0;
+      
       globals.reset = false;
     }
     SystemChrome.setPreferredOrientations([
@@ -593,6 +610,11 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   children: <Widget>[
                     deliveredShock(
                       onPressed: () => setState(() {
+                        DateTime now = DateTime.now();
+                        String formattedDate = DateFormat('kk:mm').format(now);
+                        String combined = "\n" + formattedDate + "\tShock Delivered";
+                        String full = combined.toString() + "\t" + currentTime();
+                        globals.log = globals.log + full;
                         print('Shock Delivered');
                         askForPulse = false;
                         nested.show = false;
@@ -611,7 +633,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     var pulseStack = <Widget>[ nested, cP, ];
     var lowStack = <Widget>[nested];
 
-    print([nested.show, askForPulse]);
+    
     var temp = lowStack;
     if (nested.show != null){
       if (nested.show) {
@@ -653,7 +675,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               ),
 
                               Center( child:
-                              new Text(_currentTime(),
+                              new Text(currentTime(),
                                 style: new TextStyle(
                                   fontSize: 40.0,
 
