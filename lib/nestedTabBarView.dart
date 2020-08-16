@@ -15,16 +15,18 @@ class NestedTabBar extends StatefulWidget {
   final pass;
   rootFile.MyHomePageState parent;
 
-  NestedTabBar({Key key,this.show,this.pass,this.parent}) : super(key: key);
+  NestedTabBar({Key key, this.show, this.pass, this.parent}) : super(key: key);
 
   @override
   NestedTabBarState createState() => NestedTabBarState(parent);
 }
+
 class _ListItem {
   _ListItem(this.value, this.checked);
   final String value;
   bool checked;
 }
+
 class Entry {
   const Entry(this.title, [this.children = const <Entry>[]]);
   final String title;
@@ -32,87 +34,261 @@ class Entry {
 }
 
 const List<Entry> data = <Entry>[
-  Entry('Hypovolemia',
-    <Entry>[
-      Entry('Give Fluid'),
-    ]
-  ),
-  Entry('Hypoxia',
-      <Entry>[
-        Entry('Oxygen/intubation'),
-      ]
-
-  ),
-  Entry('Hydrogen ions (acidosis)',
-      <Entry>[
-        Entry('Give bicarb'),
-      ]
-  ),
-  Entry('Hyper/hypo kalemia',
-      <Entry>[
-        Entry('Check most recent labs, dialysis/replete'),
-      ]
-  ),
-  Entry('Hypothermmia',
-      <Entry>[
-        Entry('Bair hugger, warmed fluids'),
-      ]
-  ),
-  Entry('Toxins',
-      <Entry>[
-        Entry('Cocain, Digoxin, TCA, CCB, review medications review history'),
-      ]
-  ),
-  Entry('Tamponade (cardiac)',
-      <Entry>[
-        Entry('Pericardiocentesis, echocardiogram if uncertain'),
-      ]
-  ),
-  Entry('Tension pneumothorax',
-      <Entry>[
-        Entry('Needle Thoracostomy 14-16 gauge needle'),
-      ]
-  ),
-  Entry('Thrombosis',
-      <Entry>[
-        Entry('Consider PE and anticoagulation'),
-      ]
-  ),
+  Entry('Hypovolemia', <Entry>[
+    Entry('Give Fluid'),
+  ]),
+  Entry('Hypoxia', <Entry>[
+    Entry('Oxygen/intubation'),
+  ]),
+  Entry('Hydrogen ions (acidosis)', <Entry>[
+    Entry('Give bicarb'),
+  ]),
+  Entry('Hyper/hypo kalemia', <Entry>[
+    Entry('Check most recent labs, dialysis/replete'),
+  ]),
+  Entry('Hypothermmia', <Entry>[
+    Entry('Bair hugger, warmed fluids'),
+  ]),
+  Entry('Toxins', <Entry>[
+    Entry('Cocain, Digoxin, TCA, CCB, review medications review history'),
+  ]),
+  Entry('Tamponade (cardiac)', <Entry>[
+    Entry('Pericardiocentesis, echocardiogram if uncertain'),
+  ]),
+  Entry('Tension pneumothorax', <Entry>[
+    Entry('Needle Thoracostomy 14-16 gauge needle'),
+  ]),
+  Entry('Thrombosis', <Entry>[
+    Entry('Consider PE and anticoagulation'),
+  ]),
 ];
 //"Hypovolemia", "Hypoxia", "Hydrogen ions (acidosis)",
 //"Hyper/hypokalemia",
 //"Hypothermia", "Toxins",
 //"Tamponade (cardiac)", "Tension pneumothorax", "Thrombosis"
 var tapLabel = '';
-
-
-final _medStrings = <String> [
-  'Epinephrine',
+double _weightValue = 5;
+List<double> weightkgOptions = [2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+List<String> weightOptions = [
+  "2.5kg\n5lbs",
+  "5kg\n10lbs",
+  "10kg\n20lbs",
+  "15kg\n30lbs",
+  "20kg\n40lbs",
+  "25kg\n50lbs",
+  "30kg\n60lbs",
+  "35kg\n70lbs",
+  "40kg\n80lbs",
+  "45kg\n90lbs",
+  "50kg\n100lbs"
+];
+final _medStrings = <String>[
+  'Epinephrine Low',
+  'Epinephrine High',
+  'Vasopressin',
+  'Atropine',
   'Amiodarone',
-  'Magnesium',
-  'Bicarbonate',
-  'Fluid',
+  'Lidocaine',
+  'Naloxone',
+  'Flumazenil',
+  'Atipamezole'
 ];
-final _doses = <String> [
-  '1mg every 2-3 min',
-  '300mg first dose, 150mg second dose',
-  '1-2g',
-  '1 ampule',
-  '500-1000mL bolus'
+final _doses = <String>[
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
 ];
-var timesGiven = <int> [
-  0,0,0,0,0,0,0,0,
+final epilow = <String>[
+  '0.03',
+  '0.05',
+  '0.1',
+  '0.15',
+  '0.2',
+  '0.25',
+  '0.3',
+  '0.35',
+  '0.4',
+  '0.45',
+  '0.5'
 ];
-var _lastGiven = <DateTime> [
-  DateTime.now(), DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),
+final epihigh = <String>[
+  '0.25',
+  '0.5',
+  '1',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+  '3.5',
+  '4',
+  '4.5',
+  '5'
+];
+final vaso = <String>[
+  '0.1',
+  '0.2',
+  '0.4',
+  '0.6',
+  '0.8',
+  '1',
+  '1.2',
+  '1.4',
+  '1.6',
+  '1.8',
+  '2'
+];
+final atro = <String>[
+  '0.25',
+  '0.5',
+  '1',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+  '3.5',
+  '4',
+  '4.5',
+  '5'
+];
+final amio = <String>[
+  '0.25',
+  '0.5',
+  '1',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+  '3.5',
+  '4',
+  '4.5',
+  '5'
+];
+final lido = <String>[
+  '0.25',
+  '0.5',
+  '1',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+  '3.5',
+  '4',
+  '4.5',
+  '5'
+];
+final nalo = <String>[
+  '0.25',
+  '0.5',
+  '1',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+  '3.5',
+  '4',
+  '4.5',
+  '5'
+];
+final flum = <String>[
+  '0.25',
+  '0.5',
+  '1',
+  '1.5',
+  '2',
+  '2.5',
+  '3',
+  '3.5',
+  '4',
+  '4.5',
+  '5'
+];
+final atip = <String>[
+  '0.03',
+  '0.05',
+  '0.1',
+  '0.15',
+  '0.2',
+  '0.25',
+  '0.3',
+  '0.35',
+  '0.4',
+  '0.45',
+  '0.5'
+];
+List<List<String>> mlPerDose = [
+  epilow,
+  epihigh,
+  vaso,
+  atro,
+  amio,
+  lido,
+  nalo,
+  flum,
+  atip
+];
+final mgPerKg = <String>[
+  '0.01 mg/kg',
+  '0.1 mg/kg',
+  '0.8 U/kg',
+  '0.05 mg/kg',
+  '5 mg/kg',
+  '2-8 mg/kg',
+  '0.04 mg/kg',
+  '0.01 mg/kg',
+  '50 ug/kg',
+  '',
+  '',
+  ''
+];
+var timesGiven = <int>[
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+];
+var _lastGiven = <DateTime>[
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
+  DateTime.now(),
 ];
 
-final medItems = List<MedListItem>.generate(
-  _medStrings.length,
-      (i) {
-        return MedMessageItem(_medStrings[i], _doses[i], 'last given' + _lastGiven[i].toString() + 'min ago');
-      }
-);
+final medItems = List<MedListItem>.generate(_medStrings.length, (i) {
+  return MedMessageItem(_medStrings[i], _doses[i],
+      'last given' + _lastGiven[i].toString() + 'min ago');
+});
+
 abstract class MedListItem {
   /// The title line to show in a list item.
   Widget buildTitle(BuildContext context);
@@ -122,6 +298,7 @@ abstract class MedListItem {
 
   Widget buildTrailing(BuildContext context);
 }
+
 class MedMessageItem implements MedListItem {
   final String sender;
   final String body;
@@ -156,8 +333,8 @@ class NestedTabBarState extends State<NestedTabBar>
     _nestedTabController.dispose();
   }
 
-  var tapTimes = <DateTime> [];
-  var tapDifs = <int> [];
+  var tapTimes = <DateTime>[];
+  var tapDifs = <int>[];
   var perc1 = 0.0;
   var perc2 = 0.0;
   var perc3 = 0.0;
@@ -167,9 +344,8 @@ class NestedTabBarState extends State<NestedTabBar>
   double speed = 0;
 
   _handleTap() {
-
     tapTimes.add(DateTime.now());
-    if (tapTimes.length > 4 ) {
+    if (tapTimes.length > 4) {
       tapTimes.removeAt(0);
     }
 
@@ -178,15 +354,16 @@ class NestedTabBarState extends State<NestedTabBar>
       tapDifs = [];
 
       tapTimes.forEach((element) => {
-        if (tapTimes.indexOf(element)  < tapTimes.length - 1) {
-          a =  tapTimes[tapTimes.indexOf(element) + 1],
-
-          tapDifs.add(a.difference(element).inMilliseconds),
-        }
-      });
+            if (tapTimes.indexOf(element) < tapTimes.length - 1)
+              {
+                a = tapTimes[tapTimes.indexOf(element) + 1],
+                tapDifs.add(a.difference(element).inMilliseconds),
+              }
+          });
 
       print(tapDifs);
-      double ave = (tapDifs.reduce((value, element) => value + element) / tapDifs.length);
+      double ave = (tapDifs.reduce((value, element) => value + element) /
+          tapDifs.length);
       print(ave);
       setState(() {
         tapLabel = (60000 / ave).toStringAsFixed(0) + " /min";
@@ -203,7 +380,7 @@ class NestedTabBarState extends State<NestedTabBar>
         anim1 = true;
         anim2 = true;
         anim3 = true;
-      }else if (speed > 120){
+      } else if (speed > 120) {
         perc3 = (speed - 120) / 40;
         if (perc3 > 1) {
           perc3 = 1;
@@ -213,7 +390,7 @@ class NestedTabBarState extends State<NestedTabBar>
         anim1 = false;
         anim2 = false;
         anim3 = true;
-      }else{
+      } else {
         perc2 = (speed - 100) / 20;
 
         perc1 = 1;
@@ -221,19 +398,18 @@ class NestedTabBarState extends State<NestedTabBar>
         anim1 = false;
         anim2 = true;
         anim3 = false;
-
       }
     }
     if (tapResetTimer != null) {
       tapResetTimer.cancel();
     }
 
-    tapResetTimer = new Timer(Duration(seconds: 3), ()  => {
-
-      print('resetting tap timer'),
-      _resetTapper(),
-    });
-
+    tapResetTimer = new Timer(
+        Duration(seconds: 3),
+        () => {
+              print('resetting tap timer'),
+              _resetTapper(),
+            });
   }
 
   Timer tapResetTimer;
@@ -248,30 +424,25 @@ class NestedTabBarState extends State<NestedTabBar>
       speed = 0;
     });
     perc1 = 0.0;
-     perc2 = 0.0;
-     perc3 = 0.0;
-     
+    perc2 = 0.0;
+    perc3 = 0.0;
   }
-
 
   _giveMed(int index) {
     //print('global code time' + globals.publicCodeTime);
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
-    String combined = "\n" + formattedDate + "\t" + _medStrings[index].toString();
+    String combined =
+        "\n" + formattedDate + "\t" + _medStrings[index].toString();
     String full = combined.toString() + "\t" + this.parent.currentTime();
     globals.log = globals.log + full;
-    setState( () => {
-      _lastGiven[index] = DateTime.now(),
-      timesGiven[index]++,
-
-    } );
-
+    setState(() => {
+          _lastGiven[index] = DateTime.now(),
+          timesGiven[index]++,
+        });
   }
 
-
-
-  static final _citems = <String> [
+  static final _citems = <String>[
     'IV Access',
     'Monitor',
     'Oxygen',
@@ -285,28 +456,98 @@ class NestedTabBarState extends State<NestedTabBar>
     String full = combined.toString() + "\t" + this.parent.currentTime();
     globals.log = globals.log + full;
     Navigator.push(context, PageTwo(""));
-
   }
 
+  _checkForWeight() {
+    if (globals.weightKG == null) {
+      return Container(
+        decoration: BoxDecoration(
+            color: Colors.grey,
+            borderRadius: BorderRadius.all(Radius.circular(5))),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: AutoSizeText(
+                'Select Weight',
+                style: TextStyle(fontSize: 30),
+              ),
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Icon(
+                    MaterialCommunityIcons.dog_side,
+                    size: 20,
+                  ),
+                  Icon(MaterialCommunityIcons.dog_side, size: 30),
+                  Icon(
+                    MaterialCommunityIcons.dog_side,
+                    size: 40,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+                child: Slider(
+              min: 0,
+              max: 10,
+              divisions: 10,
+              value: _weightValue,
+              label: weightOptions[_weightValue.round()],
+              onChanged: (value) {
+                setState(
+                  () {
+                    _weightValue = value;
+                  },
+                );
+              },
+            )),
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: [
+                RaisedButton(
+                  onPressed: () => {
+                    setState(() {
+                      globals.weightKG = weightkgOptions[_weightValue.round()];
+                      globals.weightIndex = _weightValue.round();
+                      print('set weight to: ' +
+                          weightkgOptions[_weightValue.round()].toString());
+                      for (MedListItem item in medItems) {
+                        item.buildSubtitle(context);
+                      }
+                    })
+                  },
+                  child: Text('DONE'),
+                )
+              ],
+            )
+          ],
+        ),
+      );
+    }
+    return Container();
+  }
 
   @override
   Widget build(BuildContext context) {
-    
     print("current log:" + globals.log);
 
-    final _listTiles = _citems.map((item) => CheckboxListTile(
-      key: Key(item.value),
-      value: item.checked ?? false,
-      onChanged: (bool newValue) {
-        setState(() => item.checked = newValue);
-      },
-      title: Text('${item.value}'),
-
-    )).toList();
+    final _listTiles = _citems
+        .map((item) => CheckboxListTile(
+              key: Key(item.value),
+              value: item.checked ?? false,
+              onChanged: (bool newValue) {
+                setState(() => item.checked = newValue);
+              },
+              title: Text('${item.value}'),
+            ))
+        .toList();
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-
         TabBar(
           controller: _nestedTabController,
           indicatorColor: Colors.red,
@@ -318,7 +559,7 @@ class NestedTabBarState extends State<NestedTabBar>
               icon: Icon(MaterialCommunityIcons.format_list_checks),
             ),
             Tab(
-              icon: Icon(AntDesign.medicinebox) ,
+              icon: Icon(AntDesign.medicinebox),
             ),
             Tab(
               icon: Icon(MaterialCommunityIcons.metronome),
@@ -336,181 +577,250 @@ class NestedTabBarState extends State<NestedTabBar>
           child: Container(
             child: TabBarView(
               controller: _nestedTabController,
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.black12,
-                      ),
-                      child: ListView(
-                        children: _listTiles,
-                      ),
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.black12,
+                    ),
+                    child: ListView(
+                      children: _listTiles,
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.black12,
-                      ),
-                      child: ListView.builder(
-                        // Let the ListView know how many items it needs to build.
-                        itemCount: medItems.length,
-                        // Provide a builder function. This is where the magic happens.
-                        // Convert each item into a widget based on the type of item it is.
-                        itemBuilder: (context, index) {
-                          final item = medItems[index];
-                          var tx = Text('');
-                          var color = Colors.black54;
-                          final dif = DateTime.now().difference(_lastGiven[index]).inMinutes.toString();
-                          if ( timesGiven[index] != 0 ) {
-                            tx = Text('given ' + timesGiven[index].toString() + ' doses\nlast given ' + dif + ' min ago',
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.black12,
+                    ),
+                    child: Stack(
+                      children: [
+                        ListView.builder(
+                          // Let the ListView know how many items it needs to build.
+                          itemCount: medItems.length,
+                          // Provide a builder function. This is where the magic happens.
+                          // Convert each item into a widget based on the type of item it is.
+                          itemBuilder: (context, index) {
+                            final item = medItems[index];
+                            var tx = Text('Not Indicated');
+                            var color = Colors.black54;
+                            var waitTime = 2;
+                            var longTime = 10;
+                            if (globals.codeStart
+                                    .difference(DateTime.now())
+                                    .inMinutes
+                                    .abs() >
+                                9) {
+                              longTime = 3;
+                            }
+                            if (timesGiven[index] != 0) {
+                              waitTime = 3;
+                            }
+                            final dif = DateTime.now()
+                                .difference(_lastGiven[index])
+                                .inMinutes
+                                .toString();
+                            if (int.parse(dif) >= waitTime) {
+                              if (index != 1) {
+                                color = Colors.transparent;
+                                tx = Text('');
+                              } else {
+                                if (int.parse(dif) >= longTime) {
+                                  color = Colors.transparent;
+                                  tx = Text('');
+                                }
+                              }
+                            }
+                            if (timesGiven[index] != 0) {
+                              tx = Text(
+                                'given ' +
+                                    timesGiven[index].toString() +
+                                    ' doses\nlast given ' +
+                                    dif +
+                                    ' min ago',
+                              );
+                            }
+                            if (globals.weightIndex != null) {
+                              _doses[index] = mlPerDose[index]
+                                      [globals.weightIndex] +
+                                  'mL DOSE' +
+                                  " (" +
+                                  mgPerKg[index] +
+                                  ")";
+                            }
 
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: color,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: ListTile(
+                                title: item.buildTitle(context),
+                                subtitle: Text(_doses[index]),
+                                trailing: tx,
+                                onTap: () {
+                                  print("med index tapped:" + index.toString());
+                                  _giveMed(index);
+                                },
+                              ),
                             );
-                          }
-                          if (int.parse(dif) >= 2) {
-                            color = Colors.transparent;
-                          }
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: color,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: ListTile(
-                              title: item.buildTitle(context),
-                              subtitle: item.buildSubtitle(context),
-                              trailing: tx,
-                              onTap: () {
-                                print("med index tapped:" + index.toString());
-                                _giveMed(index);
-                              },
-                            ),
-                          );
-                        },
-                      ),
+                          },
+                        ),
+                        _checkForWeight()
+                      ],
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
-                    child: Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
+                  child: Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Flexible(
+                          flex: 2,
+                          child: new LayoutBuilder(builder:
+                              (BuildContext context,
+                                  BoxConstraints constraints) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                CustomGauge(
+                                  gaugeSize: constraints
+                                      .maxHeight, //MediaQuery.of(context).size.width * 2 / 5 ,
+                                  maxValue: 170,
+                                  minValue: 50,
+                                  showMarkers: false,
+                                  valueWidget: Container(),
+                                  segments: [
+                                    GaugeSegment('Low', 50, Colors.red),
+                                    GaugeSegment('Medium', 20, Colors.white),
+                                    GaugeSegment('High', 50, Colors.red),
+                                  ],
+                                  currentValue: speed,
+                                  displayWidget: Text(tapLabel,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      )),
+                                ),
+                              ],
+                            );
+                          }),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: Stack(
+                            alignment: AlignmentDirectional.center,
                             children: <Widget>[
-                              Flexible(
-                                flex: 2,
-                                child: new LayoutBuilder(
-                                    builder: (BuildContext context, BoxConstraints constraints) {
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          CustomGauge(
-                                            gaugeSize: constraints.maxHeight,  //MediaQuery.of(context).size.width * 2 / 5 ,
-                                            maxValue: 170,
-                                            minValue: 50,
-                                            showMarkers: false,
-                                            valueWidget: Container(),
-                                            segments: [
-                                              GaugeSegment('Low', 50, Colors.red),
-                                              GaugeSegment('Medium', 20, Colors.white),
-                                              GaugeSegment('High', 50, Colors.red),
-                                            ],
-                                            currentValue: speed,
-                                            displayWidget: Text(tapLabel,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 20,
-                                                )),
-                                          ),
-                                        ],
-                                      );
-                                    }
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
-                              Flexible(
-                                flex: 1,
-                                child: Stack(
-                                  alignment: AlignmentDirectional.center,
-                                  children: <Widget>[
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                    AutoSizeText('tap with compressions',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 40
-                                      ),
-                                      maxLines: 1,
-                                    ),
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: _handleTap, // handle your onTap here
-                                        child: Container(),
-                                      ),
-                                    ),
-                                  ],
+                              AutoSizeText(
+                                'tap with compressions',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 40),
+                                maxLines: 1,
+                              ),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _handleTap, // handle your onTap here
+                                  child: Container(),
                                 ),
                               ),
                             ],
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            color: Colors.black12,
                           ),
                         ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
-                    child: Container(
-                      child: ListView.builder(itemBuilder: (BuildContext context, int index) => EntryItem(data[index]),
-                      itemCount: data.length,),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.black12,
-                      ),
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.black12,
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
-                    child: Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ButtonBar(
-                            mainAxisSize: MainAxisSize.min,
-                            alignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              RaisedButton(
-                                child: Text('Check Pulse Now'),
-                                onPressed: (){
-                                  this.parent.setState(() {
-                                    askForPulse = true;
-                                  });
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
+                  child: Container(
+                    child: ListView.builder(
+                      itemBuilder: (BuildContext context, int index) =>
+                          EntryItem(data[index]),
+                      itemCount: data.length,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.black12,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
+                  child: Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            ButtonBar(
+                              mainAxisSize: MainAxisSize.min,
+                              alignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                RaisedButton(
+                                  child: Text('Check Pulse Now'),
+                                  onPressed: () {
+                                    this.parent.setState(() {
+                                      askForPulse = true;
+                                    });
                                   },
-                              ),
-                              RaisedButton(
-                                child: Text('Stop Code Now'),
-                                onPressed: () {
+                                ),
+                                RaisedButton(
+                                  child: Text('Change Weight'),
+                                  onPressed: () {
+                                    setState(() {
+                                      globals.weightKG = null;
+                                      globals.weightIndex = null;
+                                      print('reset weight ' +
+                                          globals.weightKG.toString());
+                                    });
+                                    this.widget.parent.setState(() {});
+                                    _nestedTabController.animateTo(1);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ButtonBar(
+                              children: [
+                                RaisedButton(
+                                  child: Text('Stop Code Now'),
+                                  onPressed: () {
                                     stopCode();
                                   },
-                                      
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        color: Colors.black12,
-                      ),
+                                ),
+                              ],
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.black12,
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -531,72 +841,95 @@ class EntryItem extends StatelessWidget {
       title: Text(root.title),
       children: root.children.map(_buildTiles).toList(),
     );
-
   }
 
   @override
   Widget build(BuildContext context) {
     return _buildTiles(entry);
   }
-
 }
-class PageTwo extends MaterialPageRoute<Null> {
 
+class PageTwo extends MaterialPageRoute<Null> {
   final String log;
 
-  PageTwo(this.log) : super(builder: (BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Code Summary'),
-        elevation: 1.0,
-      ),
-      body: Builder(
-        builder: (BuildContext context) => Column(
-          children: <Widget>[
-            Expanded(
-              flex: 9,
-              child: SingleChildScrollView(child: Text(
-              globals.log,
-            ),),
+  PageTwo(this.log)
+      : super(builder: (BuildContext context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Code Summary'),
+              elevation: 1.0,
             ),
-            Expanded(
-              flex: 1,
-              
-              child: Container( 
-                color: Colors.red,
-                child: ButtonBar(
-                    alignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      RaisedButton(
-                      child: Text('New Code'),
-                      onPressed: () {
-
-                        globals.log = "";
-                        globals.stopCodeNow = false;
-                        timesGiven = <int> [
-                          0,0,0,0,0,0,0,0,
-                        ];
-                        _lastGiven = <DateTime> [
-                          DateTime.now(), DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),DateTime.now(),
-                        ];
-                        globals.reset = true;
-                        Navigator.pop(context);
-                      }
+            body: Builder(
+              builder: (BuildContext context) => Column(
+                children: <Widget>[
+                  Expanded(
+                    flex: 9,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        globals.log,
+                      ),
                     ),
-                     RaisedButton(
-                       child: Text('Send'),
-                       onPressed: () =>  Share.share(globals.log),
-                     )
-
-
-                  ],)
-                    
-              
-              ), 
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                        color: Colors.red,
+                        child: ButtonBar(
+                          alignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            RaisedButton(
+                                child: Text('New Code'),
+                                onPressed: () {
+                                  globals.log = "";
+                                  globals.stopCodeNow = false;
+                                  globals.codeStart = DateTime.now();
+                                  timesGiven = <int>[
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                  ];
+                                  _lastGiven = <DateTime>[
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                    DateTime.now(),
+                                  ];
+                                  globals.reset = true;
+                                  globals.weightKG = null;
+                                  globals.weightIndex = null;
+                                  Navigator.pop(context);
+                                }),
+                            RaisedButton(
+                              child: Text('Send'),
+                              onPressed: () => Share.share(globals.log),
+                            )
+                          ],
+                        )),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  });
+          );
+        });
 }
