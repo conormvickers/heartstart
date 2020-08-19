@@ -32,10 +32,12 @@ dependencies:
   customgauge: "^1.0.1"
   intl: "0.15.7"
   share: ^0.6.4+3
+  flutter_launcher_icons: ^0.7.5
 
 
 
 dev_dependencies:
+  
   flutter_test:
     sdk: flutter
 
