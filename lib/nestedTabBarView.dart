@@ -9,6 +9,7 @@ import 'globals.dart' as globals;
 import 'main.dart' as rootFile;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -342,6 +343,15 @@ class NestedTabBarState extends State<NestedTabBar>
   var anim2 = true;
   var anim3 = true;
   double speed = 0;
+
+  _launchURL() async {
+    const url = 'https://recoverinitiative.org/';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
   _handleTap() {
     tapTimes.add(DateTime.now());
@@ -723,11 +733,14 @@ class NestedTabBarState extends State<NestedTabBar>
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
-                              AutoSizeText(
-                                'tap with compressions',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 40),
-                                maxLines: 1,
+                              Padding(
+                                padding: EdgeInsets.all(15),
+                                child: AutoSizeText(
+                                  'Tap With Compressions',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 40),
+                                  maxLines: 1,
+                                ),
                               ),
                               Material(
                                 color: Colors.transparent,
@@ -765,6 +778,7 @@ class NestedTabBarState extends State<NestedTabBar>
                   margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
                   child: Container(
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -808,6 +822,10 @@ class NestedTabBarState extends State<NestedTabBar>
                                   onPressed: () {
                                     stopCode();
                                   },
+                                ),
+                                RaisedButton(
+                                  onPressed: _launchURL,
+                                  child: Text('Open Source Information'),
                                 ),
                               ],
                             )
@@ -863,7 +881,7 @@ class PageTwo extends MaterialPageRoute<Null> {
               builder: (BuildContext context) => Column(
                 children: <Widget>[
                   Expanded(
-                    flex: 9,
+                    flex: 6,
                     child: SingleChildScrollView(
                       child: Text(
                         globals.log,

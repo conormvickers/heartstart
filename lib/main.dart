@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'globals.dart' as globals;
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -21,22 +22,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Heart Start Vet',
+      builder: (BuildContext context, Widget child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1, boldText: false, ),
+          child: child,
+        );
+      },
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.red,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -46,18 +42,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
-
   @override
   MyHomePageState createState() => MyHomePageState();
 }
@@ -123,6 +108,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     setState(() {
                       globals.weightKG = weightkgOptions[_weightValue.round()];
                       globals.weightIndex = _weightValue.round();
+                      _shockType = shockDoses[globals.weightIndex];
                       print('set weight to: ' +
                           weightkgOptions[_weightValue.round()].toString());
                       for (MedListItem item in medItems) {
@@ -260,6 +246,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       parent: this,
     );
 
+
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
     globals.log = formattedDate + "\tCode Started\t00:00";
@@ -313,6 +300,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         child: Container(
                           padding: EdgeInsets.all(5),
                           child: Container(
+                            alignment: Alignment.center,
                             child: AutoSizeText(
                               'Check Pulse Now?',
                               maxLines: 1,
@@ -523,8 +511,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               padding: EdgeInsets.all(5),
                               child: Container(
                                 child: AutoSizeText(
-                                  'Continue Compressions While Chargning',
-                                  maxLines: 1,
+                                  'Continue Compressions\nWhile Charging',
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 50,
                                     color: Colors.white,
@@ -636,6 +625,15 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
       ),
     ]);
+
+    _launchURL() async {
+      const url = 'https://recoverinitiative.org/';
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    }
     var warning = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -666,7 +664,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     Flexible(
                       flex: 1,
                       child: AutoSizeText(
-                        'Has the CODE STATUS been confirmed?',
+                        'Ensure code status for the patient by referencing chart ',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 100,
@@ -685,7 +683,14 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               warningDismissed = true;
                             }),
                           ),
-                        ))
+                        )),
+                    Flexible(
+                      flex: 1,
+                      child: RaisedButton(
+                        onPressed: _launchURL,
+                        child: Text('Open Source Information'),
+                      ),
+                    )
                   ],
                 ))),
       ],
@@ -728,7 +733,7 @@ class OpenPulseButton extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
+              
               children: const <Widget>[
                 Expanded(
                   child: FittedBox(
@@ -742,13 +747,16 @@ class OpenPulseButton extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 1,
-                  child: AutoSizeText(
-                    "Yes\nCheck pulse now",
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 60,
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: AutoSizeText(
+                      "Yes\nCheck Pulse\nNow",
+                      maxLines: 3,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 60,
+                      ),
                     ),
                   ),
                 ),
@@ -791,11 +799,14 @@ class NoCeck extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: AutoSizeText(
-                        "No\nDefer pusle check",
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white, fontSize: 60),
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: AutoSizeText(
+                          "No\nDefer\nPulse Check",
+                          maxLines: 3,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white, fontSize: 60),
+                        ),
                       ),
                     ),
                   ],
@@ -869,7 +880,7 @@ class goForCode extends StatelessWidget {
           children: const <Widget>[
             Expanded(
               child: AutoSizeText(
-                "Yes or Unknown",
+                "Understood",
                 maxLines: 1,
                 style: TextStyle(color: Colors.white, fontSize: 60),
               ),
