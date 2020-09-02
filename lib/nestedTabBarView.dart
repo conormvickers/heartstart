@@ -10,6 +10,7 @@ import 'main.dart' as rootFile;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -697,8 +698,14 @@ class NestedTabBarState extends State<NestedTabBar>
                               (BuildContext context,
                                   BoxConstraints constraints) {
                             return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
+                                SpinKitPumpingHeart(
+                                  color: Colors.red,
+                                  controller: AnimationController(
+                                      vsync: this,
+                                      duration: Duration(milliseconds: 545)),
+                                ),
                                 CustomGauge(
                                   gaugeSize: constraints
                                       .maxHeight, //MediaQuery.of(context).size.width * 2 / 5 ,
@@ -718,6 +725,12 @@ class NestedTabBarState extends State<NestedTabBar>
                                         fontSize: 20,
                                       )),
                                 ),
+                                SpinKitWave(
+                                  color: Colors.blue,
+                                  controller: AnimationController(
+                                      vsync: this,
+                                      duration: Duration(milliseconds: 6000)),
+                                )
                               ],
                             );
                           }),

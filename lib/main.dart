@@ -8,6 +8,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'globals.dart' as globals;
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -22,12 +23,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'Heart Start Vet',
       builder: (BuildContext context, Widget child) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 1, boldText: false, ),
+          data: MediaQuery.of(context).copyWith(
+            textScaleFactor: 1,
+            boldText: false,
+          ),
           child: child,
         );
       },
@@ -245,7 +248,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     nested = NestedTabBar(
       parent: this,
     );
-
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
@@ -634,6 +636,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         throw 'Could not launch $url';
       }
     }
+
     var warning = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -733,7 +736,6 @@ class OpenPulseButton extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Column(
-              
               children: const <Widget>[
                 Expanded(
                   child: FittedBox(
@@ -877,12 +879,25 @@ class goForCode extends StatelessWidget {
         padding: EdgeInsets.all(10.0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const <Widget>[
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
             Expanded(
               child: AutoSizeText(
-                "Understood",
+                "UNDERSTOOD",
                 maxLines: 1,
-                style: TextStyle(color: Colors.white, fontSize: 60),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 60,
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(5),
+              child: FittedBox(
+                child: SpinKitPumpingHeart(
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
