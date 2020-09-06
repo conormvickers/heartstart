@@ -9,6 +9,7 @@ import 'globals.dart' as globals;
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:badges/badges.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -132,32 +133,49 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Color barColor = Colors.red;
   CircularPercentIndicator cycle;
-  IconData centerIcon = Icons.arrow_downward;
+  IconData centerIcon = FlutterIcons.heart_ant;
 
   String inst = "Continue Compressions";
+  DateTime lastSwitchedComp = DateTime.now();
 
   currentTime() {
+    if (DateTime.now().difference(lastSwitchedComp).inMinutes >= 2) {
+      compressorBadge = true;
+    }
+
     if (minPassed < 10) {
       if (dispSec < 10) {
+        globals.publicCodeTime = "0" +
+            minPassed.toStringAsFixed(0) +
+            " : 0" +
+            dispSec.toStringAsFixed(0);
         return "0" +
             minPassed.toStringAsFixed(0) +
             " : 0" +
             dispSec.toStringAsFixed(0);
       }
+      globals.publicCodeTime = "0" +
+          minPassed.toStringAsFixed(0) +
+          " : " +
+          dispSec.toStringAsFixed(0);
       return "0" +
           minPassed.toStringAsFixed(0) +
           " : " +
           dispSec.toStringAsFixed(0);
     }
     if (dispSec < 10) {
+      globals.publicCodeTime =
+          minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
       return minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
     }
     globals.publicCodeTime =
         minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
+
     return globals.publicCodeTime;
   }
 
   _triggerUpdate() {
+    print('initializing timer');
     Timer.periodic(
         Duration(seconds: 1),
         (Timer timer) => {
@@ -188,7 +206,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 } else {
                   barColor = Colors.red;
                   inst = "Continue Compressions";
-                  centerIcon = FontAwesome.angle_double_down;
+                  centerIcon = FlutterIcons.heart_ant;
                 }
               }),
             });
@@ -261,6 +279,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     fraction = 0;
 
     _triggerUpdate();
+  }
+
+  bool compressorBadge = false;
+  switchedCompressor() {
+    compressorBadge = false;
+    lastSwitchedComp = DateTime.now();
   }
 
   @override
@@ -500,30 +524,21 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 Flexible(
                   flex: 1,
                   child: Container(
-                    padding: EdgeInsets.all(15),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.fitHeight,
+                      child: AutoSizeText(
+                        'Continue Compressions\nWhile Charging',
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 50,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              child: Container(
-                                child: AutoSizeText(
-                                  'Continue Compressions\nWhile Charging',
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 50,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ]),
                     ),
                   ),
                 ),
@@ -572,49 +587,71 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     if (askForPulse) {
       temp = pulseStack;
     }
+
     var full = Column(children: <Widget>[
-      Container(
-        height: MediaQuery.of(context).size.width * 2 / 3 + 50,
-        child: ListView(
-            physics: const NeverScrollableScrollPhysics(),
-            children: <Widget>[
-              cycle = CircularPercentIndicator(
-                radius: (MediaQuery.of(context).size.width * 2 / 3),
-                lineWidth: 10.0,
-                percent: fraction,
-                animation: true,
-                animationDuration: 1000,
-                animateFromLastPercent: true,
-                circularStrokeCap: CircularStrokeCap.round,
-                footer: new AutoSizeText(
-                  inst,
-                  style: new TextStyle(
-                    fontSize: 40.0,
-                  ),
-                  maxLines: 1,
-                ),
-                center: Center(
-                    child: ListView(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.all(20.0),
-                        children: <Widget>[
-                      Icon(
-                        centerIcon,
-                        size: MediaQuery.of(context).size.width / 3,
-                        color: barColor,
-                      ),
-                      Center(
-                          child: new Text(
-                        currentTime(),
-                        style: new TextStyle(
-                          fontSize: 40.0,
-                        ),
-                      )),
-                    ])),
-                backgroundColor: Colors.grey,
-                progressColor: barColor,
+      Badge(
+        borderRadius: 10,
+        showBadge: compressorBadge,
+        badgeContent: Row(
+          children: [
+            Text('Switch compressors!', style: TextStyle(color: Colors.white)),
+            IconButton(
+              icon: Icon(
+                FlutterIcons.x_circle_fea,
+                color: Colors.white,
               ),
-            ]),
+              onPressed: switchedCompressor,
+            )
+          ],
+        ),
+        shape: BadgeShape.square,
+        position: BadgePosition.bottomRight(bottom: 50, right: 20),
+        child: Container(
+          height: MediaQuery.of(context).size.width * 2 / 3 + 50,
+          child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: <Widget>[
+                cycle = CircularPercentIndicator(
+                  radius: (MediaQuery.of(context).size.width * 2 / 3),
+                  lineWidth: 10.0,
+                  percent: fraction,
+                  animation: true,
+                  animationDuration: 1000,
+                  animateFromLastPercent: true,
+                  circularStrokeCap: CircularStrokeCap.round,
+                  footer: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: AutoSizeText(
+                      inst,
+                      style: new TextStyle(
+                        fontSize: 40.0,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ),
+                  center: Center(
+                      child: ListView(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(20.0),
+                          children: <Widget>[
+                        Icon(
+                          centerIcon,
+                          size: MediaQuery.of(context).size.width / 3,
+                          color: barColor,
+                        ),
+                        Center(
+                            child: new Text(
+                          currentTime(),
+                          style: new TextStyle(
+                            fontSize: 40.0,
+                          ),
+                        )),
+                      ])),
+                  backgroundColor: Colors.grey,
+                  progressColor: barColor,
+                ),
+              ]),
+        ),
       ),
       Divider(),
       Expanded(
@@ -750,14 +787,16 @@ class OpenPulseButton extends StatelessWidget {
                 Expanded(
                   flex: 1,
                   child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: AutoSizeText(
-                      "Yes\nCheck Pulse\nNow",
-                      maxLines: 3,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 60,
+                    padding: EdgeInsets.all(0),
+                    child: FittedBox(
+                      child: AutoSizeText(
+                        "Yes\nCheck Pulse Now",
+                        maxLines: 3,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 60,
+                        ),
                       ),
                     ),
                   ),
@@ -802,12 +841,14 @@ class NoCeck extends StatelessWidget {
                     ),
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: AutoSizeText(
-                          "No\nDefer\nPulse Check",
-                          maxLines: 3,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white, fontSize: 60),
+                        padding: EdgeInsets.all(0),
+                        child: FittedBox(
+                          child: AutoSizeText(
+                            "No, Defer\nPulse Check",
+                            maxLines: 3,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white, fontSize: 60),
+                          ),
                         ),
                       ),
                     ),

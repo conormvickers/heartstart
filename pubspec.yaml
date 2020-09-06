@@ -35,6 +35,8 @@ dependencies:
   flutter_launcher_icons: ^0.7.5
   url_launcher: ^5.5.0
   flutter_spinkit: "^4.1.2"
+  flutter_animation_progress_bar: ^1.0.5
+  badges: ^1.1.1
 
 
 

@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
+import 'package:badges/badges.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -315,6 +317,10 @@ class MedMessageItem implements MedListItem {
   Widget buildTrailing(BuildContext context) => Text(trailing);
 }
 
+bool needBadge = false;
+bool twominbadge = false;
+bool tenminbadge = false;
+
 class NestedTabBarState extends State<NestedTabBar>
     with TickerProviderStateMixin {
   TabController _nestedTabController;
@@ -327,6 +333,84 @@ class NestedTabBarState extends State<NestedTabBar>
     super.initState();
 
     _nestedTabController = new TabController(length: 5, vsync: this);
+
+    Timer.periodic(
+        Duration(milliseconds: 1000),
+        (Timer timer) => {
+              setState(() {
+                resetBreathingTimer();
+
+                if (int.parse(globals.publicCodeTime.substring(0, 2)) >= 2) {
+                  if (!twominbadge) {
+                    twominbadge = true;
+                    needBadge = true;
+                    print('badge needed');
+                  }
+                }
+                if (int.parse(globals.publicCodeTime.substring(0, 2)) >= 10) {
+                  if (!tenminbadge) {
+                    tenminbadge = true;
+                    needBadge = true;
+                    print('10 min badge needed');
+                  }
+                }
+              })
+            });
+  }
+
+  int breathingValue = 0;
+  int breathSeconds = 0;
+  breathingBar() {
+    return Container(
+      padding: EdgeInsets.all(15),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Column(
+              children: [
+                Expanded(
+                  child: FAProgressBar(
+                    direction: Axis.vertical,
+                    progressColor: Colors.blue,
+                    verticalDirection: VerticalDirection.up,
+                    currentValue: breathingValue,
+                    animatedDuration: Duration(milliseconds: 500),
+                    borderRadius: 0,
+                  ),
+                ),
+                Expanded(
+                  child: FAProgressBar(
+                    direction: Axis.vertical,
+                    progressColor: Colors.blue,
+                    verticalDirection: VerticalDirection.down,
+                    currentValue: breathingValue,
+                    animatedDuration: Duration(milliseconds: 500),
+                    borderRadius: 0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Text('Breaths'),
+          )
+        ],
+      ),
+    );
+  }
+
+  resetBreathingTimer() {
+    if (breathSeconds == 0) {
+      breathSeconds++;
+      breathingValue = 100;
+    } else if (breathSeconds >= 5) {
+      breathSeconds = 0;
+      breathingValue = 0;
+    } else {
+      breathSeconds++;
+      breathingValue = 100 - (breathSeconds * 15);
+    }
   }
 
   @override
@@ -544,7 +628,7 @@ class NestedTabBarState extends State<NestedTabBar>
 
   @override
   Widget build(BuildContext context) {
-    print("current log:" + globals.log);
+    // print("current log:" + globals.log);
 
     final _listTiles = _citems
         .map((item) => CheckboxListTile(
@@ -565,12 +649,24 @@ class NestedTabBarState extends State<NestedTabBar>
           labelColor: Colors.red,
           unselectedLabelColor: Colors.black54,
           isScrollable: true,
+          onTap: (index) {
+            print(index);
+            if (index == 1) {
+              setState(() {
+                print('remove badge');
+                needBadge = false;
+              });
+            }
+          },
           tabs: <Widget>[
             Tab(
               icon: Icon(MaterialCommunityIcons.format_list_checks),
             ),
             Tab(
-              icon: Icon(AntDesign.medicinebox),
+              icon: Badge(
+                  showBadge: needBadge,
+                  badgeContent: Text('!'),
+                  child: Icon(FlutterIcons.medicinebox_ant)),
             ),
             Tab(
               icon: Icon(MaterialCommunityIcons.metronome),
@@ -579,7 +675,7 @@ class NestedTabBarState extends State<NestedTabBar>
               icon: Icon(AntDesign.questioncircleo),
             ),
             Tab(
-              icon: Icon(Octicons.stop),
+              icon: Icon(FlutterIcons.setting_ant),
             ),
           ],
         ),
@@ -700,37 +796,33 @@ class NestedTabBarState extends State<NestedTabBar>
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
-                                SpinKitPumpingHeart(
-                                  color: Colors.red,
-                                  controller: AnimationController(
-                                      vsync: this,
-                                      duration: Duration(milliseconds: 545)),
+                                Expanded(
+                                  flex: 3,
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: CustomGauge(
+                                      gaugeSize: constraints
+                                          .maxHeight, //MediaQuery.of(context).size.width * 2 / 5 ,
+                                      maxValue: 170,
+                                      minValue: 50,
+                                      showMarkers: false,
+                                      valueWidget: Container(),
+                                      segments: [
+                                        GaugeSegment('Low', 50, Colors.red),
+                                        GaugeSegment(
+                                            'Medium', 20, Colors.white),
+                                        GaugeSegment('High', 50, Colors.red),
+                                      ],
+                                      currentValue: speed,
+                                      displayWidget: Text(tapLabel,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                          )),
+                                    ),
+                                  ),
                                 ),
-                                CustomGauge(
-                                  gaugeSize: constraints
-                                      .maxHeight, //MediaQuery.of(context).size.width * 2 / 5 ,
-                                  maxValue: 170,
-                                  minValue: 50,
-                                  showMarkers: false,
-                                  valueWidget: Container(),
-                                  segments: [
-                                    GaugeSegment('Low', 50, Colors.red),
-                                    GaugeSegment('Medium', 20, Colors.white),
-                                    GaugeSegment('High', 50, Colors.red),
-                                  ],
-                                  currentValue: speed,
-                                  displayWidget: Text(tapLabel,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                      )),
-                                ),
-                                SpinKitWave(
-                                  color: Colors.blue,
-                                  controller: AnimationController(
-                                      vsync: this,
-                                      duration: Duration(milliseconds: 6000)),
-                                )
+                                Expanded(child: breathingBar()),
                               ],
                             );
                           }),
