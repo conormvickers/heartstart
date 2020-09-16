@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:badges/badges.dart';
+import 'package:highlighter_coachmark/highlighter_coachmark.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -279,12 +280,44 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     fraction = 0;
 
     _triggerUpdate();
+    Future<void>.delayed(
+        Duration(seconds: 1),
+        () => {
+              print('show coach'),
+              showCoach(),
+            });
   }
 
   bool compressorBadge = false;
   switchedCompressor() {
     compressorBadge = false;
     lastSwitchedComp = DateTime.now();
+  }
+
+  showCoach() {
+    CoachMark coachMark = CoachMark();
+    RenderBox target =
+        GlobalObjectKey('timerCircle').currentContext.findRenderObject();
+    Rect markRect = target.localToGlobal(Offset.zero) & target.size;
+    markRect = Rect.fromCircle(
+        center: markRect.center, radius: markRect.longestSide * 0.6);
+    coachMark.show(
+        targetContext: GlobalObjectKey('timerCircle').currentContext,
+        markRect: markRect,
+        children: [
+          Positioned(
+              top: markRect.bottom + 15.0,
+              width: MediaQuery.of(context).size.width,
+              child: Text("Time since code start",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24.0,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white,
+                  ))),
+        ],
+        duration: null,
+        onClose: () {});
   }
 
   @override
@@ -642,6 +675,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         Center(
                             child: new Text(
                           currentTime(),
+                          key: GlobalObjectKey('timerCircle'),
                           style: new TextStyle(
                             fontSize: 40.0,
                           ),

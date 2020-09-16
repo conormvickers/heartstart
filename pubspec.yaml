@@ -37,6 +37,7 @@ dependencies:
   flutter_spinkit: "^4.1.2"
   flutter_animation_progress_bar: ^1.0.5
   badges: ^1.1.1
+  highlighter_coachmark: ^0.0.3
 
 
 
