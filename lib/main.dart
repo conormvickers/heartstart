@@ -11,6 +11,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:badges/badges.dart';
 import 'package:highlighter_coachmark/highlighter_coachmark.dart';
+import 'package:timeline_tile/timeline_tile.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:device_info/device_info.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -264,6 +267,10 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    // print(deviceInfo.iosInfo);
+    // Wakelock.enable();
+
     nested = NestedTabBar(
       parent: this,
     );
@@ -281,12 +288,16 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     _triggerUpdate();
 
-    Future<void>.delayed(Duration(seconds: 10), () => {
-      if (askForTour) {
-        switchedCompressor(),
-        askForTour = false,
-      }
-    });
+    Future<void>.delayed(
+        Duration(seconds: 10),
+        () => {
+              Wakelock.enable(),
+              if (askForTour)
+                {
+                  switchedCompressor(),
+                  askForTour = false,
+                }
+            });
   }
 
   bool compressorBadge = true;
@@ -324,7 +335,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     RenderBox target =
         coachKeys[currentCoachWidget].currentContext.findRenderObject();
     Rect markRect = target.localToGlobal(Offset.zero) & target.size;
-    markRect =  markRect.inflate(5.0);//Rect.fromCircle(center: markRect.center, radius: markRect.longestSide * 0.6);
+    markRect = markRect.inflate(
+        5.0); //Rect.fromCircle(center: markRect.center, radius: markRect.longestSide * 0.6);
     coachMark.show(
         targetContext: GlobalObjectKey('timerCircle').currentContext,
         markRect: markRect,
@@ -346,13 +358,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           currentCoachWidget++;
           if (currentCoachWidget < coachKeys.length) {
             showCoach();
-          }else{
+          } else {
             currentCoachWidget = 0;
             print('done coaching');
           }
         });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -655,17 +666,20 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       temp = pulseStack;
     }
 
-    Widget content = Text('Switch compressors!', style: TextStyle(color: Colors.white));
+    Widget content =
+        Text('Switch compressors!', style: TextStyle(color: Colors.white));
     if (askForTour) {
       content = GestureDetector(
-        onTap: () => {
-          switchedCompressor(),
-          showCoach(),
-          askForTour = false,
-        },
+          onTap: () => {
+                switchedCompressor(),
+                showCoach(),
+                askForTour = false,
+              },
           child: Padding(
-            padding: EdgeInsets.all(10),
-              child: Text('Tap for tour', textAlign: TextAlign.center,style: TextStyle(color: Colors.white))));
+              padding: EdgeInsets.all(10),
+              child: Text('Tap for tour',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white))));
     }
 
     var full = Column(children: <Widget>[
@@ -702,7 +716,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   animateFromLastPercent: true,
                   circularStrokeCap: CircularStrokeCap.round,
                   footer: FittedBox(
-
                     child: AutoSizeText(
                       inst,
                       key: GlobalObjectKey('inst'),
@@ -824,13 +837,119 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     if (!warningDismissed) {
       fullStack = <Widget>[full, warning];
     }
-
+    List<Widget> timelineTiles = List<Widget>();
+    List<String> eventSplit = globals.log.split('\n');
+    print('event parts ' + eventSplit.toString());
+    for (int i = 0; i < eventSplit.length; i++) {
+      bool first = false;
+      bool last = false;
+      bool dot = true;
+      IconData icon = Icons.arrow_downward;
+      double iconSize = 20;
+      double height = 50;
+      String time = eventSplit[i].substring(0, 5);
+      String rest = eventSplit[i].substring(5);
+      if (eventSplit[i].contains('Pulse')) {
+        icon = Icons.check_circle;
+        iconSize = 40;
+        height = 120;
+      }
+      if (eventSplit[i].contains('Shock')) {
+        icon = Icons.all_out;
+        iconSize = 40;
+        height = 120;
+      }
+      if (eventSplit[i].contains('Code')) {
+        icon = Icons.all_out;
+        iconSize = 40;
+        height = 120;
+      }
+      if (eventSplit[i].contains('Epinephrine')) {}
+      if (i == 0) {
+        first = true;
+        time = '';
+        rest = eventSplit[i];
+      }
+      if (i == eventSplit.length - 1) {
+        last = true;
+      }
+      TimelineTile add = TimelineTile(
+        alignment: TimelineAlign.manual,
+        lineXY: 0.3,
+        startChild: Container(
+          height: height,
+          alignment: Alignment.center,
+          child: Text(time),
+        ),
+        endChild: Container(
+          height: height,
+          alignment: Alignment.center,
+          child: Text(rest),
+        ),
+        isFirst: first,
+        isLast: last,
+        hasIndicator: dot,
+        indicatorStyle: IndicatorStyle(
+            width: iconSize,
+            color: Colors.red,
+            padding: EdgeInsets.all(8),
+            iconStyle: IconStyle(
+              iconData: icon,
+              color: Colors.white,
+            )),
+      );
+      timelineTiles.add(add);
+    }
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(30.0), // here the desired height
-        child: AppBar(
-          title: Text("Heart Start"),
-          leading: Icon(FontAwesome.exclamation),
+      drawer: Drawer(
+          child: Column(children: <Widget>[
+        Container(
+          color: Colors.black54,
+          height: 80,
+          alignment: Alignment.center,
+          child: Text(
+            'Code Events',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+        Container(
+          height: 20,
+          color: Colors.black12,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: Text('Time', textAlign: TextAlign.center),
+              ),
+              VerticalDivider(),
+              Expanded(
+                  flex: 10,
+                  child: Text('Time Since Code Start',
+                      textAlign: TextAlign.center))
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            reverse: true,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: timelineTiles,
+              )
+            ],
+          ),
+        ),
+      ])),
+      appBar: AppBar(
+        title: Text(
+          "Heart Start",
+        ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(FlutterIcons.timeline_alert_mco),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
       ),
       body: Stack(
@@ -874,7 +993,7 @@ class OpenPulseButton extends StatelessWidget {
                     padding: EdgeInsets.all(0),
                     child: FittedBox(
                       child: AutoSizeText(
-                        "Yes\nCheck Pulse Now",
+                        "Yes, Check\nPulse Now",
                         maxLines: 3,
                         textAlign: TextAlign.center,
                         style: TextStyle(
