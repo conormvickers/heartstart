@@ -27,12 +27,14 @@ class NestedTabBar extends StatefulWidget {
 
 class _ListItem {
   _ListItem(this.value, this.checked);
+
   final String value;
   bool checked;
 }
 
 class Entry {
   const Entry(this.title, [this.children = const <Entry>[]]);
+
   final String title;
   final List<Entry> children;
 }
@@ -360,6 +362,7 @@ class NestedTabBarState extends State<NestedTabBar>
 
   int breathingValue = 0;
   int breathSeconds = 0;
+
   breathingBar() {
     return Container(
       padding: EdgeInsets.all(15),
@@ -375,7 +378,7 @@ class NestedTabBarState extends State<NestedTabBar>
                     progressColor: Colors.blue,
                     verticalDirection: VerticalDirection.up,
                     currentValue: breathingValue,
-                    animatedDuration: Duration(milliseconds: 500),
+                    animatedDuration: Duration(milliseconds: 1000),
                     borderRadius: 0,
                   ),
                 ),
@@ -385,7 +388,7 @@ class NestedTabBarState extends State<NestedTabBar>
                     progressColor: Colors.blue,
                     verticalDirection: VerticalDirection.down,
                     currentValue: breathingValue,
-                    animatedDuration: Duration(milliseconds: 500),
+                    animatedDuration: Duration(milliseconds: 1000),
                     borderRadius: 0,
                   ),
                 ),
@@ -393,7 +396,8 @@ class NestedTabBarState extends State<NestedTabBar>
             ),
           ),
           Expanded(
-            child: Text('Breaths'),
+            child:
+                Container(alignment: Alignment.center, child: Text('Breaths')),
           )
         ],
       ),
@@ -544,6 +548,7 @@ class NestedTabBarState extends State<NestedTabBar>
     'Intubation',
     'Capnography',
   ].map((item) => _ListItem(item, false)).toList();
+
   stopCode() {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
@@ -660,22 +665,30 @@ class NestedTabBarState extends State<NestedTabBar>
           },
           tabs: <Widget>[
             Tab(
-              icon: Icon(MaterialCommunityIcons.format_list_checks),
+              icon: Icon(
+                MaterialCommunityIcons.format_list_checks,
+                key: GlobalObjectKey('tab1'),
+              ),
             ),
             Tab(
               icon: Badge(
                   showBadge: needBadge,
                   badgeContent: Text('!'),
-                  child: Icon(FlutterIcons.medicinebox_ant)),
+                  child: Icon(FlutterIcons.medicinebox_ant,
+                    key: GlobalObjectKey('tab2'),
+                  )),
             ),
             Tab(
-              icon: Icon(MaterialCommunityIcons.metronome),
+              icon: Icon(MaterialCommunityIcons.metronome,
+                key: GlobalObjectKey('tab3'),),
             ),
             Tab(
-              icon: Icon(AntDesign.questioncircleo),
+              icon: Icon(AntDesign.questioncircleo,
+                key: GlobalObjectKey('tab4'),),
             ),
             Tab(
-              icon: Icon(FlutterIcons.setting_ant),
+              icon: Icon(FlutterIcons.setting_ant,
+                key: GlobalObjectKey('tab5'),),
             ),
           ],
         ),
@@ -801,8 +814,8 @@ class NestedTabBarState extends State<NestedTabBar>
                                   child: Container(
                                     alignment: Alignment.center,
                                     child: CustomGauge(
-                                      gaugeSize: constraints
-                                          .maxHeight, //MediaQuery.of(context).size.width * 2 / 5 ,
+                                      gaugeSize: constraints.maxHeight,
+                                      //MediaQuery.of(context).size.width * 2 / 5 ,
                                       maxValue: 170,
                                       minValue: 50,
                                       showMarkers: false,
@@ -882,60 +895,45 @@ class NestedTabBarState extends State<NestedTabBar>
                 Container(
                   margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
                   child: Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            ButtonBar(
-                              mainAxisSize: MainAxisSize.min,
-                              alignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                RaisedButton(
-                                  child: Text('Check Pulse Now'),
-                                  onPressed: () {
-                                    this.parent.setState(() {
-                                      askForPulse = true;
-                                    });
-                                  },
-                                ),
-                                RaisedButton(
-                                  child: Text('Change Weight'),
-                                  onPressed: () {
-                                    setState(() {
-                                      globals.weightKG = null;
-                                      globals.weightIndex = null;
-                                      print('reset weight ' +
-                                          globals.weightKG.toString());
-                                    });
-                                    this.widget.parent.setState(() {});
-                                    _nestedTabController.animateTo(1);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
+                    alignment: Alignment.center,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      children: <Widget>[
+                        RaisedButton(
+                          child: Text('Check Pulse Now'),
+                          onPressed: () {
+                            this.parent.setState(() {
+                              askForPulse = true;
+                            });
+                          },
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ButtonBar(
-                              children: [
-                                RaisedButton(
-                                  child: Text('Stop Code Now'),
-                                  onPressed: () {
-                                    stopCode();
-                                  },
-                                ),
-                                RaisedButton(
-                                  onPressed: _launchURL,
-                                  child: Text('Open Source Information'),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
+                        RaisedButton(
+                          child: Text('Change Weight'),
+                          onPressed: () {
+                            setState(() {
+                              globals.weightKG = null;
+                              globals.weightIndex = null;
+                              print('reset weight ' +
+                                  globals.weightKG.toString());
+                            });
+                            this.widget.parent.setState(() {});
+                            _nestedTabController.animateTo(1);
+                          },
+                        ),
+                        RaisedButton(
+                          child: Text('Stop Code Now'),
+                          onPressed: () {
+                            stopCode();
+                          },
+                        ),
+                        RaisedButton(
+                          onPressed: _launchURL,
+                          child: Text('Open Source Information'),
+                        ),
+                        RaisedButton(
+                          onPressed: () => { parent.showCoach() },
+                          child: Text('Start tour'),
+                        ),
                       ],
                     ),
                     decoration: BoxDecoration(
@@ -955,6 +953,7 @@ class NestedTabBarState extends State<NestedTabBar>
 
 class EntryItem extends StatelessWidget {
   const EntryItem(this.entry);
+
   final Entry entry;
 
   Widget _buildTiles(Entry root) {

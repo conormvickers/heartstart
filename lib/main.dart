@@ -280,35 +280,60 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     fraction = 0;
 
     _triggerUpdate();
-    Future<void>.delayed(
-        Duration(seconds: 1),
-        () => {
-              print('show coach'),
-              showCoach(),
-            });
+
+    Future<void>.delayed(Duration(seconds: 10), () => {
+      if (askForTour) {
+        switchedCompressor(),
+        askForTour = false,
+      }
+    });
   }
 
-  bool compressorBadge = false;
+  bool compressorBadge = true;
   switchedCompressor() {
-    compressorBadge = false;
-    lastSwitchedComp = DateTime.now();
+    setState(() {
+      compressorBadge = false;
+      lastSwitchedComp = DateTime.now();
+    });
   }
 
+  bool askForTour = true;
+  int currentCoachWidget = 0;
+  List<String> coachInfo = [
+    "This is the time since code start",
+    "This shows how long until next pulse check",
+    "This is the current instructions",
+    "Here is your checklist",
+    "These are your medications",
+    "This will help you track compression and breath rates",
+    "This reminds you of common reversible causes of cardiopulmonary arrest",
+    "Here are other options"
+  ];
+  List<GlobalObjectKey> coachKeys = [
+    GlobalObjectKey('timerCircle'),
+    GlobalObjectKey('circleProgress'),
+    GlobalObjectKey('inst'),
+    GlobalObjectKey('tab1'),
+    GlobalObjectKey('tab2'),
+    GlobalObjectKey('tab3'),
+    GlobalObjectKey('tab4'),
+    GlobalObjectKey('tab5'),
+  ];
   showCoach() {
     CoachMark coachMark = CoachMark();
     RenderBox target =
-        GlobalObjectKey('timerCircle').currentContext.findRenderObject();
+        coachKeys[currentCoachWidget].currentContext.findRenderObject();
     Rect markRect = target.localToGlobal(Offset.zero) & target.size;
-    markRect = Rect.fromCircle(
-        center: markRect.center, radius: markRect.longestSide * 0.6);
+    markRect =  markRect.inflate(5.0);//Rect.fromCircle(center: markRect.center, radius: markRect.longestSide * 0.6);
     coachMark.show(
         targetContext: GlobalObjectKey('timerCircle').currentContext,
         markRect: markRect,
+        markShape: BoxShape.rectangle,
         children: [
           Positioned(
               top: markRect.bottom + 15.0,
               width: MediaQuery.of(context).size.width,
-              child: Text("Time since code start",
+              child: Text(coachInfo[currentCoachWidget],
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 24.0,
@@ -317,8 +342,17 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ))),
         ],
         duration: null,
-        onClose: () {});
+        onClose: () {
+          currentCoachWidget++;
+          if (currentCoachWidget < coachKeys.length) {
+            showCoach();
+          }else{
+            currentCoachWidget = 0;
+            print('done coaching');
+          }
+        });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -621,13 +655,27 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       temp = pulseStack;
     }
 
+    Widget content = Text('Switch compressors!', style: TextStyle(color: Colors.white));
+    if (askForTour) {
+      content = GestureDetector(
+        onTap: () => {
+          switchedCompressor(),
+          showCoach(),
+          askForTour = false,
+        },
+          child: Padding(
+            padding: EdgeInsets.all(10),
+              child: Text('Tap for tour', textAlign: TextAlign.center,style: TextStyle(color: Colors.white))));
+    }
+
     var full = Column(children: <Widget>[
       Badge(
         borderRadius: 10,
         showBadge: compressorBadge,
         badgeContent: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text('Switch compressors!', style: TextStyle(color: Colors.white)),
+            content,
             IconButton(
               icon: Icon(
                 FlutterIcons.x_circle_fea,
@@ -645,6 +693,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
                 cycle = CircularPercentIndicator(
+                  key: GlobalObjectKey('circleProgress'),
                   radius: (MediaQuery.of(context).size.width * 2 / 3),
                   lineWidth: 10.0,
                   percent: fraction,
@@ -652,10 +701,11 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   animationDuration: 1000,
                   animateFromLastPercent: true,
                   circularStrokeCap: CircularStrokeCap.round,
-                  footer: Padding(
-                    padding: EdgeInsets.all(5),
+                  footer: FittedBox(
+
                     child: AutoSizeText(
                       inst,
+                      key: GlobalObjectKey('inst'),
                       style: new TextStyle(
                         fontSize: 40.0,
                       ),
