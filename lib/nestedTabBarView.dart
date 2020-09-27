@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutterheart/main.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:badges/badges.dart';
+import 'package:timeline_tile/timeline_tile.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -555,7 +560,8 @@ class NestedTabBarState extends State<NestedTabBar>
     String combined = "\n" + formattedDate + "\tCode Stopped";
     String full = combined.toString() + "\t" + this.parent.currentTime();
     globals.log = globals.log + full;
-    Navigator.push(context, PageTwo(""));
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
   _checkForWeight() {
@@ -674,21 +680,28 @@ class NestedTabBarState extends State<NestedTabBar>
               icon: Badge(
                   showBadge: needBadge,
                   badgeContent: Text('!'),
-                  child: Icon(FlutterIcons.medicinebox_ant,
+                  child: Icon(
+                    FlutterIcons.medicinebox_ant,
                     key: GlobalObjectKey('tab2'),
                   )),
             ),
             Tab(
-              icon: Icon(MaterialCommunityIcons.metronome,
-                key: GlobalObjectKey('tab3'),),
+              icon: Icon(
+                MaterialCommunityIcons.metronome,
+                key: GlobalObjectKey('tab3'),
+              ),
             ),
             Tab(
-              icon: Icon(AntDesign.questioncircleo,
-                key: GlobalObjectKey('tab4'),),
+              icon: Icon(
+                AntDesign.questioncircleo,
+                key: GlobalObjectKey('tab4'),
+              ),
             ),
             Tab(
-              icon: Icon(FlutterIcons.setting_ant,
-                key: GlobalObjectKey('tab5'),),
+              icon: Icon(
+                FlutterIcons.setting_ant,
+                key: GlobalObjectKey('tab5'),
+              ),
             ),
           ],
         ),
@@ -931,7 +944,7 @@ class NestedTabBarState extends State<NestedTabBar>
                           child: Text('Open Source Information'),
                         ),
                         RaisedButton(
-                          onPressed: () => { parent.showCoach() },
+                          onPressed: () => {parent.showCoach()},
                           child: Text('Start tour'),
                         ),
                       ],
@@ -971,87 +984,260 @@ class EntryItem extends StatelessWidget {
   }
 }
 
-class PageTwo extends MaterialPageRoute<Null> {
-  final String log;
+class PageTwo extends StatefulWidget {
+  @override
+  PageTwoState createState() => PageTwoState();
+}
 
-  PageTwo(this.log)
-      : super(builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Code Summary'),
-              elevation: 1.0,
-            ),
-            body: Builder(
-              builder: (BuildContext context) => Column(
-                children: <Widget>[
-                  Expanded(
-                    flex: 6,
-                    child: SingleChildScrollView(
-                      child: Text(
-                        globals.log,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                        color: Colors.red,
-                        child: ButtonBar(
-                          alignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            RaisedButton(
-                                child: Text('New Code'),
-                                onPressed: () {
-                                  globals.log = "";
-                                  globals.stopCodeNow = false;
-                                  globals.codeStart = DateTime.now();
-                                  timesGiven = <int>[
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                    0,
-                                  ];
-                                  _lastGiven = <DateTime>[
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                    DateTime.now(),
-                                  ];
-                                  globals.reset = true;
-                                  globals.weightKG = null;
-                                  globals.weightIndex = null;
-                                  Navigator.pop(context);
-                                }),
-                            RaisedButton(
-                              child: Text('Send'),
-                              onPressed: () => Share.share(globals.log),
-                            )
-                          ],
-                        )),
-                  ),
-                ],
-              ),
+class PageTwoState extends State<PageTwo> {
+  List<Widget> timelineTiles = List<Widget>();
+  List<String> eventSplit = globals.log.split('\n');
+  int timelineEditing = null;
+  TextEditingController timelineEditingController = TextEditingController();
+
+  editTimeline(int i) {
+    setState(() {
+      timelineEditing = i;
+    });
+  }
+
+  pw.Document pdf;
+  Directory appDocDir;
+  String appDocPath;
+  sendData() async {
+    pdf = pw.Document();
+
+    pdf.addPage(pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Center(
+              child: pw.Text(
+            globals.log,
+          )); // Center
+        })); //
+
+    appDocDir = await getApplicationDocumentsDirectory();
+
+    DateTime now = DateTime.now();
+    String date = DateFormat('yyyy_MM_dd').format(now);
+
+    final file = File("${appDocDir.path}/" + date + "log.pdf");
+    await file.writeAsBytes(pdf.save());
+
+    Share.shareFiles(['${appDocDir.path}/' + date + 'log.pdf'],
+        text: 'PDF log');
+  }
+
+  sendText() async {
+    appDocDir = await getApplicationDocumentsDirectory();
+    DateTime now = DateTime.now();
+    String date = DateFormat('yyyy_MM_dd').format(now);
+
+    final file = File("${appDocDir.path}/" + date + "log.txt");
+    await file.writeAsString(globals.log);
+
+    Share.shareFiles(["${appDocDir.path}/" + date + "log.txt"],
+        text: "TXT log");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('build starting');
+    FocusNode nodeboi = FocusNode();
+    timelineTiles = List<Widget>();
+    eventSplit = globals.log.split('\n');
+    for (int i = 0; i < eventSplit.length; i++) {
+      if (eventSplit[i] != '') {
+        bool first = false;
+        bool last = false;
+        bool dot = true;
+        IconData icon = Icons.arrow_downward;
+        double iconSize = 20;
+        double height = 50;
+        String time = '';
+        String rest = eventSplit[i];
+        if (eventSplit[i].length > 5) {
+          time = eventSplit[i].substring(0, 5);
+          rest = eventSplit[i].substring(5);
+        }
+        if (eventSplit[i].contains('Pulse')) {
+          icon = Icons.check_circle;
+          iconSize = 40;
+          height = 120;
+        }
+        if (eventSplit[i].contains('Shock')) {
+          icon = Icons.all_out;
+          iconSize = 40;
+          height = 120;
+        }
+        if (eventSplit[i].contains('Code')) {
+          icon = Icons.all_out;
+          iconSize = 40;
+          height = 120;
+        }
+        if (eventSplit[i].contains('Epinephrine')) {}
+        if (i == 0) {
+          first = true;
+          time = '';
+          rest = eventSplit[i];
+        }
+        if (i == eventSplit.length - 1) {
+          last = true;
+        }
+        Widget endChild = Text(rest);
+        if (i == timelineEditing) {
+          TextField txt = TextField(
+            autofocus: true,
+            focusNode: nodeboi,
+            controller: timelineEditingController,
+            onEditingComplete: () => {
+              setState(() => {
+                    eventSplit[i] = timelineEditingController.text,
+                    globals.log = eventSplit.join('\n'),
+                    print(globals.log),
+                    timelineEditing = null,
+                    FocusScope.of(context).unfocus()
+                  })
+            },
+          );
+          IconButton but = IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () => {
+              setState(() => {
+                    eventSplit.removeAt(i),
+                    globals.log = eventSplit.join('\n'),
+                    print(globals.log),
+                    timelineEditing = null,
+                    FocusScope.of(context).unfocus()
+                  })
+            },
+          );
+          endChild = Container(
+            child: Row(
+              children: [Expanded(child: txt), but],
             ),
           );
-        });
+          print('end child should be done' + i.toString());
+        }
+        TimelineTile add = TimelineTile(
+          alignment: TimelineAlign.manual,
+          lineXY: 0.3,
+          startChild: Container(
+            height: height,
+            alignment: Alignment.center,
+            child: Text(time),
+          ),
+          endChild: Container(
+            height: height,
+            alignment: Alignment.center,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  print('tapped' + i.toString());
+                  timelineEditingController.text = eventSplit[i];
+                  editTimeline(i);
+                  nodeboi.requestFocus();
+                });
+              },
+              child: endChild,
+            ),
+          ),
+          isFirst: first,
+          isLast: last,
+          hasIndicator: dot,
+          indicatorStyle: IndicatorStyle(
+              width: iconSize,
+              color: Colors.red,
+              padding: EdgeInsets.all(8),
+              iconStyle: IconStyle(
+                iconData: icon,
+                color: Colors.white,
+              )),
+        );
+        timelineTiles.add(add);
+        print('added ' + i.toString() + endChild.toString());
+      }
+    }
+
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: Text('Code Summary'),
+        elevation: 1.0,
+      ),
+      body: Builder(
+        builder: (BuildContext context) => Column(
+          children: <Widget>[
+            Expanded(
+              flex: 6,
+              child: ListView(
+                children: timelineTiles,
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                  color: Colors.red,
+                  child: ButtonBar(
+                    alignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      RaisedButton(
+                          child: Text('New Code'),
+                          onPressed: () {
+                            globals.log = "";
+                            globals.stopCodeNow = false;
+                            globals.codeStart = DateTime.now();
+                            timesGiven = <int>[
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                            ];
+                            _lastGiven = <DateTime>[
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                              DateTime.now(),
+                            ];
+                            globals.reset = true;
+                            globals.weightKG = null;
+                            globals.weightIndex = null;
+                            Navigator.pop(context);
+                          }),
+                      RaisedButton(
+                        child: Text('Send Text File'),
+                        onPressed: sendText,
+                      ),
+                      RaisedButton(
+                        child: Text('Send PDF File'),
+                        onPressed: sendData,
+                      ),
+                    ],
+                  )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

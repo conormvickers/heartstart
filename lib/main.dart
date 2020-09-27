@@ -177,7 +177,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 //    }
 //    globals.publicCodeTime =
 //        minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
-    globals.publicCodeTime = _printDuration(Duration(seconds: secPassed.toInt()));
+    globals.publicCodeTime =
+        _printDuration(Duration(seconds: secPassed.toInt()));
 
     return globals.publicCodeTime;
   }
@@ -190,6 +191,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
+
   _triggerUpdate() {
     print('initializing timer');
     Timer.periodic(
@@ -201,14 +203,15 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 if (progressPulseCheck) {
                   fractionPulse++;
 
-                  print(_printDuration(Duration(seconds: 120 - fractionPulse.toInt())));
-                  pulseCheckCountdown = '-' + _printDuration(Duration(seconds: 120 - fractionPulse.toInt()));
+                  // print(_printDuration(
+                  //     Duration(seconds: 120 - fractionPulse.toInt())));
+                  pulseCheckCountdown = ' ' +
+                      _printDuration(
+                          Duration(seconds: 120 - fractionPulse.toInt()));
 
                   fraction = fractionPulse / 120;
 
                   if (fractionPulse >= 109) {
-
-
                     if (fractionPulse == 120) {
                       print('should open');
                       askForPulse = true;
@@ -222,7 +225,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     inst = "Continue Compressions";
                     centerIcon = FlutterIcons.heart_ant;
                   }
-                  if (fractionPulse >= 120){
+                  if (fractionPulse >= 120) {
                     fractionPulse = 0;
                   }
                 }
@@ -260,7 +263,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         String combined = "\n" + formattedDate + "\tCode Stopped";
         String full = combined.toString() + "\t" + currentTime();
         globals.log = globals.log + full;
-        Navigator.push(context, PageTwo(""));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => PageTwo()));
         askForPulse = false;
         nested.show = false;
       } else {
@@ -281,7 +285,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
-
   @override
   void initState() {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -293,7 +296,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
 
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+    String formattedDate = DateFormat('yyyy/MM/dd kk:mm').format(now);
     globals.log = formattedDate + "\tCode Started\t00:00";
     globals.codeStart = now;
     super.initState();
@@ -393,6 +396,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       secPassed = 0;
       dispSec = 0;
       fraction = 0;
+      fractionPulse = 0;
       askForPulse = false;
       globals.reset = false;
     }
@@ -747,21 +751,25 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                   center: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                         Icon(
                           centerIcon,
-                          size: MediaQuery.of(context).size.width / 3,
+                          size: MediaQuery.of(context).size.width / 4,
                           color: barColor,
                         ),
+                        Text('pulse check in'),
                         Text(
-                          currentTime(),
+                          pulseCheckCountdown,
+                          textAlign: TextAlign.center,
                           key: GlobalObjectKey('timerCircle'),
                           style: new TextStyle(
                             fontSize: 40.0,
                           ),
                         ),
-                            Text('pulse check in\n' + pulseCheckCountdown, textAlign: TextAlign.center,),
+                        Text(
+                          'time elapsed ' + currentTime(),
+                        ),
                       ])),
                   backgroundColor: Colors.grey,
                   progressColor: barColor,
@@ -851,85 +859,135 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ))),
       ],
     );
-
     var fullStack = <Widget>[full];
     if (!warningDismissed) {
       fullStack = <Widget>[full, warning];
     }
+
+    editTimeline(int i) {
+      setState(() => {
+            timelineEditing = i,
+          });
+    }
+
     List<Widget> timelineTiles = List<Widget>();
     List<String> eventSplit = globals.log.split('\n');
-    print('event parts ' + eventSplit.toString());
+    //print('event parts ' + eventSplit.toString());
     for (int i = 0; i < eventSplit.length; i++) {
-      bool first = false;
-      bool last = false;
-      bool dot = true;
-      IconData icon = Icons.arrow_downward;
-      double iconSize = 20;
-      double height = 50;
-      String time = eventSplit[i].substring(0, 5);
-      String rest = eventSplit[i].substring(5);
-      if (eventSplit[i].contains('Pulse')) {
-        icon = Icons.check_circle;
-        iconSize = 40;
-        height = 120;
+      if (eventSplit[i] != '') {
+        bool first = false;
+        bool last = false;
+        bool dot = true;
+        IconData icon = Icons.arrow_downward;
+        double iconSize = 20;
+        double height = 50;
+        String time = '';
+        String rest = eventSplit[i];
+        if (eventSplit[i].length > 5) {
+          time = eventSplit[i].substring(0, 5);
+          rest = eventSplit[i].substring(5);
+        }
+        if (eventSplit[i].contains('Pulse')) {
+          icon = Icons.check_circle;
+          iconSize = 40;
+          height = 120;
+        }
+        if (eventSplit[i].contains('Shock')) {
+          icon = Icons.all_out;
+          iconSize = 40;
+          height = 120;
+        }
+        if (eventSplit[i].contains('Code')) {
+          icon = Icons.all_out;
+          iconSize = 40;
+          height = 120;
+        }
+        if (eventSplit[i].contains('Epinephrine')) {}
+        if (i == 0) {
+          first = true;
+          time = '';
+          rest = eventSplit[i];
+        }
+        if (i == eventSplit.length - 1) {
+          last = true;
+        }
+        Widget endChild = Text(rest);
+        if (i == timelineEditing) {
+          TextField txt = TextField(
+            controller: timelineEditingController,
+            onEditingComplete: () => {
+              setState(() => {
+                    eventSplit[i] = timelineEditingController.text,
+                    globals.log = eventSplit.join('\n'),
+                    print(globals.log),
+                    timelineEditing = null,
+                    FocusScope.of(context).unfocus()
+                  })
+            },
+          );
+          IconButton but = IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () => {
+              setState(() => {
+                    eventSplit.removeAt(i),
+                    globals.log = eventSplit.join('\n'),
+                    print(globals.log),
+                    timelineEditing = null,
+                    FocusScope.of(context).unfocus()
+                  })
+            },
+          );
+          endChild = Container(
+            child: Row(
+              children: [Expanded(child: txt), but],
+            ),
+          );
+        }
+        TimelineTile add = TimelineTile(
+          alignment: TimelineAlign.manual,
+          lineXY: 0.3,
+          startChild: Container(
+            height: height,
+            alignment: Alignment.center,
+            child: Text(time),
+          ),
+          endChild: Container(
+            height: height,
+            alignment: Alignment.center,
+            child: GestureDetector(
+              onTap: () {
+                print('tapped' + i.toString());
+                timelineEditingController.text = eventSplit[i];
+                editTimeline(i);
+              },
+              child: endChild,
+            ),
+          ),
+          isFirst: first,
+          isLast: last,
+          hasIndicator: dot,
+          indicatorStyle: IndicatorStyle(
+              width: iconSize,
+              color: Colors.red,
+              padding: EdgeInsets.all(8),
+              iconStyle: IconStyle(
+                iconData: icon,
+                color: Colors.white,
+              )),
+        );
+        timelineTiles.add(add);
       }
-      if (eventSplit[i].contains('Shock')) {
-        icon = Icons.all_out;
-        iconSize = 40;
-        height = 120;
-      }
-      if (eventSplit[i].contains('Code')) {
-        icon = Icons.all_out;
-        iconSize = 40;
-        height = 120;
-      }
-      if (eventSplit[i].contains('Epinephrine')) {}
-      if (i == 0) {
-        first = true;
-        time = '';
-        rest = eventSplit[i];
-      }
-      if (i == eventSplit.length - 1) {
-        last = true;
-      }
-      TimelineTile add = TimelineTile(
-        alignment: TimelineAlign.manual,
-        lineXY: 0.3,
-        startChild: Container(
-          height: height,
-          alignment: Alignment.center,
-          child: Text(time),
-        ),
-        endChild: Container(
-          height: height,
-          alignment: Alignment.center,
-          child: Text(rest),
-        ),
-        isFirst: first,
-        isLast: last,
-        hasIndicator: dot,
-        indicatorStyle: IndicatorStyle(
-            width: iconSize,
-            color: Colors.red,
-            padding: EdgeInsets.all(8),
-            iconStyle: IconStyle(
-              iconData: icon,
-              color: Colors.white,
-            )),
-      );
-      timelineTiles.add(add);
     }
     return Scaffold(
       drawer: Drawer(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.black54,
               ),
               child: Container(
-
                 height: 80,
                 alignment: Alignment.center,
                 child: Text(
@@ -956,17 +1014,14 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
             Expanded(
-
-                child: ListView(
-                  controller: _eventScrollController,
-                  shrinkWrap: true,
-                  children:  timelineTiles,
-
-                ),
+              child: ListView(
+                controller: _eventScrollController,
+                shrinkWrap: true,
+                children: timelineTiles,
               ),
-
+            ),
           ],
-          ),
+        ),
       ),
       appBar: AppBar(
         title: Text(
@@ -975,9 +1030,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(FlutterIcons.timeline_alert_mco),
-            onPressed: () => {
-              Scaffold.of(context).openDrawer()
-            },
+            onPressed: () => {Scaffold.of(context).openDrawer()},
           ),
         ),
       ),
@@ -987,6 +1040,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 }
+
+int timelineEditing = null;
+TextEditingController timelineEditingController = TextEditingController();
 
 var nested = NestedTabBar();
 var showShock = false;

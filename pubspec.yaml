@@ -31,7 +31,7 @@ dependencies:
   flutter_icons: "^1.1.0"
   customgauge: "^1.0.1"
   intl: "0.15.7"
-  share: ^0.6.4+3
+  share: ^0.6.5+2
   flutter_launcher_icons: ^0.7.5
   url_launcher: ^5.5.0
   flutter_spinkit: "^4.1.2"
@@ -41,6 +41,8 @@ dependencies:
   timeline_tile: ^1.0.0
   wakelock: ^0.1.4+2
   device_info: ^0.4.2+8
+  pdf: ^1.11.2
+  path_provider: ^1.6.18
 
 
 
