@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -23,6 +24,7 @@ void main() {
 
 var askForPulse = false;
 var warningDismissed = false;
+final _eventScrollController = ScrollController();
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -59,6 +61,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double fraction = 0;
   double minPassed = 0;
   double secPassed = 0;
+  double fractionPulse = 0;
   double dispSec = 0;
   double _weightValue = 5;
   _checkForWeight() {
@@ -147,37 +150,46 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       compressorBadge = true;
     }
 
-    if (minPassed < 10) {
-      if (dispSec < 10) {
-        globals.publicCodeTime = "0" +
-            minPassed.toStringAsFixed(0) +
-            " : 0" +
-            dispSec.toStringAsFixed(0);
-        return "0" +
-            minPassed.toStringAsFixed(0) +
-            " : 0" +
-            dispSec.toStringAsFixed(0);
-      }
-      globals.publicCodeTime = "0" +
-          minPassed.toStringAsFixed(0) +
-          " : " +
-          dispSec.toStringAsFixed(0);
-      return "0" +
-          minPassed.toStringAsFixed(0) +
-          " : " +
-          dispSec.toStringAsFixed(0);
-    }
-    if (dispSec < 10) {
-      globals.publicCodeTime =
-          minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
-      return minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
-    }
-    globals.publicCodeTime =
-        minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
+//    if (minPassed < 10) {
+//      if (dispSec < 10) {
+//        globals.publicCodeTime = "0" +
+//            minPassed.toStringAsFixed(0) +
+//            " : 0" +
+//            dispSec.toStringAsFixed(0);
+//        return "0" +
+//            minPassed.toStringAsFixed(0) +
+//            " : 0" +
+//            dispSec.toStringAsFixed(0);
+//      }
+//      globals.publicCodeTime = "0" +
+//          minPassed.toStringAsFixed(0) +
+//          " : " +
+//          dispSec.toStringAsFixed(0);
+//      return "0" +
+//          minPassed.toStringAsFixed(0) +
+//          " : " +
+//          dispSec.toStringAsFixed(0);
+//    }
+//    if (dispSec < 10) {
+//      globals.publicCodeTime =
+//          minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
+//      return minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
+//    }
+//    globals.publicCodeTime =
+//        minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
+    globals.publicCodeTime = _printDuration(Duration(seconds: secPassed.toInt()));
 
     return globals.publicCodeTime;
   }
 
+  bool progressPulseCheck = true;
+  String pulseCheckCountdown = '';
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
+  }
   _triggerUpdate() {
     print('initializing timer');
     Timer.periodic(
@@ -185,32 +197,34 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         (Timer timer) => {
               setState(() {
                 secPassed++;
-                dispSec = secPassed;
-                if (secPassed == 60) {
-                  minPassed++;
-                }
-                if (secPassed >= 120) {
-                  secPassed = 0;
-                  minPassed++;
-                }
-                if (secPassed >= 60) {
-                  dispSec = secPassed - 60;
-                }
-                fraction = secPassed / 120;
 
-                if (secPassed >= 109) {
-                  barColor = Colors.blueAccent;
-                  inst = "Pulse Check";
-                  centerIcon = Ionicons.ios_pulse;
+                if (progressPulseCheck) {
+                  fractionPulse++;
 
-                  if (secPassed == 110) {
-                    print('should open');
-                    askForPulse = true;
+                  print(_printDuration(Duration(seconds: 120 - fractionPulse.toInt())));
+                  pulseCheckCountdown = '-' + _printDuration(Duration(seconds: 120 - fractionPulse.toInt()));
+
+                  fraction = fractionPulse / 120;
+
+                  if (fractionPulse >= 109) {
+
+
+                    if (fractionPulse == 120) {
+                      print('should open');
+                      askForPulse = true;
+                      barColor = Colors.blueAccent;
+                      inst = "Pulse Check";
+                      centerIcon = Ionicons.ios_pulse;
+                      progressPulseCheck = false;
+                    }
+                  } else {
+                    barColor = Colors.red;
+                    inst = "Continue Compressions";
+                    centerIcon = FlutterIcons.heart_ant;
                   }
-                } else {
-                  barColor = Colors.red;
-                  inst = "Continue Compressions";
-                  centerIcon = FlutterIcons.heart_ant;
+                  if (fractionPulse >= 120){
+                    fractionPulse = 0;
+                  }
                 }
               }),
             });
@@ -252,6 +266,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       } else {
         askForPulse = false;
         nested.show = false;
+        fractionPulse = 0;
+        progressPulseCheck = true;
       }
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('kk:mm').format(now);
@@ -264,6 +280,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       globals.log = globals.log + full;
     });
   }
+
 
   @override
   void initState() {
@@ -429,6 +446,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     print('no pcheck');
                     askForPulse = false;
                     nested.show = false;
+                    progressPulseCheck = true;
                   }),
                 ),
                 OpenPulseButton(
@@ -638,6 +656,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           askForPulse = false;
                           nested.show = false;
                           showShock = false;
+                          fractionPulse = 0;
+                          progressPulseCheck = true;
                         }),
                       ),
                     ],
@@ -726,23 +746,22 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                   ),
                   center: Center(
-                      child: ListView(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                         Icon(
                           centerIcon,
                           size: MediaQuery.of(context).size.width / 3,
                           color: barColor,
                         ),
-                        Center(
-                            child: new Text(
+                        Text(
                           currentTime(),
                           key: GlobalObjectKey('timerCircle'),
                           style: new TextStyle(
                             fontSize: 40.0,
                           ),
-                        )),
+                        ),
+                            Text('pulse check in\n' + pulseCheckCountdown, textAlign: TextAlign.center,),
                       ])),
                   backgroundColor: Colors.grey,
                   progressColor: barColor,
@@ -902,45 +921,53 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     }
     return Scaffold(
       drawer: Drawer(
-          child: Column(children: <Widget>[
-        Container(
-          color: Colors.black54,
-          height: 80,
-          alignment: Alignment.center,
-          child: Text(
-            'Code Events',
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
-        Container(
-          height: 20,
-          color: Colors.black12,
-          child: Row(
-            children: [
-              Expanded(
-                flex: 4,
-                child: Text('Time', textAlign: TextAlign.center),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.black54,
               ),
-              VerticalDivider(),
-              Expanded(
-                  flex: 10,
-                  child: Text('Time Since Code Start',
-                      textAlign: TextAlign.center))
-            ],
+              child: Container(
+
+                height: 80,
+                alignment: Alignment.center,
+                child: Text(
+                  'Code Events',
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+              ),
+            ),
+            Container(
+              height: 20,
+              color: Colors.black12,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: Text('Time', textAlign: TextAlign.center),
+                  ),
+                  VerticalDivider(),
+                  Expanded(
+                      flex: 10,
+                      child: Text('Time Since Code Start',
+                          textAlign: TextAlign.center))
+                ],
+              ),
+            ),
+            Expanded(
+
+                child: ListView(
+                  controller: _eventScrollController,
+                  shrinkWrap: true,
+                  children:  timelineTiles,
+
+                ),
+              ),
+
+          ],
           ),
-        ),
-        Expanded(
-          child: ListView(
-            reverse: true,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: timelineTiles,
-              )
-            ],
-          ),
-        ),
-      ])),
+      ),
       appBar: AppBar(
         title: Text(
           "Heart Start",
@@ -948,7 +975,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(FlutterIcons.timeline_alert_mco),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => {
+              Scaffold.of(context).openDrawer()
+            },
           ),
         ),
       ),
