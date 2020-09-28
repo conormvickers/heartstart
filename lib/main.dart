@@ -15,6 +15,7 @@ import 'package:highlighter_coachmark/highlighter_coachmark.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:device_info/device_info.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -383,6 +384,14 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             print('done coaching');
           }
         });
+  }
+
+  FlutterTts flutterTts = FlutterTts();
+  Future _speak() async {
+    flutterTts.setVolume(1.0);
+    var result = await flutterTts
+        .speak("Start compressions right away. Do not stop for 2 minutes");
+    print('finished speaching');
   }
 
   @override
@@ -845,6 +854,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             onPressed: () => setState(() {
                               print('dismiss warning');
                               warningDismissed = true;
+                              _speak();
                             }),
                           ),
                         )),
