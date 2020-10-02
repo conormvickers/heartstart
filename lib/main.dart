@@ -16,6 +16,8 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audio_cache.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -26,6 +28,12 @@ void main() {
 var askForPulse = false;
 var warningDismissed = false;
 final _eventScrollController = ScrollController();
+int timelineEditing = null;
+TextEditingController timelineEditingController = TextEditingController();
+
+var nested = NestedTabBar();
+var showShock = false;
+var _shockType = " ";
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -59,6 +67,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  static AudioCache player = AudioCache();
   double fraction = 0;
   double minPassed = 0;
   double secPassed = 0;
@@ -209,6 +218,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   pulseCheckCountdown = ' ' +
                       _printDuration(
                           Duration(seconds: 120 - fractionPulse.toInt()));
+                  if (120 - fractionPulse.toInt() == 10) {
+                    _speechThis('10 seconds to pulse check');
+                  }
 
                   fraction = fractionPulse / 120;
 
@@ -216,6 +228,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     if (fractionPulse == 120) {
                       print('should open');
                       askForPulse = true;
+                      _speechThis(
+                          'Stop compressions. Resume compressions within 10 seconds');
                       barColor = Colors.blueAccent;
                       inst = "Pulse Check";
                       centerIcon = Ionicons.ios_pulse;
@@ -389,11 +403,59 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   FlutterTts flutterTts = FlutterTts();
   Future _speak() async {
     flutterTts.setVolume(1.0);
-    var result = await flutterTts
-        .speak("Start compressions right away. Do not stop for 2 minutes");
+    flutterTts.setCompletionHandler(() {
+      if (playCompressions) {
+        startMetronome();
+      }
+    });
+    var result = await flutterTts.speak("Start compressions right away");
+
     print('finished speaching');
   }
 
+  _speechThis(String string) async {
+    if (playCompressions) {
+      metronomeTimer.cancel();
+    }
+    var result = await flutterTts.speak(string);
+  }
+
+  bool playCompressions = true;
+  Timer metronomeTimer;
+  startMetronome() async {
+    metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
+      metronome(player);
+    });
+  }
+
+  metronome(AudioCache player) {
+    if (playCompressions) {
+      player.play('2.wav');
+    }
+  }
+
+  toggleSound() {
+    playCompressions = !playCompressions;
+    print('play compressions ' + playCompressions.toString());
+    if (!playCompressions) {
+      metronomeTimer.cancel();
+      setState(() {
+        soundIcon = Icon(FlutterIcons.volume_mute_faw5s);
+        soundColor = Colors.grey;
+      });
+    } else {
+      setState(() {
+        soundIcon = Icon(FlutterIcons.volume_up_faw5s);
+        soundColor = Colors.red;
+      });
+      metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
+        metronome(player);
+      });
+    }
+  }
+
+  Icon soundIcon = Icon(FlutterIcons.volume_up_faw5s);
+  Color soundColor = Colors.red;
   @override
   Widget build(BuildContext context) {
     if (globals.reset) {
@@ -715,76 +777,87 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   style: TextStyle(color: Colors.white))));
     }
 
-    var full = Column(children: <Widget>[
-      Badge(
-        borderRadius: 10,
-        showBadge: compressorBadge,
-        badgeContent: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            content,
-            IconButton(
-              icon: Icon(
-                FlutterIcons.x_circle_fea,
-                color: Colors.white,
-              ),
-              onPressed: switchedCompressor,
-            )
-          ],
-        ),
-        shape: BadgeShape.square,
-        position: BadgePosition.bottomRight(bottom: 50, right: 20),
-        child: Container(
-          height: MediaQuery.of(context).size.width * 2 / 3 + 50,
-          child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: <Widget>[
-                cycle = CircularPercentIndicator(
-                  key: GlobalObjectKey('circleProgress'),
-                  radius: (MediaQuery.of(context).size.width * 2 / 3),
-                  lineWidth: 10.0,
-                  percent: fraction,
-                  animation: true,
-                  animationDuration: 1000,
-                  animateFromLastPercent: true,
-                  circularStrokeCap: CircularStrokeCap.round,
-                  footer: FittedBox(
-                    child: AutoSizeText(
-                      inst,
-                      key: GlobalObjectKey('inst'),
-                      style: new TextStyle(
-                        fontSize: 40.0,
-                      ),
-                      maxLines: 1,
-                    ),
+    Widget full = Column(children: <Widget>[
+      Stack(
+        children: [
+          Badge(
+            borderRadius: 10,
+            showBadge: compressorBadge,
+            badgeContent: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                content,
+                IconButton(
+                  icon: Icon(
+                    FlutterIcons.x_circle_fea,
+                    color: Colors.white,
                   ),
-                  center: Center(
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                        Icon(
-                          centerIcon,
-                          size: MediaQuery.of(context).size.width / 4,
-                          color: barColor,
-                        ),
-                        Text('pulse check in'),
-                        Text(
-                          pulseCheckCountdown,
-                          textAlign: TextAlign.center,
-                          key: GlobalObjectKey('timerCircle'),
+                  onPressed: switchedCompressor,
+                )
+              ],
+            ),
+            shape: BadgeShape.square,
+            position: BadgePosition.bottomRight(bottom: 50, right: 20),
+            child: Container(
+              height: MediaQuery.of(context).size.width * 2 / 3 + 50,
+              child: ListView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: <Widget>[
+                    cycle = CircularPercentIndicator(
+                      key: GlobalObjectKey('circleProgress'),
+                      radius: (MediaQuery.of(context).size.width * 2 / 3),
+                      lineWidth: 10.0,
+                      percent: fraction,
+                      animation: true,
+                      animationDuration: 1000,
+                      animateFromLastPercent: true,
+                      circularStrokeCap: CircularStrokeCap.round,
+                      footer: FittedBox(
+                        child: AutoSizeText(
+                          inst,
+                          key: GlobalObjectKey('inst'),
                           style: new TextStyle(
                             fontSize: 40.0,
                           ),
+                          maxLines: 1,
                         ),
-                        Text(
-                          'time elapsed ' + currentTime(),
-                        ),
-                      ])),
-                  backgroundColor: Colors.grey,
-                  progressColor: barColor,
-                ),
-              ]),
-        ),
+                      ),
+                      center: Center(
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                            Icon(
+                              centerIcon,
+                              size: MediaQuery.of(context).size.width / 4,
+                              color: barColor,
+                            ),
+                            Text('pulse check in'),
+                            Text(
+                              '-' + pulseCheckCountdown,
+                              textAlign: TextAlign.center,
+                              key: GlobalObjectKey('timerCircle'),
+                              style: new TextStyle(
+                                fontSize: 40.0,
+                              ),
+                            ),
+                            Text(
+                              'time elapsed ' + currentTime(),
+                            ),
+                          ])),
+                      backgroundColor: Colors.grey,
+                      progressColor: barColor,
+                    ),
+                  ]),
+            ),
+          ),
+          Positioned(
+            child: IconButton(
+              icon: soundIcon,
+              color: soundColor,
+              onPressed: () => {toggleSound()},
+            ),
+          )
+        ],
       ),
       Divider(),
       Expanded(
@@ -1051,12 +1124,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 }
 
-int timelineEditing = null;
-TextEditingController timelineEditingController = TextEditingController();
-
-var nested = NestedTabBar();
-var showShock = false;
-
 class OpenPulseButton extends StatelessWidget {
   OpenPulseButton({@required this.onPressed});
   final GestureTapCallback onPressed;
@@ -1203,8 +1270,6 @@ class deliveredShock extends StatelessWidget {
             )));
   }
 }
-
-var _shockType = " ";
 
 class goForCode extends StatelessWidget {
   goForCode({@required this.onPressed});

@@ -44,6 +44,7 @@ dependencies:
   pdf: ^1.11.2
   path_provider: ^1.6.18
   flutter_tts: ^1.2.7
+  audioplayers: ^0.16.1
 
 
 
