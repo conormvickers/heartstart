@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -16,8 +17,8 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers/audio_cache.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -68,6 +69,7 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   static AudioCache player = AudioCache();
+
   double fraction = 0;
   double minPassed = 0;
   double secPassed = 0;
@@ -153,7 +155,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   IconData centerIcon = FlutterIcons.heart_ant;
 
   String inst = "Continue Compressions";
-  DateTime lastSwitchedComp = DateTime.now();
+  DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
 
   currentTime() {
     if (DateTime.now().difference(lastSwitchedComp).inMinutes >= 2) {
@@ -309,6 +311,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     nested = NestedTabBar(
       parent: this,
     );
+    player.load('2.wav');
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy/MM/dd kk:mm').format(now);
@@ -343,7 +346,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
-  bool askForTour = true;
+  bool askForTour = false;
   int currentCoachWidget = 0;
   List<String> coachInfo = [
     "This is the time since code start",
@@ -404,6 +407,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Future _speak() async {
     flutterTts.setVolume(1.0);
     flutterTts.setCompletionHandler(() {
+
       if (playCompressions) {
         startMetronome();
       }
@@ -414,15 +418,20 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   _speechThis(String string) async {
-    if (playCompressions) {
-      metronomeTimer.cancel();
+    if (playVoice) {
+      if (playCompressions) {
+        metronomeTimer.cancel();
+      }
+      var result = await flutterTts.speak(string);
     }
-    var result = await flutterTts.speak(string);
   }
 
   bool playCompressions = true;
   Timer metronomeTimer;
   startMetronome() async {
+    if (metronomeTimer != null) {
+      metronomeTimer.cancel();
+    }
     metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
       metronome(player);
     });
@@ -438,14 +447,16 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     playCompressions = !playCompressions;
     print('play compressions ' + playCompressions.toString());
     if (!playCompressions) {
-      metronomeTimer.cancel();
+      if (metronomeTimer != null){
+        metronomeTimer.cancel();
+      }
       setState(() {
-        soundIcon = Icon(FlutterIcons.volume_mute_faw5s);
+        soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
       });
     } else {
       setState(() {
-        soundIcon = Icon(FlutterIcons.volume_up_faw5s);
+        soundIcon = Icon(FlutterIcons.metronome_mco);
         soundColor = Colors.red;
       });
       metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
@@ -453,9 +464,28 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
     }
   }
+  toggleVoice() {
+    playVoice = !playVoice;
+    if (playVoice) {
+      setState(() {
+        voiceIcon = Icon(FlutterIcons.voice_mco);
+        voiceColor = Colors.red;
+      });
+    }else{
+      setState(() {
+        voiceIcon = Icon(FlutterIcons.voice_off_mco);
+        voiceColor = Colors.grey;
+      });
+    }
+  }
 
-  Icon soundIcon = Icon(FlutterIcons.volume_up_faw5s);
+  bool playVoice = true;
+  Icon soundIcon = Icon(FlutterIcons.metronome_mco);
   Color soundColor = Colors.red;
+  List<Widget> timelineTiles = List<Widget>();
+  Icon voiceIcon = Icon(FlutterIcons.voice_mco);
+  Color voiceColor = Colors.red;
+
   @override
   Widget build(BuildContext context) {
     if (globals.reset) {
@@ -851,10 +881,19 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
           ),
           Positioned(
-            child: IconButton(
-              icon: soundIcon,
-              color: soundColor,
-              onPressed: () => {toggleSound()},
+            child: Column(
+              children: [
+                IconButton(
+                  icon: soundIcon,
+                  color: soundColor,
+                  onPressed: () => {toggleSound()},
+                ),
+                IconButton(
+                  icon: voiceIcon,
+                  color: voiceColor,
+                  onPressed: () => {toggleVoice()},
+                ),
+              ],
             ),
           )
         ],
@@ -953,117 +992,159 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           });
     }
 
-    List<Widget> timelineTiles = List<Widget>();
     List<String> eventSplit = globals.log.split('\n');
-    //print('event parts ' + eventSplit.toString());
-    for (int i = 0; i < eventSplit.length; i++) {
-      if (eventSplit[i] != '') {
-        bool first = false;
-        bool last = false;
-        bool dot = true;
-        IconData icon = Icons.arrow_downward;
-        double iconSize = 20;
-        double height = 50;
-        String time = '';
-        String rest = eventSplit[i];
-        if (eventSplit[i].length > 5) {
-          time = eventSplit[i].substring(0, 5);
-          rest = eventSplit[i].substring(5);
-        }
-        if (eventSplit[i].contains('Pulse')) {
-          icon = Icons.check_circle;
-          iconSize = 40;
-          height = 120;
-        }
-        if (eventSplit[i].contains('Shock')) {
-          icon = Icons.all_out;
-          iconSize = 40;
-          height = 120;
-        }
-        if (eventSplit[i].contains('Code')) {
-          icon = Icons.all_out;
-          iconSize = 40;
-          height = 120;
-        }
-        if (eventSplit[i].contains('Epinephrine')) {}
-        if (i == 0) {
-          first = true;
-          time = '';
-          rest = eventSplit[i];
-        }
-        if (i == eventSplit.length - 1) {
-          last = true;
-        }
-        Widget endChild = Text(rest);
-        if (i == timelineEditing) {
-          TextField txt = TextField(
-            controller: timelineEditingController,
-            onEditingComplete: () => {
-              setState(() => {
+
+    updateDrawer () {
+      FocusNode focusEdit = FocusNode();
+      setState(() {
+        print('updating drawer');
+        eventSplit = globals.log.split('\n');
+        timelineTiles = List<Widget>();
+        for (int i = 0; i < eventSplit.length; i++) {
+          if (eventSplit[i] != '') {
+            bool first = false;
+            bool last = false;
+            bool dot = true;
+            IconData icon = Icons.arrow_downward;
+            double iconSize = 20;
+            double height = 50;
+            String time = '';
+            String rest = eventSplit[i];
+            if (eventSplit[i].length > 5) {
+              time = eventSplit[i].substring(0, 5);
+              rest = eventSplit[i].substring(5);
+            }
+            if (eventSplit[i].contains('Pulse')) {
+              icon = Icons.check_circle;
+              iconSize = 40;
+              height = 120;
+            }
+            if (eventSplit[i].contains('Shock')) {
+              icon = Icons.all_out;
+              iconSize = 40;
+              height = 120;
+            }
+            if (eventSplit[i].contains('Code')) {
+              icon = Icons.all_out;
+              iconSize = 40;
+              height = 120;
+            }
+            if (eventSplit[i].contains('Epinephrine')) {}
+            if (i == 0) {
+              first = true;
+              time = '';
+              rest = eventSplit[i];
+            }
+            if (i == eventSplit.length - 1) {
+              last = true;
+            }
+            Widget endChild = Text(rest);
+            if (i == timelineEditing) {
+              TextField txt = TextField(
+                maxLines: null,
+                focusNode: focusEdit,
+                keyboardType: TextInputType.text,
+                controller: timelineEditingController,
+                onEditingComplete: () => {
+                  setState(() => {
                     eventSplit[i] = timelineEditingController.text,
                     globals.log = eventSplit.join('\n'),
                     print(globals.log),
                     timelineEditing = null,
-                    FocusScope.of(context).unfocus()
+                    FocusScope.of(context).unfocus(),
+                    updateDrawer(),
                   })
-            },
-          );
-          IconButton but = IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () => {
-              setState(() => {
-                    eventSplit.removeAt(i),
-                    globals.log = eventSplit.join('\n'),
-                    print(globals.log),
-                    timelineEditing = null,
-                    FocusScope.of(context).unfocus()
-                  })
-            },
-          );
-          endChild = Container(
-            child: Row(
-              children: [Expanded(child: txt), but],
-            ),
-          );
-        }
-        TimelineTile add = TimelineTile(
-          alignment: TimelineAlign.manual,
-          lineXY: 0.3,
-          startChild: Container(
-            height: height,
-            alignment: Alignment.center,
-            child: Text(time),
-          ),
-          endChild: Container(
-            height: height,
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                print('tapped' + i.toString());
-                timelineEditingController.text = eventSplit[i];
-                editTimeline(i);
-              },
-              child: endChild,
-            ),
-          ),
-          isFirst: first,
-          isLast: last,
-          hasIndicator: dot,
-          indicatorStyle: IndicatorStyle(
-              width: iconSize,
-              color: Colors.red,
-              padding: EdgeInsets.all(8),
-              iconStyle: IconStyle(
-                iconData: icon,
+                },
+              );
+
+              endChild = Container(
+                child: Row(
+                  children: [Expanded(child: txt)],
+                ),
+              );
+            }
+            TimelineTile add = TimelineTile(
+              alignment: TimelineAlign.manual,
+              lineXY: 0.3,
+              startChild: Container(
+                height: height,
+                alignment: Alignment.center,
+                child: Text(time),
+              ),
+              endChild: Container(
                 color: Colors.white,
-              )),
-        );
-        timelineTiles.add(add);
-      }
+                height: height,
+                alignment: Alignment.center,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      print('tapped' + i.toString());
+                      timelineEditingController.text = eventSplit[i];
+                      editTimeline(i);
+                      updateDrawer();
+                    });
+                  },
+                  child: endChild,
+                ),
+              ),
+              isFirst: first,
+              isLast: last,
+              hasIndicator: dot,
+              indicatorStyle: IndicatorStyle(
+                  width: iconSize,
+                  color: Colors.red,
+                  padding: EdgeInsets.all(8),
+                  iconStyle: IconStyle(
+                    iconData: icon,
+                    color: Colors.white,
+                  )),
+            );
+            timelineTiles.add(Slidable(
+                key: Key(i.toString() + 'timeline'),
+                actionPane: SlidableBehindActionPane(),
+                actionExtentRatio: 0.2,
+                secondaryActions: [
+
+                  IconSlideAction(
+                    caption: 'delete',
+                    icon: FlutterIcons.delete_mdi,
+                    color: Colors.red,
+                    onTap: () => {
+                      setState(() => {
+                        eventSplit.removeAt(i),
+                        globals.log = eventSplit.join('\n'),
+                        print(globals.log),
+                        timelineEditing = null,
+                        FocusScope.of(context).unfocus(),
+                        updateDrawer(),
+                      })
+                    },
+                  )
+                ],
+                child: add));
+          }
+        }
+        focusEdit.requestFocus();
+      });
     }
+
+    onReorder(int oldIndex, int newIndex) {
+      setState(() {
+        if (newIndex > oldIndex) {
+          newIndex -= 1;
+        }
+        final String item = eventSplit.removeAt(oldIndex);
+        eventSplit.insert(newIndex, item);
+        globals.log = eventSplit.join('\n');
+      });
+      updateDrawer();
+    }
+    //print('event parts ' + eventSplit.toString());
+
     return Scaffold(
       drawer: Drawer(
         child: Column(
+
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             DrawerHeader(
@@ -1097,12 +1178,32 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ),
             ),
             Expanded(
-              child: ListView(
-                controller: _eventScrollController,
-                shrinkWrap: true,
-                children: timelineTiles,
+              child: Container(
+                color: Colors.white,
+                child: ReorderableListView(
+                  onReorder: onReorder,
+                  children: timelineTiles,
+                  scrollController: ScrollController(),
+                ),
               ),
             ),
+            Container(
+              height: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  RaisedButton(
+                    child: Text('add event'),
+                    onPressed: () =>
+                    {
+                      globals.log = globals.log + '\n??:?? new event',
+                      updateDrawer(),
+
+                    }
+                  )
+                ],
+              ),
+            )
           ],
         ),
       ),
@@ -1113,7 +1214,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(FlutterIcons.timeline_alert_mco),
-            onPressed: () => {Scaffold.of(context).openDrawer()},
+            onPressed: () => {
+              updateDrawer(),
+              Scaffold.of(context).openDrawer()},
           ),
         ),
       ),

@@ -45,7 +45,7 @@ dependencies:
   path_provider: ^1.6.18
   flutter_tts: ^1.2.7
   audioplayers: ^0.16.1
-
+  flutter_slidable: ^0.5.7
 
 
 dev_dependencies:

@@ -18,6 +18,7 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -636,6 +637,12 @@ class NestedTabBarState extends State<NestedTabBar>
     }
     return Container();
   }
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -647,6 +654,9 @@ class NestedTabBarState extends State<NestedTabBar>
               value: item.checked ?? false,
               onChanged: (bool newValue) {
                 setState(() => item.checked = newValue);
+                if (newValue == true){
+                  globals.log = globals.log + '\n' + _printDuration(Duration(seconds: DateTime.now().difference(globals.codeStart).inSeconds )) + item.value;
+                }
               },
               title: Text('${item.value}'),
             ))
@@ -990,6 +1000,8 @@ class PageTwo extends StatefulWidget {
 }
 
 class PageTwoState extends State<PageTwo> {
+
+
   List<Widget> timelineTiles = List<Widget>();
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
@@ -1040,123 +1052,167 @@ class PageTwoState extends State<PageTwo> {
         text: "TXT log");
   }
 
+
+  onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final String item = eventSplit.removeAt(oldIndex);
+      eventSplit.insert(newIndex, item);
+      globals.log = eventSplit.join('\n');
+    });
+    updateDrawer();
+  }
+
+  updateDrawer () {
+    FocusNode focusEdit = FocusNode();
+    setState(() {
+      print('updating drawer');
+      eventSplit = globals.log.split('\n');
+      timelineTiles = List<Widget>();
+      for (int i = 0; i < eventSplit.length; i++) {
+        if (eventSplit[i] != '') {
+          bool first = false;
+          bool last = false;
+          bool dot = true;
+          IconData icon = Icons.arrow_downward;
+          double iconSize = 20;
+          double height = 50;
+          String time = '';
+          String rest = eventSplit[i];
+          if (eventSplit[i].length > 5) {
+            time = eventSplit[i].substring(0, 5);
+            rest = eventSplit[i].substring(5);
+          }
+          if (eventSplit[i].contains('Pulse')) {
+            icon = Icons.check_circle;
+            iconSize = 40;
+            height = 120;
+          }
+          if (eventSplit[i].contains('Shock')) {
+            icon = Icons.all_out;
+            iconSize = 40;
+            height = 120;
+          }
+          if (eventSplit[i].contains('Code')) {
+            icon = Icons.all_out;
+            iconSize = 40;
+            height = 120;
+          }
+          if (eventSplit[i].contains('Epinephrine')) {}
+          if (i == 0) {
+            first = true;
+            time = '';
+            rest = eventSplit[i];
+          }
+          if (i == eventSplit.length - 1) {
+            last = true;
+          }
+          Widget endChild = Text(rest);
+          if (i == timelineEditing) {
+            TextField txt = TextField(
+              maxLines: null,
+              focusNode: focusEdit,
+              keyboardType: TextInputType.text,
+              controller: timelineEditingController,
+              onEditingComplete: () => {
+                setState(() => {
+                  eventSplit[i] = timelineEditingController.text,
+                  globals.log = eventSplit.join('\n'),
+                  print(globals.log),
+                  timelineEditing = null,
+                  FocusScope.of(context).unfocus(),
+                  updateDrawer(),
+                })
+              },
+            );
+
+            endChild = Container(
+              child: Row(
+                children: [Expanded(child: txt)],
+              ),
+            );
+          }
+          TimelineTile add = TimelineTile(
+            alignment: TimelineAlign.manual,
+            lineXY: 0.3,
+            startChild: Container(
+              height: height,
+              alignment: Alignment.center,
+              child: Text(time),
+            ),
+            endChild: Container(
+              color: Colors.white,
+              height: height,
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    print('tapped' + i.toString());
+                    timelineEditingController.text = eventSplit[i];
+                    editTimeline(i);
+                    updateDrawer();
+                  });
+                },
+                child: endChild,
+              ),
+            ),
+            isFirst: first,
+            isLast: last,
+            hasIndicator: dot,
+            indicatorStyle: IndicatorStyle(
+                width: iconSize,
+                color: Colors.red,
+                padding: EdgeInsets.all(8),
+                iconStyle: IconStyle(
+                  iconData: icon,
+                  color: Colors.white,
+                )),
+          );
+          timelineTiles.add(Slidable(
+              key: Key(i.toString() + 'timeline'),
+              actionPane: SlidableBehindActionPane(),
+              actionExtentRatio: 0.2,
+              secondaryActions: [
+
+                IconSlideAction(
+                  caption: 'delete',
+                  icon: FlutterIcons.delete_mdi,
+                  color: Colors.red,
+                  onTap: () => {
+                    setState(() => {
+                      eventSplit.removeAt(i),
+                      globals.log = eventSplit.join('\n'),
+                      print(globals.log),
+                      timelineEditing = null,
+                      FocusScope.of(context).unfocus(),
+                      updateDrawer(),
+                    })
+                  },
+                )
+              ],
+              child: add));
+        }
+      }
+      focusEdit.requestFocus();
+    });
+  }
+
+  @override void initState() {
+
+    updateDrawer();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
-    FocusNode nodeboi = FocusNode();
-    timelineTiles = List<Widget>();
-    eventSplit = globals.log.split('\n');
-    for (int i = 0; i < eventSplit.length; i++) {
-      if (eventSplit[i] != '') {
-        bool first = false;
-        bool last = false;
-        bool dot = true;
-        IconData icon = Icons.arrow_downward;
-        double iconSize = 20;
-        double height = 50;
-        String time = '';
-        String rest = eventSplit[i];
-        if (eventSplit[i].length > 5) {
-          time = eventSplit[i].substring(0, 5);
-          rest = eventSplit[i].substring(5);
-        }
-        if (eventSplit[i].contains('Pulse')) {
-          icon = Icons.check_circle;
-          iconSize = 40;
-          height = 120;
-        }
-        if (eventSplit[i].contains('Shock')) {
-          icon = Icons.all_out;
-          iconSize = 40;
-          height = 120;
-        }
-        if (eventSplit[i].contains('Code')) {
-          icon = Icons.all_out;
-          iconSize = 40;
-          height = 120;
-        }
-        if (eventSplit[i].contains('Epinephrine')) {}
-        if (i == 0) {
-          first = true;
-          time = '';
-          rest = eventSplit[i];
-        }
-        if (i == eventSplit.length - 1) {
-          last = true;
-        }
-        Widget endChild = Text(rest);
-        if (i == timelineEditing) {
-          TextField txt = TextField(
-            autofocus: true,
-            focusNode: nodeboi,
-            controller: timelineEditingController,
-            onEditingComplete: () => {
-              setState(() => {
-                    eventSplit[i] = timelineEditingController.text,
-                    globals.log = eventSplit.join('\n'),
-                    print(globals.log),
-                    timelineEditing = null,
-                    FocusScope.of(context).unfocus()
-                  })
-            },
-          );
-          IconButton but = IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () => {
-              setState(() => {
-                    eventSplit.removeAt(i),
-                    globals.log = eventSplit.join('\n'),
-                    print(globals.log),
-                    timelineEditing = null,
-                    FocusScope.of(context).unfocus()
-                  })
-            },
-          );
-          endChild = Container(
-            child: Row(
-              children: [Expanded(child: txt), but],
-            ),
-          );
-          print('end child should be done' + i.toString());
-        }
-        TimelineTile add = TimelineTile(
-          alignment: TimelineAlign.manual,
-          lineXY: 0.3,
-          startChild: Container(
-            height: height,
-            alignment: Alignment.center,
-            child: Text(time),
-          ),
-          endChild: Container(
-            height: height,
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  print('tapped' + i.toString());
-                  timelineEditingController.text = eventSplit[i];
-                  editTimeline(i);
-                  nodeboi.requestFocus();
-                });
-              },
-              child: endChild,
-            ),
-          ),
-          isFirst: first,
-          isLast: last,
-          hasIndicator: dot,
-          indicatorStyle: IndicatorStyle(
-              width: iconSize,
-              color: Colors.red,
-              padding: EdgeInsets.all(8),
-              iconStyle: IconStyle(
-                iconData: icon,
-                color: Colors.white,
-              )),
-        );
-        timelineTiles.add(add);
-        print('added ' + i.toString() + endChild.toString());
-      }
+
+
+    for (Widget key in timelineTiles){
+      print('key name ' + key.toString());
+      print(key.key);
     }
 
     return Scaffold(
@@ -1169,9 +1225,32 @@ class PageTwoState extends State<PageTwo> {
         builder: (BuildContext context) => Column(
           children: <Widget>[
             Expanded(
-              flex: 6,
-              child: ListView(
-                children: timelineTiles,
+              flex: 5,
+              child: Container(
+                color: Colors.white,
+                child: ReorderableListView(
+                  onReorder: onReorder,
+                  children: timelineTiles,
+                  scrollController: ScrollController(),
+                ),
+              ),
+            ),
+            Container(
+              height: 100,
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  RaisedButton(
+                      child: Text('add event'),
+                      onPressed: () =>
+                      {
+                        globals.log = globals.log + '\n??:?? new event',
+                        updateDrawer(),
+
+                      }
+                  )
+                ],
               ),
             ),
             Expanded(
