@@ -19,12 +19,14 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
 void main() {
   runApp(MyApp());
 }
+
 
 var askForPulse = false;
 var warningDismissed = false;
@@ -70,6 +72,7 @@ class MyHomePage extends StatefulWidget {
 class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   static AudioCache player = AudioCache();
 
+  bool handsFree = true;
   double fraction = 0;
   double minPassed = 0;
   double secPassed = 0;
@@ -158,37 +161,10 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
 
   currentTime() {
-    if (DateTime.now().difference(lastSwitchedComp).inMinutes >= 2) {
-      compressorBadge = true;
-    }
+    // if (DateTime.now().difference(lastSwitchedComp).inMinutes >= 2) {
+    //   compressorBadge = true;
+    // }
 
-//    if (minPassed < 10) {
-//      if (dispSec < 10) {
-//        globals.publicCodeTime = "0" +
-//            minPassed.toStringAsFixed(0) +
-//            " : 0" +
-//            dispSec.toStringAsFixed(0);
-//        return "0" +
-//            minPassed.toStringAsFixed(0) +
-//            " : 0" +
-//            dispSec.toStringAsFixed(0);
-//      }
-//      globals.publicCodeTime = "0" +
-//          minPassed.toStringAsFixed(0) +
-//          " : " +
-//          dispSec.toStringAsFixed(0);
-//      return "0" +
-//          minPassed.toStringAsFixed(0) +
-//          " : " +
-//          dispSec.toStringAsFixed(0);
-//    }
-//    if (dispSec < 10) {
-//      globals.publicCodeTime =
-//          minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
-//      return minPassed.toStringAsFixed(0) + " : 0" + dispSec.toStringAsFixed(0);
-//    }
-//    globals.publicCodeTime =
-//        minPassed.toStringAsFixed(0) + " : " + dispSec.toStringAsFixed(0);
     globals.publicCodeTime =
         _printDuration(Duration(seconds: secPassed.toInt()));
 
@@ -269,11 +245,13 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (selected == "vtach" || selected == "svt") {
         showShock = true;
         _shockType = "SYNCRONIZED SHOCK DELIVERED";
+        _speechThis('Continue compressions while charging. Ensure clear before shock');
       } else if (selected == "vfib" || selected == "tors") {
         showShock = true;
         if (globals.weightIndex != null) {
           _shockType = shockDoses[globals.weightIndex];
         }
+        _speechThis('Continue compressions while charging. Ensure clear before shock');
       } else if (selected == "pulse") {
         DateTime now = DateTime.now();
         String formattedDate = DateFormat('kk:mm').format(now);
@@ -284,11 +262,13 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             context, MaterialPageRoute(builder: (context) => PageTwo()));
         askForPulse = false;
         nested.show = false;
+
       } else {
         askForPulse = false;
         nested.show = false;
         fractionPulse = 0;
         progressPulseCheck = true;
+        _speechThis('Continue compressions');
       }
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('kk:mm').format(now);
@@ -302,11 +282,36 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
+  loadPreferences()async {
+    var prefs = await SharedPreferences.getInstance();
+    playCompressions = prefs.getBool('playCompressions') ?? true;
+    playVoice = prefs.getBool('playVoice') ?? true;
+    print('loaded ' + playCompressions.toString() + playVoice.toString());
+    if (!playCompressions){
+      setState(() {
+        soundIcon = Icon(FlutterIcons.metronome_tick_mco);
+        soundColor = Colors.grey;
+      });
+    }
+    if (!playVoice) {
+      setState(() {
+        voiceIcon = Icon(FlutterIcons.voice_off_mco);
+        voiceColor = Colors.grey;
+      });
+    }
+  }
+  savePreferences() async {
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setBool('playCompressions', playCompressions);
+    prefs.setBool('playVoice', playVoice);
+    print('saved ' + playCompressions.toString() + playVoice.toString());
+  }
+
   @override
   void initState() {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    // print(deviceInfo.iosInfo);
-    // Wakelock.enable();
+
+    loadPreferences();
 
     nested = NestedTabBar(
       parent: this,
@@ -338,7 +343,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             });
   }
 
-  bool compressorBadge = true;
+  bool compressorBadge = false;
   switchedCompressor() {
     setState(() {
       compressorBadge = false;
@@ -407,12 +412,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Future _speak() async {
     flutterTts.setVolume(1.0);
     flutterTts.setCompletionHandler(() {
-
       if (playCompressions) {
         startMetronome();
       }
     });
-    var result = await flutterTts.speak("Start compressions right away");
+
+    _speechThis("Start compressions right away");
 
     print('finished speaching');
   }
@@ -445,6 +450,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   toggleSound() {
     playCompressions = !playCompressions;
+    savePreferences();
     print('play compressions ' + playCompressions.toString());
     if (!playCompressions) {
       if (metronomeTimer != null){
@@ -466,6 +472,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
   toggleVoice() {
     playVoice = !playVoice;
+    savePreferences();
     if (playVoice) {
       setState(() {
         voiceIcon = Icon(FlutterIcons.voice_mco);
@@ -486,8 +493,41 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
   Color voiceColor = Colors.red;
 
+  Widget handsFreeWidget = Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      Expanded(
+          child: Container(
+            child: AutoSizeText('HANDS FREE MODE',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 300,
+                color: Colors.white,
+              ),
+            ),
+            alignment: Alignment.center,
+          )),
+      Expanded(
+        child: FittedBox(
+          alignment: Alignment.center,
+          child: Icon(FlutterIcons.hand_ent,
+            size: 500,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
+    List<String> eventSplit = globals.log.split('\n');
+    editTimeline(int i) {
+      setState(() => {
+        timelineEditing = i,
+      });
+    }
+
     if (globals.reset) {
       print("reseting now");
       DateTime now = DateTime.now();
@@ -763,6 +803,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           showShock = false;
                           fractionPulse = 0;
                           progressPulseCheck = true;
+                          _speechThis('Continue Compressions');
                         }),
                       ),
                     ],
@@ -789,6 +830,129 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     }
     if (askForPulse) {
       temp = pulseStack;
+      handsFreeWidget = Column(
+        children: [
+          Expanded(
+            child: FittedBox(
+              child: TextButton(
+                child: Text('New Cycle',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 200,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FittedBox(
+              child: Icon(
+                Icons.touch_app,
+                color: Colors.white,
+                size: 200,
+              ),
+            ),
+          )
+        ],
+      );
+    }else{
+      handsFreeWidget = Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+              child: Container(
+                child: AutoSizeText('HANDS FREE MODE',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 300,
+                    color: Colors.white,
+                  ),
+                ),
+                alignment: Alignment.center,
+              )),
+          Expanded(
+            child: FittedBox(
+              alignment: Alignment.center,
+              child: Icon(FlutterIcons.hand_ent,
+                size: 500,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    if (handsFree){
+      temp.add( Container(
+        padding: EdgeInsets.all(15),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              flex: 2,
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  if (askForPulse) {
+                    print('new cycle hands free');
+                    askForPulse = false;
+                    nested.show = false;
+                    progressPulseCheck = true;
+                    _speechThis('Resume Compressions');
+                  }
+                }),
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    alignment: Alignment.center,
+                    child: handsFreeWidget,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: EdgeInsets.all(15),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 2,),
+                    borderRadius: BorderRadius.all(Radius.circular(15))
+                  ),
+                  child: TextButton(
+                    onPressed: () => {
+                      setState(() => {
+                        handsFree = false,
+                      })
+                    },
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Text('Exit Hands Free',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 300,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Icon(FlutterIcons.pencil_alt_faw5s))
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            )
+          ],
+        ),
+      ));
     }
 
     Widget content =
@@ -806,193 +970,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white))));
     }
-
-    Widget full = Column(children: <Widget>[
-      Stack(
-        children: [
-          Badge(
-            borderRadius: 10,
-            showBadge: compressorBadge,
-            badgeContent: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                content,
-                IconButton(
-                  icon: Icon(
-                    FlutterIcons.x_circle_fea,
-                    color: Colors.white,
-                  ),
-                  onPressed: switchedCompressor,
-                )
-              ],
-            ),
-            shape: BadgeShape.square,
-            position: BadgePosition.bottomRight(bottom: 50, right: 20),
-            child: Container(
-              height: MediaQuery.of(context).size.width * 2 / 3 + 50,
-              child: ListView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: <Widget>[
-                    cycle = CircularPercentIndicator(
-                      key: GlobalObjectKey('circleProgress'),
-                      radius: (MediaQuery.of(context).size.width * 2 / 3),
-                      lineWidth: 10.0,
-                      percent: fraction,
-                      animation: true,
-                      animationDuration: 1000,
-                      animateFromLastPercent: true,
-                      circularStrokeCap: CircularStrokeCap.round,
-                      footer: FittedBox(
-                        child: AutoSizeText(
-                          inst,
-                          key: GlobalObjectKey('inst'),
-                          style: new TextStyle(
-                            fontSize: 40.0,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ),
-                      center: Center(
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                            Icon(
-                              centerIcon,
-                              size: MediaQuery.of(context).size.width / 4,
-                              color: barColor,
-                            ),
-                            Text('pulse check in'),
-                            Text(
-                              '-' + pulseCheckCountdown,
-                              textAlign: TextAlign.center,
-                              key: GlobalObjectKey('timerCircle'),
-                              style: new TextStyle(
-                                fontSize: 40.0,
-                              ),
-                            ),
-                            Text(
-                              'time elapsed ' + currentTime(),
-                            ),
-                          ])),
-                      backgroundColor: Colors.grey,
-                      progressColor: barColor,
-                    ),
-                  ]),
-            ),
-          ),
-          Positioned(
-            child: Column(
-              children: [
-                IconButton(
-                  icon: soundIcon,
-                  color: soundColor,
-                  onPressed: () => {toggleSound()},
-                ),
-                IconButton(
-                  icon: voiceIcon,
-                  color: voiceColor,
-                  onPressed: () => {toggleVoice()},
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
-      Divider(),
-      Expanded(
-        flex: 1,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Stack(
-            children: temp,
-          ),
-        ),
-      ),
-    ]);
-
-    _launchURL() async {
-      const url = 'https://recoverinitiative.org/';
-      if (await canLaunch(url)) {
-        await launch(url);
-      } else {
-        throw 'Could not launch $url';
-      }
-    }
-
-    var warning = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-            flex: 1,
-            child: Container(
-                alignment: Alignment.center,
-                color: Colors.black87,
-                child: Padding(
-                  padding: EdgeInsets.all(15),
-                  child: AutoSizeText(
-                    'THIS IS INTENDED FOR TRAINING PURPOSES ONLY',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 100,
-                      color: Colors.red,
-                    ),
-                  ),
-                ))),
-        Expanded(
-            flex: 1,
-            child: Container(
-                alignment: Alignment.center,
-                color: Colors.black87,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Flexible(
-                      flex: 1,
-                      child: AutoSizeText(
-                        'Ensure code status for the patient by referencing chart ',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 100,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                        flex: 1,
-                        child: Container(
-                          padding: EdgeInsets.all(15),
-                          alignment: Alignment.center,
-                          child: goForCode(
-                            onPressed: () => setState(() {
-                              print('dismiss warning');
-                              warningDismissed = true;
-                              _speak();
-                            }),
-                          ),
-                        )),
-                    Flexible(
-                      flex: 1,
-                      child: RaisedButton(
-                        onPressed: _launchURL,
-                        child: Text('Open Source Information'),
-                      ),
-                    )
-                  ],
-                ))),
-      ],
-    );
-    var fullStack = <Widget>[full];
-    if (!warningDismissed) {
-      fullStack = <Widget>[full, warning];
-    }
-
-    editTimeline(int i) {
-      setState(() => {
-            timelineEditing = i,
-          });
-    }
-
-    List<String> eventSplit = globals.log.split('\n');
 
     updateDrawer () {
       FocusNode focusEdit = FocusNode();
@@ -1128,6 +1105,211 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
     }
 
+    Widget full = Column(children: <Widget>[
+      Stack(
+        children: [
+          Badge(
+            borderRadius: 10,
+            showBadge: compressorBadge,
+            badgeContent: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                content,
+                IconButton(
+                  icon: Icon(
+                    FlutterIcons.x_circle_fea,
+                    color: Colors.white,
+                  ),
+                  onPressed: switchedCompressor,
+                )
+              ],
+            ),
+            shape: BadgeShape.square,
+            position: BadgePosition.bottomRight(bottom: 50, right: 20),
+            child: Container(
+              height: MediaQuery.of(context).size.width * 2 / 3 + 50,
+              child: ListView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: <Widget>[
+                    cycle = CircularPercentIndicator(
+                      key: GlobalObjectKey('circleProgress'),
+                      radius: (MediaQuery.of(context).size.width * 2 / 3),
+                      lineWidth: 10.0,
+                      percent: fraction,
+                      animation: true,
+                      animationDuration: 1000,
+                      animateFromLastPercent: true,
+                      circularStrokeCap: CircularStrokeCap.round,
+                      footer: FittedBox(
+                        child: AutoSizeText(
+                          inst,
+                          key: GlobalObjectKey('inst'),
+                          style: new TextStyle(
+                            fontSize: 40.0,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                      center: Center(
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                            Icon(
+                              centerIcon,
+                              size: MediaQuery.of(context).size.width / 4,
+                              color: barColor,
+                            ),
+                            Text('pulse check in'),
+                            Text(
+                              '-' + pulseCheckCountdown,
+                              textAlign: TextAlign.center,
+                              key: GlobalObjectKey('timerCircle'),
+                              style: new TextStyle(
+                                fontSize: 40.0,
+                              ),
+                            ),
+                            Text(
+                              'time elapsed ' + currentTime(),
+                            ),
+                          ])),
+                      backgroundColor: Colors.grey,
+                      progressColor: barColor,
+                    ),
+                  ]),
+            ),
+          ),
+          Positioned(
+            child: Column(
+              children: [
+                IconButton(
+                  icon: soundIcon,
+                  color: soundColor,
+                  onPressed: () => {toggleSound()},
+                ),
+                IconButton(
+                  icon: voiceIcon,
+                  color: voiceColor,
+                  onPressed: () => {toggleVoice()},
+                ),
+              ],
+            ),
+          ),
+
+          Positioned(
+            right: 0,
+            top: 25,
+
+            child: GestureDetector(
+              onTap: () => {
+                updateDrawer(),
+                _scaffoldKey.currentState.openEndDrawer(),
+              },
+              child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
+                    color: Colors.red,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(FlutterIcons.timeline_alert_mco,
+                  color: Colors.white,),
+              ),
+            ),
+          ),
+
+        ],
+      ),
+      Divider(),
+      Expanded(
+        flex: 1,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Stack(
+            children: temp,
+          ),
+        ),
+      ),
+    ]);
+
+    _launchURL() async {
+      const url = 'https://recoverinitiative.org/';
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    }
+
+    var warning = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+            flex: 1,
+            child: Container(
+                alignment: Alignment.center,
+                color: Colors.black87,
+                child: Padding(
+                  padding: EdgeInsets.all(15),
+                  child: AutoSizeText(
+                    'THIS IS INTENDED FOR TRAINING PURPOSES ONLY',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 100,
+                      color: Colors.red,
+                    ),
+                  ),
+                ))),
+        Expanded(
+            flex: 1,
+            child: Container(
+                alignment: Alignment.center,
+                color: Colors.black87,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Flexible(
+                      flex: 1,
+                      child: AutoSizeText(
+                        'Ensure code status for the patient by referencing chart ',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 100,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                        flex: 1,
+                        child: Container(
+                          padding: EdgeInsets.all(15),
+                          alignment: Alignment.center,
+                          child: goForCode(
+                            onPressed: () => setState(() {
+                              print('dismiss warning');
+                              warningDismissed = true;
+                              _speak();
+                            }),
+                          ),
+                        )),
+                    Flexible(
+                      flex: 1,
+                      child: RaisedButton(
+                        onPressed: _launchURL,
+                        child: Text('Open Source Information'),
+                      ),
+                    )
+                  ],
+                ))),
+      ],
+    );
+    var fullStack = <Widget>[full];
+    if (!warningDismissed) {
+      fullStack = <Widget>[full, warning];
+    }
+
+
+
     onReorder(int oldIndex, int newIndex) {
       setState(() {
         if (newIndex > oldIndex) {
@@ -1140,9 +1322,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       updateDrawer();
     }
     //print('event parts ' + eventSplit.toString());
-
-    return Scaffold(
-      drawer: Drawer(
+    Scaffold s = Scaffold(
+      key: _scaffoldKey,
+      endDrawer: Drawer(
         child: Column(
 
           mainAxisSize: MainAxisSize.min,
@@ -1208,24 +1390,30 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
       ),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [Container()],
         title: Text(
           "Heart Start",
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(FlutterIcons.timeline_alert_mco),
-            onPressed: () => {
-              updateDrawer(),
-              Scaffold.of(context).openDrawer()},
-          ),
-        ),
+        // leading: Builder(
+        //   builder: (context) => IconButton(
+        //     icon: Icon(FlutterIcons.timeline_alert_mco),
+        //     onPressed: () => {
+        //       updateDrawer(),
+        //       Scaffold.of(context).openDrawer()},
+        //   ),
+        // ),
       ),
       body: Stack(
         children: fullStack,
       ),
     );
+    return s;
+    currentScaffold = s;
   }
 }
+Scaffold currentScaffold;
+GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
 class OpenPulseButton extends StatelessWidget {
   OpenPulseButton({@required this.onPressed});

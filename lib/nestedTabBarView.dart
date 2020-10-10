@@ -538,8 +538,8 @@ class NestedTabBarState extends State<NestedTabBar>
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
     String combined =
-        "\n" + formattedDate + "\t" + _medStrings[index].toString();
-    String full = combined.toString() + "\t" + this.parent.currentTime();
+        "\n" + this.parent.currentTime() + "\t" + _medStrings[index].toString();
+    String full = combined.toString() + "\t" + formattedDate;
     globals.log = globals.log + full;
     setState(() => {
           _lastGiven[index] = DateTime.now(),
@@ -956,6 +956,10 @@ class NestedTabBarState extends State<NestedTabBar>
                         RaisedButton(
                           onPressed: () => {parent.showCoach()},
                           child: Text('Start tour'),
+                        ),
+                        RaisedButton(
+                          onPressed: () => {parent.handsFree = true},
+                          child: Text('Hands Free Mode'),
                         ),
                       ],
                     ),
