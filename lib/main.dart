@@ -27,7 +27,6 @@ void main() {
   runApp(MyApp());
 }
 
-
 var askForPulse = false;
 var warningDismissed = false;
 final _eventScrollController = ScrollController();
@@ -37,6 +36,7 @@ TextEditingController timelineEditingController = TextEditingController();
 var nested = NestedTabBar();
 var showShock = false;
 var _shockType = " ";
+var handFreeColor = Colors.red;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -245,13 +245,15 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (selected == "vtach" || selected == "svt") {
         showShock = true;
         _shockType = "SYNCRONIZED SHOCK DELIVERED";
-        _speechThis('Continue compressions while charging. Ensure clear before shock');
+        _speechThis(
+            'Continue compressions while charging. Ensure clear before shock');
       } else if (selected == "vfib" || selected == "tors") {
         showShock = true;
         if (globals.weightIndex != null) {
           _shockType = shockDoses[globals.weightIndex];
         }
-        _speechThis('Continue compressions while charging. Ensure clear before shock');
+        _speechThis(
+            'Continue compressions while charging. Ensure clear before shock');
       } else if (selected == "pulse") {
         DateTime now = DateTime.now();
         String formattedDate = DateFormat('kk:mm').format(now);
@@ -262,7 +264,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             context, MaterialPageRoute(builder: (context) => PageTwo()));
         askForPulse = false;
         nested.show = false;
-
       } else {
         askForPulse = false;
         nested.show = false;
@@ -282,12 +283,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
-  loadPreferences()async {
+  loadPreferences() async {
     var prefs = await SharedPreferences.getInstance();
     playCompressions = prefs.getBool('playCompressions') ?? true;
     playVoice = prefs.getBool('playVoice') ?? true;
     print('loaded ' + playCompressions.toString() + playVoice.toString());
-    if (!playCompressions){
+    if (!playCompressions) {
       setState(() {
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
@@ -300,6 +301,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
     }
   }
+
   savePreferences() async {
     var prefs = await SharedPreferences.getInstance();
     prefs.setBool('playCompressions', playCompressions);
@@ -425,7 +427,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   _speechThis(String string) async {
     if (playVoice) {
       if (playCompressions) {
-        metronomeTimer.cancel();
+        if (metronomeTimer != null) {
+          metronomeTimer.cancel();
+        }
       }
       var result = await flutterTts.speak(string);
     }
@@ -453,7 +457,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     savePreferences();
     print('play compressions ' + playCompressions.toString());
     if (!playCompressions) {
-      if (metronomeTimer != null){
+      if (metronomeTimer != null) {
         metronomeTimer.cancel();
       }
       setState(() {
@@ -470,6 +474,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
     }
   }
+
   toggleVoice() {
     playVoice = !playVoice;
     savePreferences();
@@ -478,7 +483,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         voiceIcon = Icon(FlutterIcons.voice_mco);
         voiceColor = Colors.red;
       });
-    }else{
+    } else {
       setState(() {
         voiceIcon = Icon(FlutterIcons.voice_off_mco);
         voiceColor = Colors.grey;
@@ -498,19 +503,21 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     children: [
       Expanded(
           child: Container(
-            child: AutoSizeText('HANDS FREE MODE',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 300,
-                color: Colors.white,
-              ),
-            ),
-            alignment: Alignment.center,
-          )),
+        child: AutoSizeText(
+          'HANDS FREE MODE',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 300,
+            color: Colors.white,
+          ),
+        ),
+        alignment: Alignment.center,
+      )),
       Expanded(
         child: FittedBox(
           alignment: Alignment.center,
-          child: Icon(FlutterIcons.hand_ent,
+          child: Icon(
+            FlutterIcons.hand_ent,
             size: 500,
             color: Colors.white,
           ),
@@ -524,8 +531,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     List<String> eventSplit = globals.log.split('\n');
     editTimeline(int i) {
       setState(() => {
-        timelineEditing = i,
-      });
+            timelineEditing = i,
+          });
     }
 
     if (globals.reset) {
@@ -829,17 +836,17 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     }
     if (askForPulse) {
+      handFreeColor = Colors.blue;
       temp = pulseStack;
       handsFreeWidget = Column(
         children: [
           Expanded(
             child: FittedBox(
-              child: TextButton(
-                child: Text('New Cycle',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 200,
-                  ),
+              child: Text(
+                'New Cycle',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 200,
                 ),
               ),
             ),
@@ -855,25 +862,28 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           )
         ],
       );
-    }else{
+    } else {
+      handFreeColor = Colors.red;
       handsFreeWidget = Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Expanded(
               child: Container(
-                child: AutoSizeText('HANDS FREE MODE',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 300,
-                    color: Colors.white,
-                  ),
-                ),
-                alignment: Alignment.center,
-              )),
+            child: AutoSizeText(
+              'HANDS FREE MODE',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 300,
+                color: Colors.white,
+              ),
+            ),
+            alignment: Alignment.center,
+          )),
           Expanded(
             child: FittedBox(
               alignment: Alignment.center,
-              child: Icon(FlutterIcons.hand_ent,
+              child: Icon(
+                FlutterIcons.hand_ent,
                 size: 500,
                 color: Colors.white,
               ),
@@ -882,10 +892,9 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ],
       );
     }
-    if (handsFree){
-      temp.add( Container(
+    if (handsFree) {
+      temp.add(Container(
         padding: EdgeInsets.all(15),
-
         decoration: BoxDecoration(
           color: Colors.white,
         ),
@@ -905,51 +914,53 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 }),
                 child: Container(
                   padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    alignment: Alignment.center,
-                    child: handsFreeWidget,
+                  decoration: BoxDecoration(
+                    color: handFreeColor,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  alignment: Alignment.center,
+                  child: handsFreeWidget,
                 ),
               ),
             ),
             Expanded(
-              flex: 1,
-              child: Container(
-                padding: EdgeInsets.all(15),
+                flex: 1,
                 child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 2,),
-                    borderRadius: BorderRadius.all(Radius.circular(15))
-                  ),
-                  child: TextButton(
-                    onPressed: () => {
-                      setState(() => {
-                        handsFree = false,
-                      })
-                    },
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Text('Exit Hands Free',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 300,
+                  padding: EdgeInsets.all(15),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
+                    child: TextButton(
+                      onPressed: () => {
+                        setState(() => {
+                              handsFree = false,
+                            })
+                      },
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: FittedBox(
+                              fit: BoxFit.fill,
+                              child: Text(
+                                'Exit Hands Free',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 300,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(child: Icon(FlutterIcons.pencil_alt_faw5s))
-                      ],
+                          Expanded(child: Icon(FlutterIcons.pencil_alt_faw5s))
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              )
-            )
+                ))
           ],
         ),
       ));
@@ -971,7 +982,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   style: TextStyle(color: Colors.white))));
     }
 
-    updateDrawer () {
+    updateDrawer() {
       FocusNode focusEdit = FocusNode();
       setState(() {
         print('updating drawer');
@@ -1024,13 +1035,13 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 controller: timelineEditingController,
                 onEditingComplete: () => {
                   setState(() => {
-                    eventSplit[i] = timelineEditingController.text,
-                    globals.log = eventSplit.join('\n'),
-                    print(globals.log),
-                    timelineEditing = null,
-                    FocusScope.of(context).unfocus(),
-                    updateDrawer(),
-                  })
+                        eventSplit[i] = timelineEditingController.text,
+                        globals.log = eventSplit.join('\n'),
+                        print(globals.log),
+                        timelineEditing = null,
+                        FocusScope.of(context).unfocus(),
+                        updateDrawer(),
+                      })
                 },
               );
 
@@ -1081,20 +1092,19 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 actionPane: SlidableBehindActionPane(),
                 actionExtentRatio: 0.2,
                 secondaryActions: [
-
                   IconSlideAction(
                     caption: 'delete',
                     icon: FlutterIcons.delete_mdi,
                     color: Colors.red,
                     onTap: () => {
                       setState(() => {
-                        eventSplit.removeAt(i),
-                        globals.log = eventSplit.join('\n'),
-                        print(globals.log),
-                        timelineEditing = null,
-                        FocusScope.of(context).unfocus(),
-                        updateDrawer(),
-                      })
+                            eventSplit.removeAt(i),
+                            globals.log = eventSplit.join('\n'),
+                            print(globals.log),
+                            timelineEditing = null,
+                            FocusScope.of(context).unfocus(),
+                            updateDrawer(),
+                          })
                     },
                   )
                 ],
@@ -1194,30 +1204,31 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               ],
             ),
           ),
-
           Positioned(
             right: 0,
             top: 25,
-
             child: GestureDetector(
               onTap: () => {
                 updateDrawer(),
                 _scaffoldKey.currentState.openEndDrawer(),
               },
               child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
-                    color: Colors.red,
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(FlutterIcons.timeline_alert_mco,
-                  color: Colors.white,),
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      bottomLeft: Radius.circular(15)),
+                  color: Colors.red,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  FlutterIcons.timeline_alert_mco,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
-
         ],
       ),
       Divider(),
@@ -1308,8 +1319,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       fullStack = <Widget>[full, warning];
     }
 
-
-
     onReorder(int oldIndex, int newIndex) {
       setState(() {
         if (newIndex > oldIndex) {
@@ -1321,12 +1330,12 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
       updateDrawer();
     }
+
     //print('event parts ' + eventSplit.toString());
     Scaffold s = Scaffold(
       key: _scaffoldKey,
       endDrawer: Drawer(
         child: Column(
-
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             DrawerHeader(
@@ -1375,14 +1384,11 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   RaisedButton(
-                    child: Text('add event'),
-                    onPressed: () =>
-                    {
-                      globals.log = globals.log + '\n??:?? new event',
-                      updateDrawer(),
-
-                    }
-                  )
+                      child: Text('add event'),
+                      onPressed: () => {
+                            globals.log = globals.log + '\n??:?? new event',
+                            updateDrawer(),
+                          })
                 ],
               ),
             )
@@ -1412,6 +1418,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     currentScaffold = s;
   }
 }
+
 Scaffold currentScaffold;
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 

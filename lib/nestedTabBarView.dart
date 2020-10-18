@@ -538,8 +538,8 @@ class NestedTabBarState extends State<NestedTabBar>
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
     String combined =
-        "\n" + this.parent.currentTime() + "\t" + _medStrings[index].toString();
-    String full = combined.toString() + "\t" + formattedDate;
+        "\n" + formattedDate + "\t" + _medStrings[index].toString();
+    String full = combined.toString();
     globals.log = globals.log + full;
     setState(() => {
           _lastGiven[index] = DateTime.now(),
@@ -637,6 +637,7 @@ class NestedTabBarState extends State<NestedTabBar>
     }
     return Container();
   }
+
   String _printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
@@ -654,8 +655,11 @@ class NestedTabBarState extends State<NestedTabBar>
               value: item.checked ?? false,
               onChanged: (bool newValue) {
                 setState(() => item.checked = newValue);
-                if (newValue == true){
-                  globals.log = globals.log + '\n' + _printDuration(Duration(seconds: DateTime.now().difference(globals.codeStart).inSeconds )) + item.value;
+                if (newValue == true) {
+                  DateTime now = DateTime.now();
+                  String formattedDate = DateFormat('kk:mm').format(now);
+                  globals.log =
+                      globals.log + '\n' + formattedDate + '\t' + item.value;
                 }
               },
               title: Text('${item.value}'),
@@ -1004,8 +1008,6 @@ class PageTwo extends StatefulWidget {
 }
 
 class PageTwoState extends State<PageTwo> {
-
-
   List<Widget> timelineTiles = List<Widget>();
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
@@ -1056,7 +1058,6 @@ class PageTwoState extends State<PageTwo> {
         text: "TXT log");
   }
 
-
   onReorder(int oldIndex, int newIndex) {
     setState(() {
       if (newIndex > oldIndex) {
@@ -1069,7 +1070,7 @@ class PageTwoState extends State<PageTwo> {
     updateDrawer();
   }
 
-  updateDrawer () {
+  updateDrawer() {
     FocusNode focusEdit = FocusNode();
     setState(() {
       print('updating drawer');
@@ -1122,13 +1123,13 @@ class PageTwoState extends State<PageTwo> {
               controller: timelineEditingController,
               onEditingComplete: () => {
                 setState(() => {
-                  eventSplit[i] = timelineEditingController.text,
-                  globals.log = eventSplit.join('\n'),
-                  print(globals.log),
-                  timelineEditing = null,
-                  FocusScope.of(context).unfocus(),
-                  updateDrawer(),
-                })
+                      eventSplit[i] = timelineEditingController.text,
+                      globals.log = eventSplit.join('\n'),
+                      print(globals.log),
+                      timelineEditing = null,
+                      FocusScope.of(context).unfocus(),
+                      updateDrawer(),
+                    })
               },
             );
 
@@ -1179,20 +1180,19 @@ class PageTwoState extends State<PageTwo> {
               actionPane: SlidableBehindActionPane(),
               actionExtentRatio: 0.2,
               secondaryActions: [
-
                 IconSlideAction(
                   caption: 'delete',
                   icon: FlutterIcons.delete_mdi,
                   color: Colors.red,
                   onTap: () => {
                     setState(() => {
-                      eventSplit.removeAt(i),
-                      globals.log = eventSplit.join('\n'),
-                      print(globals.log),
-                      timelineEditing = null,
-                      FocusScope.of(context).unfocus(),
-                      updateDrawer(),
-                    })
+                          eventSplit.removeAt(i),
+                          globals.log = eventSplit.join('\n'),
+                          print(globals.log),
+                          timelineEditing = null,
+                          FocusScope.of(context).unfocus(),
+                          updateDrawer(),
+                        })
                   },
                 )
               ],
@@ -1203,18 +1203,16 @@ class PageTwoState extends State<PageTwo> {
     });
   }
 
-  @override void initState() {
-
+  @override
+  void initState() {
     updateDrawer();
-
   }
 
   @override
   Widget build(BuildContext context) {
     print('build starting');
 
-
-    for (Widget key in timelineTiles){
+    for (Widget key in timelineTiles) {
       print('key name ' + key.toString());
       print(key.key);
     }
@@ -1247,13 +1245,10 @@ class PageTwoState extends State<PageTwo> {
                 children: [
                   RaisedButton(
                       child: Text('add event'),
-                      onPressed: () =>
-                      {
-                        globals.log = globals.log + '\n??:?? new event',
-                        updateDrawer(),
-
-                      }
-                  )
+                      onPressed: () => {
+                            globals.log = globals.log + '\n??:??\tnew event',
+                            updateDrawer(),
+                          })
                 ],
               ),
             ),
