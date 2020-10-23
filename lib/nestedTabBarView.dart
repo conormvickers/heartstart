@@ -381,7 +381,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Colors.blue,
+                    progressColor: Theme.of(context).primaryColor,
                     verticalDirection: VerticalDirection.up,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -391,7 +391,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Colors.blue,
+                    progressColor: Theme.of(context).accentColor,
                     verticalDirection: VerticalDirection.down,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -580,21 +580,25 @@ class NestedTabBarState extends State<NestedTabBar>
                 style: TextStyle(fontSize: 30),
               ),
             ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Icon(
-                    MaterialCommunityIcons.dog_side,
-                    size: 20,
-                  ),
-                  Icon(MaterialCommunityIcons.dog_side, size: 30),
-                  Icon(
-                    MaterialCommunityIcons.dog_side,
-                    size: 40,
-                  ),
-                ],
+            Container(
+              child: FittedBox(
+                fit: BoxFit.fitHeight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Icon(
+                      MaterialCommunityIcons.dog_side,
+                      size: 20,
+                    ),
+                    VerticalDivider(),
+                    Icon(MaterialCommunityIcons.dog_side, size: 30),
+                    VerticalDivider(),
+                    Icon(
+                      MaterialCommunityIcons.dog_side,
+                      size: 40,
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -670,8 +674,8 @@ class NestedTabBarState extends State<NestedTabBar>
       children: <Widget>[
         TabBar(
           controller: _nestedTabController,
-          indicatorColor: Colors.red,
-          labelColor: Colors.red,
+          indicatorColor: Theme.of(context).primaryColor,
+          labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Colors.black54,
           isScrollable: true,
           onTap: (index) {
@@ -848,10 +852,12 @@ class NestedTabBarState extends State<NestedTabBar>
                                       showMarkers: false,
                                       valueWidget: Container(),
                                       segments: [
-                                        GaugeSegment('Low', 50, Colors.red),
+                                        GaugeSegment('Low', 50,
+                                            Theme.of(context).primaryColor),
                                         GaugeSegment(
                                             'Medium', 20, Colors.white),
-                                        GaugeSegment('High', 50, Colors.red),
+                                        GaugeSegment('High', 50,
+                                            Theme.of(context).primaryColor),
                                       ],
                                       currentValue: speed,
                                       displayWidget: Text(tapLabel,
@@ -874,7 +880,7 @@ class NestedTabBarState extends State<NestedTabBar>
                             children: <Widget>[
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.red,
+                                  color: Theme.of(context).primaryColor,
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
@@ -1168,7 +1174,7 @@ class PageTwoState extends State<PageTwo> {
             hasIndicator: dot,
             indicatorStyle: IndicatorStyle(
                 width: iconSize,
-                color: Colors.red,
+                color: Theme.of(context).primaryColor,
                 padding: EdgeInsets.all(8),
                 iconStyle: IconStyle(
                   iconData: icon,
@@ -1183,7 +1189,7 @@ class PageTwoState extends State<PageTwo> {
                 IconSlideAction(
                   caption: 'delete',
                   icon: FlutterIcons.delete_mdi,
-                  color: Colors.red,
+                  color: Theme.of(context).primaryColor,
                   onTap: () => {
                     setState(() => {
                           eventSplit.removeAt(i),
@@ -1255,7 +1261,7 @@ class PageTwoState extends State<PageTwo> {
             Expanded(
               flex: 1,
               child: Container(
-                  color: Colors.red,
+                  color: Theme.of(context).primaryColor,
                   child: ButtonBar(
                     alignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[

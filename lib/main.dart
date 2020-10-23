@@ -36,7 +36,7 @@ TextEditingController timelineEditingController = TextEditingController();
 var nested = NestedTabBar();
 var showShock = false;
 var _shockType = " ";
-var handFreeColor = Colors.red;
+var handFreeColor;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -54,7 +54,8 @@ class MyApp extends StatelessWidget {
         );
       },
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primaryColor: Colors.blue,
+        accentColor: Colors.lightBlueAccent,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -153,7 +154,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return Container();
   }
 
-  Color barColor = Colors.red;
+  Color barColor;
   CircularPercentIndicator cycle;
   IconData centerIcon = FlutterIcons.heart_ant;
 
@@ -208,13 +209,13 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       askForPulse = true;
                       _speechThis(
                           'Stop compressions. Resume compressions within 10 seconds');
-                      barColor = Colors.blueAccent;
+                      barColor = Theme.of(context).accentColor;
                       inst = "Pulse Check";
                       centerIcon = Ionicons.ios_pulse;
                       progressPulseCheck = false;
                     }
                   } else {
-                    barColor = Colors.red;
+                    barColor = Theme.of(context).primaryColor;
                     inst = "Continue Compressions";
                     centerIcon = FlutterIcons.heart_ant;
                   }
@@ -467,7 +468,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     } else {
       setState(() {
         soundIcon = Icon(FlutterIcons.metronome_mco);
-        soundColor = Colors.red;
+        soundColor = Theme.of(context).primaryColor;
       });
       metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
         metronome(player);
@@ -481,7 +482,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     if (playVoice) {
       setState(() {
         voiceIcon = Icon(FlutterIcons.voice_mco);
-        voiceColor = Colors.red;
+        voiceColor = Theme.of(context).primaryColor;
       });
     } else {
       setState(() {
@@ -493,10 +494,10 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   bool playVoice = true;
   Icon soundIcon = Icon(FlutterIcons.metronome_mco);
-  Color soundColor = Colors.red;
+  Color soundColor;
   List<Widget> timelineTiles = List<Widget>();
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
-  Color voiceColor = Colors.red;
+  Color voiceColor;
 
   Widget handsFreeWidget = Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -617,7 +618,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 ListTile(
                                   title: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.blue,
+                                      color: Theme.of(context).accentColor,
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     height: 100,
@@ -707,7 +708,8 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                 child: Icon(
                                                   FontAwesome.bolt,
                                                   size: 50,
-                                                  color: Colors.red,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
                                                 ),
                                               )),
                                           Expanded(
@@ -836,7 +838,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     }
     if (askForPulse) {
-      handFreeColor = Colors.blue;
+      handFreeColor = Theme.of(context).accentColor;
       temp = pulseStack;
       handsFreeWidget = Column(
         children: [
@@ -854,7 +856,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           Expanded(
             child: FittedBox(
               child: Icon(
-                Icons.touch_app,
+                Icons.touch_app_sharp,
                 color: Colors.white,
                 size: 200,
               ),
@@ -863,7 +865,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ],
       );
     } else {
-      handFreeColor = Colors.red;
+      handFreeColor = Theme.of(context).primaryColor;
       handsFreeWidget = Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -926,7 +928,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             Expanded(
                 flex: 1,
                 child: Container(
-                  padding: EdgeInsets.all(15),
                   child: Container(
                     decoration: BoxDecoration(
                         border: Border.all(
@@ -945,7 +946,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           Expanded(
                             flex: 4,
                             child: FittedBox(
-                              fit: BoxFit.fill,
+                              fit: BoxFit.fitHeight,
                               child: Text(
                                 'Exit Hands Free',
                                 textAlign: TextAlign.center,
@@ -955,7 +956,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               ),
                             ),
                           ),
-                          Expanded(child: Icon(FlutterIcons.pencil_alt_faw5s))
+                          Icon(FlutterIcons.notes_medical_faw5s)
                         ],
                       ),
                     ),
@@ -1080,7 +1081,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               hasIndicator: dot,
               indicatorStyle: IndicatorStyle(
                   width: iconSize,
-                  color: Colors.red,
+                  color: Theme.of(context).primaryColor,
                   padding: EdgeInsets.all(8),
                   iconStyle: IconStyle(
                     iconData: icon,
@@ -1095,7 +1096,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   IconSlideAction(
                     caption: 'delete',
                     icon: FlutterIcons.delete_mdi,
-                    color: Colors.red,
+                    color: Theme.of(context).primaryColor,
                     onTap: () => {
                       setState(() => {
                             eventSplit.removeAt(i),
@@ -1219,7 +1220,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(15),
                       bottomLeft: Radius.circular(15)),
-                  color: Colors.red,
+                  color: Theme.of(context).primaryColor,
                 ),
                 alignment: Alignment.center,
                 child: Icon(
@@ -1267,7 +1268,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 100,
-                      color: Colors.red,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
                 ))),
@@ -1431,7 +1432,7 @@ class OpenPulseButton extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(15),
         child: RawMaterialButton(
-          fillColor: Colors.blue,
+          fillColor: Theme.of(context).accentColor,
           splashColor: Colors.white,
           child: Padding(
             padding: EdgeInsets.all(10.0),
@@ -1485,7 +1486,7 @@ class NoCeck extends StatelessWidget {
         child: Padding(
             padding: EdgeInsets.all(15),
             child: RawMaterialButton(
-              fillColor: Colors.red,
+              fillColor: Theme.of(context).primaryColor,
               splashColor: Colors.white,
               child: Padding(
                 padding: EdgeInsets.all(10.0),
@@ -1534,7 +1535,7 @@ class deliveredShock extends StatelessWidget {
         child: Padding(
             padding: EdgeInsets.all(5),
             child: RawMaterialButton(
-              fillColor: Colors.red,
+              fillColor: Theme.of(context).primaryColor,
               splashColor: Colors.white,
               child: Padding(
                 padding: EdgeInsets.all(5.0),
@@ -1575,7 +1576,7 @@ class goForCode extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return RawMaterialButton(
-      fillColor: Colors.red,
+      fillColor: Theme.of(context).primaryColor,
       splashColor: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(10.0),
