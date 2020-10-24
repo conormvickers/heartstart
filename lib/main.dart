@@ -20,6 +20,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //https://oblador.github.io/react-native-vector-icons/
 
@@ -54,9 +55,16 @@ class MyApp extends StatelessWidget {
         );
       },
       theme: ThemeData(
-        primaryColor: Colors.blue,
-        accentColor: Colors.lightBlueAccent,
+        primaryColor: Colors.red,
+        accentColor: Colors.blue,
+        splashColor: Colors.redAccent,
+        indicatorColor: Colors.redAccent,
+        primarySwatch: Colors.red,
+        disabledColor: Colors.grey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        textTheme: GoogleFonts.montserratTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -97,17 +105,16 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
             Expanded(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    MaterialCommunityIcons.dog_side,
-                    size: 20,
-                  ),
-                  Icon(MaterialCommunityIcons.dog_side, size: 30),
-                  Icon(
-                    MaterialCommunityIcons.dog_side,
-                    size: 40,
+
+                  Container(child: Icon(MaterialCommunityIcons.dog_side, size: 30)),
+                  Container(
+                    child: Icon(
+                      MaterialCommunityIcons.dog_side,
+                      size: 40,
+                    ),
                   ),
                 ],
               ),
@@ -162,9 +169,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
 
   currentTime() {
-    // if (DateTime.now().difference(lastSwitchedComp).inMinutes >= 2) {
-    //   compressorBadge = true;
-    // }
 
     globals.publicCodeTime =
         _printDuration(Duration(seconds: secPassed.toInt()));
@@ -548,6 +552,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       fractionPulse = 0;
       askForPulse = false;
       globals.reset = false;
+      progressPulseCheck = true;
     }
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -951,12 +956,18 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 'Exit Hands Free',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
                                   fontSize: 300,
                                 ),
                               ),
                             ),
                           ),
-                          Icon(FlutterIcons.notes_medical_faw5s)
+                          Expanded(child: FittedBox(
+                            child: Icon(FlutterIcons.notes_medical_faw5s,
+                              size: 300,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ))
                         ],
                       ),
                     ),
@@ -1332,8 +1343,10 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       updateDrawer();
     }
 
+
     //print('event parts ' + eventSplit.toString());
     Scaffold s = Scaffold(
+      endDrawerEnableOpenDragGesture: false,
       key: _scaffoldKey,
       endDrawer: Drawer(
         child: Column(
@@ -1486,7 +1499,7 @@ class NoCeck extends StatelessWidget {
         child: Padding(
             padding: EdgeInsets.all(15),
             child: RawMaterialButton(
-              fillColor: Theme.of(context).primaryColor,
+              fillColor: Colors.red,
               splashColor: Colors.white,
               child: Padding(
                 padding: EdgeInsets.all(10.0),

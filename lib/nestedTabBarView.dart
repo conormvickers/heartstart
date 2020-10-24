@@ -19,6 +19,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -391,7 +392,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Theme.of(context).accentColor,
+                    progressColor: Theme.of(context).primaryColor,
                     verticalDirection: VerticalDirection.down,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -575,33 +576,72 @@ class NestedTabBarState extends State<NestedTabBar>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
+              flex: 1,
               child: AutoSizeText(
                 'Select Weight',
                 style: TextStyle(fontSize: 30),
               ),
             ),
-            Container(
-              child: FittedBox(
-                fit: BoxFit.fitHeight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Icon(
-                      MaterialCommunityIcons.dog_side,
-                      size: 20,
+            Expanded(
+              child: Row(
+
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: FittedBox(
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    VerticalDivider(),
-                    Icon(MaterialCommunityIcons.dog_side, size: 30),
-                    VerticalDivider(),
-                    Icon(
-                      MaterialCommunityIcons.dog_side,
-                      size: 40,
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: FittedBox(
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 9,
+                          child: FittedBox(
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
+              flex: 2,
                 child: Slider(
               min: 0,
               max: 10,
@@ -698,6 +738,7 @@ class NestedTabBarState extends State<NestedTabBar>
               icon: Badge(
                   showBadge: needBadge,
                   badgeContent: Text('!'),
+                  badgeColor: Theme.of(context).accentColor,
                   child: Icon(
                     FlutterIcons.medicinebox_ant,
                     key: GlobalObjectKey('tab2'),
@@ -1174,7 +1215,7 @@ class PageTwoState extends State<PageTwo> {
             hasIndicator: dot,
             indicatorStyle: IndicatorStyle(
                 width: iconSize,
-                color: Theme.of(context).primaryColor,
+                color: Colors.red,
                 padding: EdgeInsets.all(8),
                 iconStyle: IconStyle(
                   iconData: icon,
@@ -1189,7 +1230,7 @@ class PageTwoState extends State<PageTwo> {
                 IconSlideAction(
                   caption: 'delete',
                   icon: FlutterIcons.delete_mdi,
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.red,
                   onTap: () => {
                     setState(() => {
                           eventSplit.removeAt(i),
@@ -1261,7 +1302,7 @@ class PageTwoState extends State<PageTwo> {
             Expanded(
               flex: 1,
               child: Container(
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.red,
                   child: ButtonBar(
                     alignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
