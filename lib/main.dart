@@ -98,6 +98,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
+              flex: 1,
               child: AutoSizeText(
                 'Select Weight',
                 style: TextStyle(fontSize: 30),
@@ -105,35 +106,78 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
             Expanded(
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                // crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
 
-                  Container(child: Icon(MaterialCommunityIcons.dog_side, size: 30)),
-                  Container(
-                    child: Icon(
-                      MaterialCommunityIcons.dog_side,
-                      size: 40,
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: FittedBox(
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: FittedBox(
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          flex: 9,
+                          child: FittedBox(
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
             Expanded(
+                flex: 2,
                 child: Slider(
-              min: 0,
-              max: 10,
-              divisions: 10,
-              value: _weightValue,
-              label: weightOptions[_weightValue.round()],
-              onChanged: (value) {
-                setState(
-                  () {
-                    _weightValue = value;
+                  min: 0,
+                  max: 10,
+                  divisions: 10,
+                  value: _weightValue,
+                  label: weightOptions[_weightValue.round()],
+                  onChanged: (value) {
+                    setState(
+                          () {
+                        _weightValue = value;
+                      },
+                    );
                   },
-                );
-              },
-            )),
+                )),
             ButtonBar(
               alignment: MainAxisAlignment.center,
               children: [
@@ -142,7 +186,6 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     setState(() {
                       globals.weightKG = weightkgOptions[_weightValue.round()];
                       globals.weightIndex = _weightValue.round();
-                      _shockType = shockDoses[globals.weightIndex];
                       print('set weight to: ' +
                           weightkgOptions[_weightValue.round()].toString());
                       for (MedListItem item in medItems) {
