@@ -1,4 +1,4 @@
-import 'package:audioplayers/audioplayers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -366,7 +366,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     nested = NestedTabBar(
       parent: this,
     );
-    player.load('2.wav');
+
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy/MM/dd kk:mm').format(now);
@@ -461,19 +461,25 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   FlutterTts flutterTts = FlutterTts();
   Future _speak() async {
     flutterTts.setVolume(1.0);
+
+    player.play('2.wav', volume: 0);
+    await _speechThis("Start compressions right away");
+    await player.load('2.wav');
+
     flutterTts.setCompletionHandler(() {
+      print('completion handler');
       if (playCompressions) {
         startMetronome();
       }
+      print('finished speaching');
     });
 
-    _speechThis("Start compressions right away");
 
-    print('finished speaching');
   }
 
   _speechThis(String string) async {
     if (playVoice) {
+      print('about to say: ' + string);
       if (playCompressions) {
         if (metronomeTimer != null) {
           metronomeTimer.cancel();
@@ -486,16 +492,21 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   bool playCompressions = true;
   Timer metronomeTimer;
   startMetronome() async {
+    print('start metronome');
     if (metronomeTimer != null) {
+      print('tried to start when already running');
       metronomeTimer.cancel();
     }
     metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
+      print('about to play');
       metronome(player);
     });
   }
 
   metronome(AudioCache player) {
     if (playCompressions) {
+      print('loaded: ' + player.loadedFiles.toString());
+      print(DateTime.now());
       player.play('2.wav');
     }
   }
@@ -541,10 +552,10 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   bool playVoice = true;
   Icon soundIcon = Icon(FlutterIcons.metronome_mco);
-  Color soundColor;
+  Color soundColor = Colors.red;
   List<Widget> timelineTiles = List<Widget>();
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
-  Color voiceColor;
+  Color voiceColor = Colors.red;
 
   Widget handsFreeWidget = Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1127,7 +1138,14 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       updateDrawer();
                     });
                   },
-                  child: endChild,
+                  child: Row(
+                    children: [
+                      Expanded(child: endChild),
+                      Icon(
+                        FlutterIcons.drag_handle_mdi,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               isFirst: first,
