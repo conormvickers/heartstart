@@ -19,6 +19,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NestedTabBar extends StatefulWidget {
@@ -556,13 +557,15 @@ class NestedTabBarState extends State<NestedTabBar>
     'Capnography',
   ].map((item) => _ListItem(item, false)).toList();
 
-  stopCode() {
+  stopCode() async {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
     String combined = "\n" + formattedDate + "\tCode Stopped";
     String full = combined.toString() + "\t" + this.parent.currentTime();
     globals.log = globals.log + full;
-
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setString('log', null);
+    print('finished code');
     Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 

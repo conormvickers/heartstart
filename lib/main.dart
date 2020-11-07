@@ -22,11 +22,10 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-//https://oblador.github.io/react-native-vector-icons/
-
 void main() {
   runApp(MyApp());
 }
+
 
 var askForPulse = false;
 var warningDismissed = false;
@@ -78,7 +77,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, TickerProviderStateMixin {
   static AudioCache player = AudioCache();
 
   bool handsFree = true;
@@ -88,6 +87,26 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   double fractionPulse = 0;
   double dispSec = 0;
   double _weightValue = 5;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      print(state.toString());
+      if (state == AppLifecycleState.paused)  {
+        print('saving log...');
+        _saveLog();
+        print('done');
+      }
+      if (state == AppLifecycleState.resumed) {
+
+      }
+    });
+  }
+  _saveLog() async {
+
+      var prefs = await SharedPreferences.getInstance();
+      prefs.setString('log', globals.log);
+
+  }
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -357,10 +376,50 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     print('saved ' + playCompressions.toString() + playVoice.toString());
   }
 
+  Future<void> _showMyDialog() async {
+    var prefs = await SharedPreferences.getInstance();
+    String test = prefs.getString('log') ?? null;
+    print('found log ' + test);
+    if (test != null) {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Previous Code Saved'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('An unfunished code was found'),
+                  Text('Would you like to resume?'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('No start new code'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Yes resume previous code'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  globals.log = test;
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
   @override
   void initState() {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
+    WidgetsBinding.instance.addObserver(this);
     loadPreferences();
 
     nested = NestedTabBar(
@@ -370,7 +429,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy/MM/dd kk:mm').format(now);
-    globals.log = formattedDate + "\tCode Started\t00:00";
+    globals.log = formattedDate + "\tCode Started";
     globals.codeStart = now;
     super.initState();
 
@@ -391,6 +450,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   askForTour = false,
                 }
             });
+
   }
 
   bool compressorBadge = false;
@@ -997,6 +1057,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     child: TextButton(
                       onPressed: () => {
                         setState(() => {
+
                               handsFree = false,
                             })
                       },
@@ -1373,6 +1434,7 @@ class MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               print('dismiss warning');
                               warningDismissed = true;
                               _speak();
+                              _showMyDialog();
                             }),
                           ),
                         )),
