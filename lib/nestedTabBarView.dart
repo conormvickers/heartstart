@@ -561,7 +561,7 @@ class NestedTabBarState extends State<NestedTabBar>
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
     String combined = "\n" + formattedDate + "\tCode Stopped";
-    String full = combined.toString() + "\t" + this.parent.currentTime();
+    String full = combined.toString() + "\t";
     globals.log = globals.log + full;
     var prefs = await SharedPreferences.getInstance();
     prefs.setString('log', null);
@@ -587,7 +587,6 @@ class NestedTabBarState extends State<NestedTabBar>
             ),
             Expanded(
               child: Row(
-
                 children: [
                   Expanded(
                     child: Column(
@@ -644,21 +643,21 @@ class NestedTabBarState extends State<NestedTabBar>
               ),
             ),
             Expanded(
-              flex: 2,
+                flex: 2,
                 child: Slider(
-              min: 0,
-              max: 10,
-              divisions: 10,
-              value: _weightValue,
-              label: weightOptions[_weightValue.round()],
-              onChanged: (value) {
-                setState(
-                  () {
-                    _weightValue = value;
+                  min: 0,
+                  max: 10,
+                  divisions: 10,
+                  value: _weightValue,
+                  label: weightOptions[_weightValue.round()],
+                  onChanged: (value) {
+                    setState(
+                      () {
+                        _weightValue = value;
+                      },
+                    );
                   },
-                );
-              },
-            )),
+                )),
             ButtonBar(
               alignment: MainAxisAlignment.center,
               children: [
@@ -1134,35 +1133,48 @@ class PageTwoState extends State<PageTwo> {
           IconData icon = Icons.arrow_downward;
           double iconSize = 20;
           double height = 50;
-          String time = '';
           String rest = eventSplit[i];
-          if (eventSplit[i].length > 5) {
-            time = eventSplit[i].substring(0, 5);
-            rest = eventSplit[i].substring(5);
-          }
-          if (eventSplit[i].contains('Pulse')) {
-            icon = Icons.check_circle;
-            iconSize = 40;
-            height = 120;
-          }
-          if (eventSplit[i].contains('Shock')) {
-            icon = Icons.all_out;
-            iconSize = 40;
-            height = 120;
-          }
-          if (eventSplit[i].contains('Code')) {
-            icon = Icons.all_out;
-            iconSize = 40;
-            height = 120;
-          }
-          if (eventSplit[i].contains('Epinephrine')) {}
+
           if (i == 0) {
             first = true;
-            time = '';
+
             rest = eventSplit[i];
           }
           if (i == eventSplit.length - 1) {
             last = true;
+          }
+          for (String string in ['Pulse', 'Shock', 'Code']) {
+            if (eventSplit[i].contains(string)) {
+              icon = Icons.star_border_purple500_sharp;
+              iconSize = 40;
+              height = 120;
+            }
+          }
+          for (String string in [
+            'Epinephrine Low',
+            'Epinephrine High',
+            'Vasopressin',
+            'Atropine',
+            'Amiodarone',
+            'Lidocaine',
+            'Naloxone',
+            'Flumazenil',
+            'Atipamezole'
+          ]) {
+            if (eventSplit[i].contains(string)) {
+              icon = Icons.medical_services;
+            }
+          }
+          for (String string in [
+            'IV Access',
+            'Monitor',
+            'Oxygen',
+            'Intubation',
+            'Capnography',
+          ]) {
+            if (eventSplit[i].contains(string)) {
+              icon = Icons.check;
+            }
           }
           Widget endChild = Text(rest);
           if (i == timelineEditing) {
@@ -1191,11 +1203,9 @@ class PageTwoState extends State<PageTwo> {
           }
           TimelineTile add = TimelineTile(
             alignment: TimelineAlign.manual,
-            lineXY: 0.3,
+            lineXY: 0.1,
             startChild: Container(
               height: height,
-              alignment: Alignment.center,
-              child: Text(time),
             ),
             endChild: Container(
               color: Colors.white,
@@ -1210,7 +1220,14 @@ class PageTwoState extends State<PageTwo> {
                     updateDrawer();
                   });
                 },
-                child: endChild,
+                child: Row(
+                  children: [
+                    Expanded(child: endChild),
+                    Icon(
+                      FlutterIcons.drag_handle_mdi,
+                    ),
+                  ],
+                ),
               ),
             ),
             isFirst: first,
@@ -1218,7 +1235,7 @@ class PageTwoState extends State<PageTwo> {
             hasIndicator: dot,
             indicatorStyle: IndicatorStyle(
                 width: iconSize,
-                color: Colors.red,
+                // color: Theme.of(context).primaryColor,
                 padding: EdgeInsets.all(8),
                 iconStyle: IconStyle(
                   iconData: icon,
@@ -1233,7 +1250,7 @@ class PageTwoState extends State<PageTwo> {
                 IconSlideAction(
                   caption: 'delete',
                   icon: FlutterIcons.delete_mdi,
-                  color: Colors.red,
+                  // color: Theme.of(context).primaryColor,
                   onTap: () => {
                     setState(() => {
                           eventSplit.removeAt(i),

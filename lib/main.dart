@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -25,7 +24,6 @@ import 'package:google_fonts/google_fonts.dart';
 void main() {
   runApp(MyApp());
 }
-
 
 var askForPulse = false;
 var warningDismissed = false;
@@ -77,7 +75,8 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, TickerProviderStateMixin {
+class MyHomePageState extends State<MyHomePage>
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   static AudioCache player = AudioCache();
 
   bool handsFree = true;
@@ -91,22 +90,20 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
       print(state.toString());
-      if (state == AppLifecycleState.paused)  {
+      if (state == AppLifecycleState.paused) {
         print('saving log...');
         _saveLog();
         print('done');
       }
-      if (state == AppLifecycleState.resumed) {
-
-      }
+      if (state == AppLifecycleState.resumed) {}
     });
   }
+
   _saveLog() async {
-
-      var prefs = await SharedPreferences.getInstance();
-      prefs.setString('log', globals.log);
-
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setString('log', globals.log);
   }
+
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -125,7 +122,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
             ),
             Expanded(
               child: Row(
-
                 children: [
                   Expanded(
                     child: Column(
@@ -191,7 +187,7 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
                   label: weightOptions[_weightValue.round()],
                   onChanged: (value) {
                     setState(
-                          () {
+                      () {
                         _weightValue = value;
                       },
                     );
@@ -231,7 +227,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
   DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
 
   currentTime() {
-
     globals.publicCodeTime =
         _printDuration(Duration(seconds: secPassed.toInt()));
 
@@ -379,7 +374,9 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
   Future<void> _showMyDialog() async {
     var prefs = await SharedPreferences.getInstance();
     String test = prefs.getString('log') ?? null;
-    print('found log ' + test);
+    if (test != null) {
+      print('found log ' + test);
+    }
     if (test != null) {
       return showDialog<void>(
         context: context,
@@ -415,6 +412,7 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
       );
     }
   }
+
   @override
   void initState() {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -425,7 +423,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
     nested = NestedTabBar(
       parent: this,
     );
-
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy/MM/dd kk:mm').format(now);
@@ -450,7 +447,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
                   askForTour = false,
                 }
             });
-
   }
 
   bool compressorBadge = false;
@@ -533,8 +529,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
       }
       print('finished speaching');
     });
-
-
   }
 
   _speechThis(String string) async {
@@ -1057,7 +1051,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
                     child: TextButton(
                       onPressed: () => {
                         setState(() => {
-
                               handsFree = false,
                             })
                       },
@@ -1077,8 +1070,10 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
                               ),
                             ),
                           ),
-                          Expanded(child: FittedBox(
-                            child: Icon(FlutterIcons.notes_medical_faw5s,
+                          Expanded(
+                              child: FittedBox(
+                            child: Icon(
+                              FlutterIcons.notes_medical_faw5s,
                               size: 300,
                               color: Theme.of(context).primaryColor,
                             ),
@@ -1123,35 +1118,48 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
             IconData icon = Icons.arrow_downward;
             double iconSize = 20;
             double height = 50;
-            String time = '';
             String rest = eventSplit[i];
-            if (eventSplit[i].length > 5) {
-              time = eventSplit[i].substring(0, 5);
-              rest = eventSplit[i].substring(5);
-            }
-            if (eventSplit[i].contains('Pulse')) {
-              icon = Icons.check_circle;
-              iconSize = 40;
-              height = 120;
-            }
-            if (eventSplit[i].contains('Shock')) {
-              icon = Icons.all_out;
-              iconSize = 40;
-              height = 120;
-            }
-            if (eventSplit[i].contains('Code')) {
-              icon = Icons.all_out;
-              iconSize = 40;
-              height = 120;
-            }
-            if (eventSplit[i].contains('Epinephrine')) {}
+
             if (i == 0) {
               first = true;
-              time = '';
+
               rest = eventSplit[i];
             }
             if (i == eventSplit.length - 1) {
               last = true;
+            }
+            for (String string in ['Pulse', 'Shock', 'Code']) {
+              if (eventSplit[i].contains(string)) {
+                icon = Icons.star_border_purple500_sharp;
+                iconSize = 40;
+                height = 120;
+              }
+            }
+            for (String string in [
+              'Epinephrine Low',
+              'Epinephrine High',
+              'Vasopressin',
+              'Atropine',
+              'Amiodarone',
+              'Lidocaine',
+              'Naloxone',
+              'Flumazenil',
+              'Atipamezole'
+            ]) {
+              if (eventSplit[i].contains(string)) {
+                icon = Icons.medical_services;
+              }
+            }
+            for (String string in [
+              'IV Access',
+              'Monitor',
+              'Oxygen',
+              'Intubation',
+              'Capnography',
+            ]) {
+              if (eventSplit[i].contains(string)) {
+                icon = Icons.check;
+              }
             }
             Widget endChild = Text(rest);
             if (i == timelineEditing) {
@@ -1180,11 +1188,9 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
             }
             TimelineTile add = TimelineTile(
               alignment: TimelineAlign.manual,
-              lineXY: 0.3,
+              lineXY: 0.1,
               startChild: Container(
                 height: height,
-                alignment: Alignment.center,
-                child: Text(time),
               ),
               endChild: Container(
                 color: Colors.white,
@@ -1466,7 +1472,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
       updateDrawer();
     }
 
-
     //print('event parts ' + eventSplit.toString());
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
@@ -1488,23 +1493,6 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
                 ),
               ),
             ),
-            Container(
-              height: 20,
-              color: Colors.black12,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Text('Time', textAlign: TextAlign.center),
-                  ),
-                  VerticalDivider(),
-                  Expanded(
-                      flex: 10,
-                      child: Text('Time Since Code Start',
-                          textAlign: TextAlign.center))
-                ],
-              ),
-            ),
             Expanded(
               child: Container(
                 color: Colors.white,
@@ -1516,7 +1504,7 @@ class MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver, Tic
               ),
             ),
             Container(
-              height: 200,
+              height: 100,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
