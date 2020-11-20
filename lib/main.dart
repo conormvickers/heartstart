@@ -1130,7 +1130,7 @@ class MyHomePageState extends State<MyHomePage>
             }
             for (String string in ['Pulse', 'Shock', 'Code']) {
               if (eventSplit[i].contains(string)) {
-                icon = Icons.star_border_purple500_sharp;
+                icon = Icons.access_alarm;
                 iconSize = 40;
                 height = 120;
               }
