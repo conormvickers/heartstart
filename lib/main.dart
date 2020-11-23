@@ -31,7 +31,10 @@ final _eventScrollController = ScrollController();
 int timelineEditing = null;
 TextEditingController timelineEditingController = TextEditingController();
 
-var nested = NestedTabBar();
+final GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
+var nested = NestedTabBar(
+  key: nestedKey,
+);
 var showShock = false;
 var _shockType = " ";
 var handFreeColor;
@@ -422,6 +425,7 @@ class MyHomePageState extends State<MyHomePage>
 
     nested = NestedTabBar(
       parent: this,
+      key: nestedKey,
     );
 
     DateTime now = DateTime.now();
@@ -477,7 +481,6 @@ class MyHomePageState extends State<MyHomePage>
     GlobalObjectKey('tab2'),
     GlobalObjectKey('tab3'),
     GlobalObjectKey('tab4'),
-    GlobalObjectKey('tab5'),
   ];
   showCoach() {
     CoachMark coachMark = CoachMark();
@@ -1473,9 +1476,90 @@ class MyHomePageState extends State<MyHomePage>
     }
 
     //print('event parts ' + eventSplit.toString());
+    List<Widget> settingItems() {
+      return [
+        DrawerHeader(
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(),
+              ),
+              Expanded(
+                child: Text(
+                  'Options',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(child: Icon(FlutterIcons.md_options_ion))
+            ],
+          ),
+        ),
+        RaisedButton(
+          child: Text('Check Pulse Now'),
+          onPressed: () {
+            setState(() {
+              askForPulse = true;
+              Navigator.pop(context);
+            });
+          },
+        ),
+        RaisedButton(
+          child: Text('Change Weight'),
+          onPressed: () {
+            setState(() {
+              globals.weightKG = null;
+              globals.weightIndex = null;
+              print('reset weight ' + globals.weightKG.toString());
+              nestedKey.currentState.setState(() {
+                nestedKey.currentState.nestedTabController.animateTo(1);
+              });
+
+              Navigator.pop(context);
+            });
+          },
+        ),
+        RaisedButton(
+          child: Text('Stop Code Now'),
+          onPressed: () {
+            setState(() {
+              Navigator.pop(context);
+            });
+            nestedKey.currentState.stopCode();
+          },
+        ),
+        RaisedButton(
+          onPressed: _launchURL,
+          child: Text('Open Source Information'),
+        ),
+        RaisedButton(
+          onPressed: () => {
+            setState(() => {
+                  Navigator.pop(context),
+                }),
+            showCoach()
+          },
+          child: Text('Start tour'),
+        ),
+        RaisedButton(
+          onPressed: () => {
+            setState(() => {
+                  Navigator.pop(context),
+                }),
+            handsFree = true
+          },
+          child: Text('Hands Free Mode'),
+        ),
+      ];
+    }
+
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
       key: _scaffoldKey,
+      drawer: Drawer(
+        child: Column(
+          children: settingItems(),
+        ),
+      ),
       endDrawer: Drawer(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1521,7 +1605,7 @@ class MyHomePageState extends State<MyHomePage>
         ),
       ),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         actions: [Container()],
         title: Text(
           "Heart Start",

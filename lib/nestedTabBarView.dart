@@ -333,7 +333,7 @@ bool tenminbadge = false;
 
 class NestedTabBarState extends State<NestedTabBar>
     with TickerProviderStateMixin {
-  TabController _nestedTabController;
+  TabController nestedTabController;
   MyHomePageState parent;
 
   NestedTabBarState(this.parent);
@@ -342,7 +342,7 @@ class NestedTabBarState extends State<NestedTabBar>
   void initState() {
     super.initState();
 
-    _nestedTabController = new TabController(length: 5, vsync: this);
+    nestedTabController = new TabController(length: 4, vsync: this);
 
     Timer.periodic(
         Duration(milliseconds: 1000),
@@ -428,7 +428,7 @@ class NestedTabBarState extends State<NestedTabBar>
   @override
   void dispose() {
     super.dispose();
-    _nestedTabController.dispose();
+    nestedTabController.dispose();
   }
 
   var tapTimes = <DateTime>[];
@@ -541,7 +541,7 @@ class NestedTabBarState extends State<NestedTabBar>
     String formattedDate = DateFormat('kk:mm').format(now);
     String combined =
         "\n" + formattedDate + "\t" + _medStrings[index].toString();
-    String full = combined.toString();
+    String full = combined.toString() + ' ' + mgPerKg[index];
     globals.log = globals.log + full;
     setState(() => {
           _lastGiven[index] = DateTime.now(),
@@ -715,7 +715,7 @@ class NestedTabBarState extends State<NestedTabBar>
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         TabBar(
-          controller: _nestedTabController,
+          controller: nestedTabController,
           indicatorColor: Theme.of(context).primaryColor,
           labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Colors.black54,
@@ -758,19 +758,13 @@ class NestedTabBarState extends State<NestedTabBar>
                 key: GlobalObjectKey('tab4'),
               ),
             ),
-            Tab(
-              icon: Icon(
-                FlutterIcons.setting_ant,
-                key: GlobalObjectKey('tab5'),
-              ),
-            ),
           ],
         ),
         Expanded(
           flex: 1,
           child: Container(
             child: TabBarView(
-              controller: _nestedTabController,
+              controller: nestedTabController,
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
@@ -961,60 +955,6 @@ class NestedTabBarState extends State<NestedTabBar>
                       itemBuilder: (BuildContext context, int index) =>
                           EntryItem(data[index]),
                       itemCount: data.length,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      color: Colors.black12,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      children: <Widget>[
-                        RaisedButton(
-                          child: Text('Check Pulse Now'),
-                          onPressed: () {
-                            this.parent.setState(() {
-                              askForPulse = true;
-                            });
-                          },
-                        ),
-                        RaisedButton(
-                          child: Text('Change Weight'),
-                          onPressed: () {
-                            setState(() {
-                              globals.weightKG = null;
-                              globals.weightIndex = null;
-                              print('reset weight ' +
-                                  globals.weightKG.toString());
-                            });
-                            this.widget.parent.setState(() {});
-                            _nestedTabController.animateTo(1);
-                          },
-                        ),
-                        RaisedButton(
-                          child: Text('Stop Code Now'),
-                          onPressed: () {
-                            stopCode();
-                          },
-                        ),
-                        RaisedButton(
-                          onPressed: _launchURL,
-                          child: Text('Open Source Information'),
-                        ),
-                        RaisedButton(
-                          onPressed: () => {parent.showCoach()},
-                          child: Text('Start tour'),
-                        ),
-                        RaisedButton(
-                          onPressed: () => {parent.handsFree = true},
-                          child: Text('Hands Free Mode'),
-                        ),
-                      ],
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
