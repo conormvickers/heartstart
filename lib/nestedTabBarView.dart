@@ -1012,6 +1012,10 @@ class PageTwoState extends State<PageTwo> {
   Directory appDocDir;
   String appDocPath;
   sendData() async {
+    String log = globals.log;
+    if (infoController.text != null) {
+      log = infoController.text + ' ' + log;
+    }
     pdf = pw.Document();
 
     pdf.addPage(pw.Page(
@@ -1019,7 +1023,7 @@ class PageTwoState extends State<PageTwo> {
         build: (pw.Context context) {
           return pw.Center(
               child: pw.Text(
-            globals.log,
+            log,
           )); // Center
         })); //
 
@@ -1041,7 +1045,11 @@ class PageTwoState extends State<PageTwo> {
     String date = DateFormat('yyyy_MM_dd').format(now);
 
     final file = File("${appDocDir.path}/" + date + "log.txt");
-    await file.writeAsString(globals.log);
+    String log = globals.log;
+    if (infoController.text != null) {
+      log = infoController.text + ' ' + log;
+    }
+    await file.writeAsString(log);
 
     Share.shareFiles(["${appDocDir.path}/" + date + "log.txt"],
         text: "TXT log");
@@ -1175,7 +1183,7 @@ class PageTwoState extends State<PageTwo> {
             hasIndicator: dot,
             indicatorStyle: IndicatorStyle(
                 width: iconSize,
-                // color: Theme.of(context).primaryColor,
+                color: Colors.red,
                 padding: EdgeInsets.all(8),
                 iconStyle: IconStyle(
                   iconData: icon,
@@ -1184,13 +1192,13 @@ class PageTwoState extends State<PageTwo> {
           );
           timelineTiles.add(Slidable(
               key: Key(i.toString() + 'timeline'),
-              actionPane: SlidableBehindActionPane(),
+              actionPane: SlidableScrollActionPane(),
               actionExtentRatio: 0.2,
               secondaryActions: [
                 IconSlideAction(
                   caption: 'delete',
                   icon: FlutterIcons.delete_mdi,
-                  // color: Theme.of(context).primaryColor,
+                  color: Colors.red,
                   onTap: () => {
                     setState(() => {
                           eventSplit.removeAt(i),
@@ -1215,6 +1223,8 @@ class PageTwoState extends State<PageTwo> {
     updateDrawer();
   }
 
+  TextEditingController infoController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
@@ -1225,10 +1235,73 @@ class PageTwoState extends State<PageTwo> {
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text('Code Summary'),
         elevation: 1.0,
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Expanded(
+          flex: 1,
+          child: Container(
+              color: Colors.red,
+              child: ButtonBar(
+                alignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  RaisedButton(
+                      child: Text('New Code'),
+                      onPressed: () {
+                        globals.log = "";
+                        globals.stopCodeNow = false;
+                        globals.codeStart = DateTime.now();
+                        timesGiven = <int>[
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                        ];
+                        _lastGiven = <DateTime>[
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                          DateTime.now(),
+                        ];
+                        globals.reset = true;
+                        globals.weightKG = null;
+                        globals.weightIndex = null;
+                        Navigator.pop(context);
+                      }),
+                  RaisedButton(
+                    child: Text('Send Text File'),
+                    onPressed: sendText,
+                  ),
+                  RaisedButton(
+                    child: Text('Send PDF File'),
+                    onPressed: sendData,
+                  ),
+                ],
+              )),
+        ),
       ),
       body: Builder(
         builder: (BuildContext context) => Column(
@@ -1250,75 +1323,27 @@ class PageTwoState extends State<PageTwo> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  RaisedButton(
-                      child: Text('add event'),
-                      onPressed: () => {
-                            globals.log = globals.log + '\n??:??\tnew event',
-                            updateDrawer(),
-                          })
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: TextField(
+                        controller: infoController,
+                        decoration:
+                            InputDecoration(hintText: 'Patient name, MRN'),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: RaisedButton(
+                        child: Text('add event'),
+                        onPressed: () => {
+                              globals.log = globals.log + '\n??:??\tnew event',
+                              updateDrawer(),
+                            }),
+                  )
                 ],
               ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Container(
-                  color: Colors.red,
-                  child: ButtonBar(
-                    alignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      RaisedButton(
-                          child: Text('New Code'),
-                          onPressed: () {
-                            globals.log = "";
-                            globals.stopCodeNow = false;
-                            globals.codeStart = DateTime.now();
-                            timesGiven = <int>[
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                              0,
-                            ];
-                            _lastGiven = <DateTime>[
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                              DateTime.now(),
-                            ];
-                            globals.reset = true;
-                            globals.weightKG = null;
-                            globals.weightIndex = null;
-                            Navigator.pop(context);
-                          }),
-                      RaisedButton(
-                        child: Text('Send Text File'),
-                        onPressed: sendText,
-                      ),
-                      RaisedButton(
-                        child: Text('Send PDF File'),
-                        onPressed: sendData,
-                      ),
-                    ],
-                  )),
             ),
           ],
         ),

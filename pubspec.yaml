@@ -48,6 +48,8 @@ dependencies:
   flutter_slidable: ^0.5.7
   shared_preferences: ^0.5.12
   google_fonts: ^1.1.1
+  vibration: ^1.7.3
+
 
 
 dev_dependencies:

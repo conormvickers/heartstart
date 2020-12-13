@@ -22,6 +22,8 @@ import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vibration/vibration.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -247,6 +249,12 @@ class MyHomePageState extends State<MyHomePage>
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
+  vibrate() async {
+    if (await Vibration.hasVibrator()) {
+      Vibration.vibrate();
+    }
+  }
+
   _triggerUpdate() {
     print('initializing timer');
     Timer.periodic(
@@ -279,6 +287,7 @@ class MyHomePageState extends State<MyHomePage>
                       inst = "Pulse Check";
                       centerIcon = Ionicons.ios_pulse;
                       progressPulseCheck = false;
+                      vibrate();
                     }
                   } else {
                     barColor = Theme.of(context).primaryColor;
@@ -728,11 +737,11 @@ class MyHomePageState extends State<MyHomePage>
                       context: context,
                       backgroundColor: Colors.transparent,
                       builder: (context) => Container(
-
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))
-                        ),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15))),
                         child: ListView.builder(
                           itemCount: 1,
                           itemBuilder: (context, index) {
@@ -767,7 +776,6 @@ class MyHomePageState extends State<MyHomePage>
                                       height: 100,
                                       child: Row(
                                         children: <Widget>[
-
                                           Expanded(
                                             flex: 5,
                                             child: Column(
@@ -779,25 +787,23 @@ class MyHomePageState extends State<MyHomePage>
                                                   child: Container(
                                                     width: 1000,
                                                     child: ShaderMask(
-
                                                       child: Image.asset(
-                                                          ('assets/pea.png'),
-                                                          fit: BoxFit.fitWidth,
-                                                        ),
-                                                      shaderCallback: (Rect bounds) {
+                                                        ('assets/pea.png'),
+                                                        fit: BoxFit.fill,
+                                                      ),
+                                                      shaderCallback:
+                                                          (Rect bounds) {
                                                         return LinearGradient(
-                                                          colors: [Colors.white, Colors.white],
-                                                          stops: [
-                                                            0.0, 0.0
+                                                          colors: [
+                                                            Colors.white,
+                                                            Colors.white
                                                           ],
+                                                          stops: [0.0, 0.0],
                                                         ).createShader(bounds);
                                                       },
-                                                      blendMode: BlendMode.srcATop,
+                                                      blendMode:
+                                                          BlendMode.srcATop,
                                                     ),
-                                                    // child: Image.asset(
-                                                    //   ('assets/pea.png'),
-                                                    //   fit: BoxFit.fitWidth,
-                                                    // ),
                                                   ),
                                                 ),
                                                 Expanded(
@@ -811,7 +817,8 @@ class MyHomePageState extends State<MyHomePage>
                                                         'Asystole / PEA - no shock',
                                                         style: TextStyle(
                                                             fontSize: 40,
-                                                        color: Colors.white),
+                                                            color:
+                                                                Colors.white),
                                                       ),
                                                     ),
                                                   ),
@@ -859,15 +866,18 @@ class MyHomePageState extends State<MyHomePage>
                                                         ('assets/vfib.png'),
                                                         fit: BoxFit.fill,
                                                       ),
-                                                      shaderCallback: (Rect bounds) {
+                                                      shaderCallback:
+                                                          (Rect bounds) {
                                                         return LinearGradient(
-                                                          colors: [Colors.white, Colors.white],
-                                                          stops: [
-                                                            0.0, 0.0
+                                                          colors: [
+                                                            Colors.white,
+                                                            Colors.white
                                                           ],
+                                                          stops: [0.0, 0.0],
                                                         ).createShader(bounds);
                                                       },
-                                                      blendMode: BlendMode.srcATop,
+                                                      blendMode:
+                                                          BlendMode.srcATop,
                                                     ),
                                                   ),
                                                 ),
@@ -876,8 +886,7 @@ class MyHomePageState extends State<MyHomePage>
                                                     'Ventricular Fibrillation',
                                                     style: TextStyle(
                                                         fontSize: 40,
-                                                    color: Colors.white
-                                                    ),
+                                                        color: Colors.white),
                                                   ),
                                                 ),
                                               ],
@@ -903,7 +912,7 @@ class MyHomePageState extends State<MyHomePage>
                                       decoration: BoxDecoration(
                                         color: Colors.black54,
                                         borderRadius:
-                                        BorderRadius.circular(8.0),
+                                            BorderRadius.circular(8.0),
                                       ),
                                       height: 100,
                                       child: Row(
@@ -923,7 +932,7 @@ class MyHomePageState extends State<MyHomePage>
                                             flex: 5,
                                             child: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                                  MainAxisAlignment.center,
                                               children: <Widget>[
                                                 Expanded(
                                                   flex: 4,
@@ -934,15 +943,18 @@ class MyHomePageState extends State<MyHomePage>
                                                         ('assets/vtach.png'),
                                                         fit: BoxFit.fill,
                                                       ),
-                                                      shaderCallback: (Rect bounds) {
+                                                      shaderCallback:
+                                                          (Rect bounds) {
                                                         return LinearGradient(
-                                                          colors: [Colors.white, Colors.white],
-                                                          stops: [
-                                                            0.0, 0.0
+                                                          colors: [
+                                                            Colors.white,
+                                                            Colors.white
                                                           ],
+                                                          stops: [0.0, 0.0],
                                                         ).createShader(bounds);
                                                       },
-                                                      blendMode: BlendMode.srcATop,
+                                                      blendMode:
+                                                          BlendMode.srcATop,
                                                     ),
                                                   ),
                                                 ),
@@ -951,8 +963,7 @@ class MyHomePageState extends State<MyHomePage>
                                                     'Pulseless Ventricular Tachycardia',
                                                     style: TextStyle(
                                                         fontSize: 40,
-                                                      color: Colors.white
-                                                    ),
+                                                        color: Colors.white),
                                                   ),
                                                 ),
                                               ],
