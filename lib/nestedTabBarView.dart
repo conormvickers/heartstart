@@ -1224,6 +1224,7 @@ class PageTwoState extends State<PageTwo> {
   }
 
   TextEditingController infoController = TextEditingController();
+  ScrollController timelineController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -1313,7 +1314,7 @@ class PageTwoState extends State<PageTwo> {
                 child: ReorderableListView(
                   onReorder: onReorder,
                   children: timelineTiles,
-                  scrollController: ScrollController(),
+                  scrollController: timelineController,
                 ),
               ),
             ),
@@ -1339,7 +1340,14 @@ class PageTwoState extends State<PageTwo> {
                         child: Text('add event'),
                         onPressed: () => {
                               globals.log = globals.log + '\n??:??\tnew event',
+                  
                               updateDrawer(),
+                              timelineController.animateTo(
+              timelineController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            ),
+                            
                             }),
                   )
                 ],

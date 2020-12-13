@@ -475,9 +475,9 @@ class MyHomePageState extends State<MyHomePage>
   bool askForTour = false;
   int currentCoachWidget = 0;
   List<String> coachInfo = [
-    "This is the time since code start",
-    "This shows how long until next pulse check",
-    "This is the current instructions",
+    "This is the time until next pulse check",
+    "When this ring fills completely, it is time for a pulse check",
+    "This displays the current place in the cycle",
     "Here is your checklist",
     "These are your medications",
     "This will help you track compression and breath rates",
@@ -1653,15 +1653,7 @@ class MyHomePageState extends State<MyHomePage>
           onPressed: _launchURL,
           child: Text('Open Source Information'),
         ),
-        RaisedButton(
-          onPressed: () => {
-            setState(() => {
-                  Navigator.pop(context),
-                }),
-            showCoach()
-          },
-          child: Text('Start tour'),
-        ),
+      
         RaisedButton(
           onPressed: () => {
             setState(() => {
@@ -1670,6 +1662,15 @@ class MyHomePageState extends State<MyHomePage>
             handsFree = true
           },
           child: Text('Hands Free Mode'),
+        ),
+        RaisedButton(
+          onPressed: () => {
+            setState(() => {
+                  Navigator.pop(context),
+                }),
+            showCoach()
+          },
+          child: Text('Start tour'),
         ),
       ];
     }
