@@ -1095,7 +1095,11 @@ class MyHomePageState extends State<MyHomePage>
                 size: 200,
               ),
             ),
-          )
+          ),
+          Text('tap',
+          style: TextStyle(
+            color: Colors.white
+          )),
         ],
       );
     } else {
