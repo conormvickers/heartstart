@@ -24,7 +24,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -1096,10 +1095,7 @@ class MyHomePageState extends State<MyHomePage>
               ),
             ),
           ),
-          Text('tap',
-          style: TextStyle(
-            color: Colors.white
-          )),
+          Text('tap', style: TextStyle(color: Colors.white)),
         ],
       );
     } else {
@@ -1653,7 +1649,6 @@ class MyHomePageState extends State<MyHomePage>
           onPressed: _launchURL,
           child: Text('Open Source Information'),
         ),
-      
         RaisedButton(
           onPressed: () => {
             setState(() => {

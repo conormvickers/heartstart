@@ -334,6 +334,7 @@ bool tenminbadge = false;
 class NestedTabBarState extends State<NestedTabBar>
     with TickerProviderStateMixin {
   TabController nestedTabController;
+  TabController chestTypeController;
   MyHomePageState parent;
 
   NestedTabBarState(this.parent);
@@ -343,6 +344,10 @@ class NestedTabBarState extends State<NestedTabBar>
     super.initState();
 
     nestedTabController = new TabController(length: 4, vsync: this);
+    chestTypeController = TabController(
+      length: 3,
+      vsync: this,
+    );
 
     Timer.periodic(
         Duration(milliseconds: 1000),
@@ -569,7 +574,6 @@ class NestedTabBarState extends State<NestedTabBar>
     Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
-  TabController chestTypeController = TabController();
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -580,63 +584,91 @@ class NestedTabBarState extends State<NestedTabBar>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              flex: 1,
-              child: AutoSizeText(
-                'Select Weight',
-                style: TextStyle(fontSize: 30),
-              ),
-            ),
+                flex: 1,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: FittedBox(
+                        child: Text(
+                          'Weight',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    VerticalDivider(),
+                    Column(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.fitHeight,
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: Slider(
+                        min: 0,
+                        max: 10,
+                        divisions: 10,
+                        value: _weightValue,
+                        label: weightOptions[_weightValue.round()],
+                        onChanged: (value) {
+                          setState(
+                            () {
+                              _weightValue = value;
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.fitHeight,
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )),
             Expanded(
               child: Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: FittedBox(
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
-                          ),
-                        ),
-                      ],
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    child: FittedBox(
+                      child: Text(
+                        'Chest',
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
                   ),
+                  VerticalDivider(),
                   Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
+                    child: TabBar(
+                      controller: chestTypeController,
+                      tabs: [
+                        Tab(
+                          child: Text('round'),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: FittedBox(
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Expanded(
-                          flex: 9,
-                          child: FittedBox(
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
-                          ),
-                        ),
+                        Tab(child: Text('keel')),
+                        Tab(
+                          child: Text('flat'),
+                        )
                       ],
                     ),
                   ),
@@ -644,52 +676,26 @@ class NestedTabBarState extends State<NestedTabBar>
               ),
             ),
             Expanded(
-                flex: 2,
-                child: Slider(
-                  min: 0,
-                  max: 10,
-                  divisions: 10,
-                  value: _weightValue,
-                  label: weightOptions[_weightValue.round()],
-                  onChanged: (value) {
-                    setState(
-                      () {
-                        _weightValue = value;
-                      },
-                    );
-                  },
-                )),
-            Expanded(
-              child: TabBar(
-                controller: chestTypeController,
-                tabs: [
-                  Tab(
-                    child: Text('flat'),
-                  ),
-                  Tab(
-                    child: Text('keel')
+              child: ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: [
+                  RaisedButton(
+                    onPressed: () => {
+                      setState(() {
+                        globals.weightKG =
+                            weightkgOptions[_weightValue.round()];
+                        globals.weightIndex = _weightValue.round();
+                        print('set weight to: ' +
+                            weightkgOptions[_weightValue.round()].toString());
+                        for (MedListItem item in medItems) {
+                          item.buildSubtitle(context);
+                        }
+                      })
+                    },
+                    child: Text('DONE'),
                   )
                 ],
               ),
-            ),
-            ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: [
-                RaisedButton(
-                  onPressed: () => {
-                    setState(() {
-                      globals.weightKG = weightkgOptions[_weightValue.round()];
-                      globals.weightIndex = _weightValue.round();
-                      print('set weight to: ' +
-                          weightkgOptions[_weightValue.round()].toString());
-                      for (MedListItem item in medItems) {
-                        item.buildSubtitle(context);
-                      }
-                    })
-                  },
-                  child: Text('DONE'),
-                )
-              ],
             )
           ],
         ),
@@ -1352,14 +1358,12 @@ class PageTwoState extends State<PageTwo> {
                         child: Text('add event'),
                         onPressed: () => {
                               globals.log = globals.log + '\n??:??\tnew event',
-
                               updateDrawer(),
                               timelineController.animateTo(
-              timelineController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            ),
-
+                                timelineController.position.maxScrollExtent,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOut,
+                              ),
                             }),
                   )
                 ],
