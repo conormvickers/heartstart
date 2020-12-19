@@ -14,6 +14,8 @@ PODS:
     - Flutter
   - url_launcher (0.0.1):
     - Flutter
+  - vibration (1.7.3):
+    - Flutter
   - wakelock (0.0.1):
     - Flutter
 
@@ -26,6 +28,7 @@ DEPENDENCIES:
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+  - vibration (from `.symlinks/plugins/vibration/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
 
 EXTERNAL SOURCES:
@@ -45,6 +48,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
+  vibration:
+    :path: ".symlinks/plugins/vibration/ios"
   wakelock:
     :path: ".symlinks/plugins/wakelock/ios"
 
@@ -57,6 +62,7 @@ SPEC CHECKSUMS:
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
+  vibration: b5a33e764c3f609a975b9dca73dce20fdde627dc
   wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c

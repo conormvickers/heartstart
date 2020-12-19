@@ -569,6 +569,7 @@ class NestedTabBarState extends State<NestedTabBar>
     Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
+  TabController chestTypeController = TabController();
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -658,6 +659,19 @@ class NestedTabBarState extends State<NestedTabBar>
                     );
                   },
                 )),
+            Expanded(
+              child: TabBar(
+                controller: chestTypeController,
+                tabs: [
+                  Tab(
+                    child: Text('flat'),
+                  ),
+                  Tab(
+                    child: Text('keel')
+                  )
+                ],
+              ),
+            ),
             ButtonBar(
               alignment: MainAxisAlignment.center,
               children: [
@@ -738,7 +752,7 @@ class NestedTabBarState extends State<NestedTabBar>
             ),
             Tab(
               icon: Badge(
-                  showBadge: needBadge,
+                  showBadge: false,
                   badgeContent: Text('!'),
                   badgeColor: Theme.of(context).accentColor,
                   child: Icon(
@@ -794,35 +808,35 @@ class NestedTabBarState extends State<NestedTabBar>
                           // Convert each item into a widget based on the type of item it is.
                           itemBuilder: (context, index) {
                             final item = medItems[index];
-                            var tx = Text('Not Indicated');
-                            var color = Colors.black54;
+                            var tx = Text('');
+                            var color = Colors.transparent;
                             var waitTime = 2;
                             var longTime = 10;
-                            if (globals.codeStart
-                                    .difference(DateTime.now())
-                                    .inMinutes
-                                    .abs() >
-                                9) {
-                              longTime = 3;
-                            }
-                            if (timesGiven[index] != 0) {
-                              waitTime = 3;
-                            }
+                            // if (globals.codeStart
+                            //         .difference(DateTime.now())
+                            //         .inMinutes
+                            //         .abs() >
+                            //     9) {
+                            //   longTime = 3;
+                            // }
+                            // if (timesGiven[index] != 0) {
+                            //   waitTime = 3;
+                            // }
                             final dif = DateTime.now()
                                 .difference(_lastGiven[index])
                                 .inMinutes
                                 .toString();
-                            if (int.parse(dif) >= waitTime) {
-                              if (index != 1) {
-                                color = Colors.transparent;
-                                tx = Text('');
-                              } else {
-                                if (int.parse(dif) >= longTime) {
-                                  color = Colors.transparent;
-                                  tx = Text('');
-                                }
-                              }
-                            }
+                            // if (int.parse(dif) >= waitTime) {
+                            //   if (index != 1) {
+                            //     color = Colors.transparent;
+                            //     tx = Text('');
+                            //   } else {
+                            //     if (int.parse(dif) >= longTime) {
+                            //       color = Colors.transparent;
+                            //       tx = Text('');
+                            //     }
+                            //   }
+                            // }
                             if (timesGiven[index] != 0) {
                               tx = Text(
                                 'given ' +
@@ -1242,67 +1256,65 @@ class PageTwoState extends State<PageTwo> {
         elevation: 1.0,
       ),
       bottomNavigationBar: BottomAppBar(
-        child: Expanded(
-          flex: 1,
-          child: Container(
-              color: Colors.red,
-              child: ButtonBar(
-                alignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  RaisedButton(
-                      child: Text('New Code'),
-                      onPressed: () {
-                        globals.log = "";
-                        globals.stopCodeNow = false;
-                        globals.codeStart = DateTime.now();
-                        timesGiven = <int>[
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                        ];
-                        _lastGiven = <DateTime>[
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                          DateTime.now(),
-                        ];
-                        globals.reset = true;
-                        globals.weightKG = null;
-                        globals.weightIndex = null;
-                        Navigator.pop(context);
-                      }),
-                  RaisedButton(
-                    child: Text('Send Text File'),
-                    onPressed: sendText,
-                  ),
-                  RaisedButton(
-                    child: Text('Send PDF File'),
-                    onPressed: sendData,
-                  ),
-                ],
-              )),
-        ),
+        color: Colors.red,
+        child: Container(
+            color: Colors.red,
+            child: ButtonBar(
+              alignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                RaisedButton(
+                    child: Text('New Code'),
+                    onPressed: () {
+                      globals.log = "";
+                      globals.stopCodeNow = false;
+                      globals.codeStart = DateTime.now();
+                      timesGiven = <int>[
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                      ];
+                      _lastGiven = <DateTime>[
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                        DateTime.now(),
+                      ];
+                      globals.reset = true;
+                      globals.weightKG = null;
+                      globals.weightIndex = null;
+                      Navigator.pop(context);
+                    }),
+                RaisedButton(
+                  child: Text('Send Text File'),
+                  onPressed: sendText,
+                ),
+                RaisedButton(
+                  child: Text('Send PDF File'),
+                  onPressed: sendData,
+                ),
+              ],
+            )),
       ),
       body: Builder(
         builder: (BuildContext context) => Column(
@@ -1340,14 +1352,14 @@ class PageTwoState extends State<PageTwo> {
                         child: Text('add event'),
                         onPressed: () => {
                               globals.log = globals.log + '\n??:??\tnew event',
-                  
+
                               updateDrawer(),
                               timelineController.animateTo(
               timelineController.position.maxScrollExtent,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
             ),
-                            
+
                             }),
                   )
                 ],
