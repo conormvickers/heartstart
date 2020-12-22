@@ -1225,6 +1225,45 @@ class MyHomePageState extends State<MyHomePage>
                   style: TextStyle(color: Colors.white))));
     }
 
+    Widget checkIfWeightChest() {
+      if (globals.chest != null && globals.weightKG != null) {
+        return GestureDetector(
+          onTap: () => {
+            print('change weight'),
+            setState(() {
+              globals.weightKG = null;
+              globals.weightIndex = null;
+              globals.chest = null;
+              print('reset weight ' + globals.weightKG.toString());
+              nestedKey.currentState.setState(() {
+                nestedKey.currentState.nestedTabController.animateTo(1);
+              });
+            }),
+          },
+          child: Container(
+            width: 100,
+            height: 50,
+            child: Text(
+              'weight: ' +
+                  globals.weightKG.toStringAsPrecision(2) +
+                  'kg\nchest: ' +
+                  globals.chest,
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(15),
+                    bottomRight: Radius.circular(15)),
+                border: Border.all(color: Colors.red, width: 3),
+                color: Colors.red),
+          ),
+        );
+      }
+      return Container();
+    }
+
     updateDrawer() {
       FocusNode focusEdit = FocusNode();
       setState(() {
@@ -1449,21 +1488,24 @@ class MyHomePageState extends State<MyHomePage>
                   ]),
             ),
           ),
+          Column(
+            children: [
+              IconButton(
+                icon: soundIcon,
+                color: soundColor,
+                onPressed: () => {toggleSound()},
+              ),
+              IconButton(
+                icon: voiceIcon,
+                color: voiceColor,
+                onPressed: () => {toggleVoice()},
+              ),
+            ],
+          ),
           Positioned(
-            child: Column(
-              children: [
-                IconButton(
-                  icon: soundIcon,
-                  color: soundColor,
-                  onPressed: () => {toggleSound()},
-                ),
-                IconButton(
-                  icon: voiceIcon,
-                  color: voiceColor,
-                  onPressed: () => {toggleVoice()},
-                ),
-              ],
-            ),
+            left: 0,
+            bottom: 40,
+            child: checkIfWeightChest(),
           ),
           Positioned(
             right: 0,
@@ -1627,6 +1669,7 @@ class MyHomePageState extends State<MyHomePage>
             setState(() {
               globals.weightKG = null;
               globals.weightIndex = null;
+              globals.chest = null;
               print('reset weight ' + globals.weightKG.toString());
               nestedKey.currentState.setState(() {
                 nestedKey.currentState.nestedTabController.animateTo(1);

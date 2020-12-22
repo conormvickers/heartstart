@@ -7,3 +7,4 @@ String publicCodeTime;
 double weightKG;
 int weightIndex;
 DateTime codeStart;
+String chest;

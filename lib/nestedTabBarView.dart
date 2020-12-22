@@ -574,6 +574,7 @@ class NestedTabBarState extends State<NestedTabBar>
     Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
+  List<String> chestTypes = ['round', 'keel', 'flat'];
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -663,11 +664,11 @@ class NestedTabBarState extends State<NestedTabBar>
                       controller: chestTypeController,
                       tabs: [
                         Tab(
-                          child: Text('round'),
+                          child: Text(chestTypes[0]),
                         ),
-                        Tab(child: Text('keel')),
+                        Tab(child: Text(chestTypes[1])),
                         Tab(
-                          child: Text('flat'),
+                          child: Text(chestTypes[2]),
                         )
                       ],
                     ),
@@ -685,11 +686,13 @@ class NestedTabBarState extends State<NestedTabBar>
                         globals.weightKG =
                             weightkgOptions[_weightValue.round()];
                         globals.weightIndex = _weightValue.round();
+                        globals.chest = chestTypes[chestTypeController.index];
                         print('set weight to: ' +
                             weightkgOptions[_weightValue.round()].toString());
                         for (MedListItem item in medItems) {
                           item.buildSubtitle(context);
                         }
+                        parent.setState(() {});
                       })
                     },
                     child: Text('DONE'),
@@ -1032,10 +1035,20 @@ class PageTwoState extends State<PageTwo> {
   Directory appDocDir;
   String appDocPath;
   sendData() async {
-    String log = globals.log;
+    String log = '';
     if (infoController.text != null) {
-      log = infoController.text + ' ' + log;
+      log = infoController.text + '\n';
     }
+    if (globals.chest != null && globals.weightKG != null) {
+      log = log +
+          ' ' +
+          globals.chest +
+          ' chest, ' +
+          globals.weightKG.toStringAsPrecision(2) +
+          'kg\n';
+    }
+    log = log + globals.log;
+
     pdf = pw.Document();
 
     pdf.addPage(pw.Page(
@@ -1065,10 +1078,20 @@ class PageTwoState extends State<PageTwo> {
     String date = DateFormat('yyyy_MM_dd').format(now);
 
     final file = File("${appDocDir.path}/" + date + "log.txt");
-    String log = globals.log;
+    String log = '';
     if (infoController.text != null) {
-      log = infoController.text + ' ' + log;
+      log = infoController.text + '\n';
     }
+    if (globals.chest != null && globals.weightKG != null) {
+      log = log +
+          ' ' +
+          globals.chest +
+          ' chest, ' +
+          globals.weightKG.toStringAsPrecision(2) +
+          'kg\n';
+    }
+    log = log + globals.log;
+
     await file.writeAsString(log);
 
     Share.shareFiles(["${appDocDir.path}/" + date + "log.txt"],
