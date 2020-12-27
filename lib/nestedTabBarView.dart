@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutterheart/chesttypes_icons.dart';
 import 'package:flutterheart/main.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter/material.dart';
@@ -67,10 +68,10 @@ const List<Entry> data = <Entry>[
     Entry('Cocain, Digoxin, TCA, CCB, review medications review history'),
   ]),
   Entry('Tamponade (cardiac)', <Entry>[
-    Entry('Pericardiocentesis, echocardiogram if uncertain'),
+    Entry('Pericardiocentesis, echocardiogram if uncertain, open chest CPR'),
   ]),
   Entry('Tension pneumothorax', <Entry>[
-    Entry('Needle Thoracostomy 14-16 gauge needle'),
+    Entry('Needle Thoracostomy 14-16 gauge needle, open chest CPR'),
   ]),
   Entry('Thrombosis', <Entry>[
     Entry('Consider PE and anticoagulation'),
@@ -571,10 +572,14 @@ class NestedTabBarState extends State<NestedTabBar>
     var prefs = await SharedPreferences.getInstance();
     prefs.setString('log', null);
     print('finished code');
+    if (parent.playCompressions) {
+      parent.toggleSound();
+    }
     Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
   List<String> chestTypes = ['round', 'keel', 'flat'];
+  List<IconData> chestIcons = [Chesttypes.round, Chesttypes.keel, Chesttypes.flat];
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -598,25 +603,33 @@ class NestedTabBarState extends State<NestedTabBar>
                       ),
                     ),
                     VerticalDivider(),
-                    Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Expanded(
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+
+                          Row(
+                            children: [
+                              Expanded(child: Container()),
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: Icon(
+                                    MaterialCommunityIcons.dog_side,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                           ),
-                        ),
-                        Expanded(
-                          child: Container(),
-                        ),
-                      ],
+
+                        ],
+                      ),
                     ),
                     Expanded(
+                      flex: 5,
                       child: Slider(
                         min: 0,
                         max: 10,
@@ -632,17 +645,19 @@ class NestedTabBarState extends State<NestedTabBar>
                         },
                       ),
                     ),
-                    Column(
-                      children: [
-                        Expanded(
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.fitWidth,
+                              child: Icon(
+                                MaterialCommunityIcons.dog_side,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 )),
@@ -687,6 +702,10 @@ class NestedTabBarState extends State<NestedTabBar>
                             weightkgOptions[_weightValue.round()];
                         globals.weightIndex = _weightValue.round();
                         globals.chest = chestTypes[chestTypeController.index];
+                        parent.setState(() {
+                          parent.centerIcon = chestIcons[chestTypeController.index];
+                          parent.chestIcon = chestIcons[chestTypeController.index];
+                        });
                         print('set weight to: ' +
                             weightkgOptions[_weightValue.round()].toString());
                         for (MedListItem item in medItems) {
