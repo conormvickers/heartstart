@@ -626,7 +626,7 @@ class MyHomePageState extends State<MyHomePage>
     if (playCompressions) {
       print(DateTime.now());
       //player.play('2.wav');
-      cutg = await player.play('long.wav');
+      cutg = await player.play('longmp.mp3');
 
     }
   }
