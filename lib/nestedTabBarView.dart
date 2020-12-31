@@ -579,7 +579,11 @@ class NestedTabBarState extends State<NestedTabBar>
   }
 
   List<String> chestTypes = ['round', 'keel', 'flat'];
-  List<IconData> chestIcons = [Chesttypes.round, Chesttypes.keel, Chesttypes.flat];
+  List<IconData> chestIcons = [
+    Chesttypes.round,
+    Chesttypes.keel,
+    Chesttypes.flat
+  ];
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -608,7 +612,6 @@ class NestedTabBarState extends State<NestedTabBar>
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-
                           Row(
                             children: [
                               Expanded(child: Container()),
@@ -624,7 +627,6 @@ class NestedTabBarState extends State<NestedTabBar>
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                           ),
-
                         ],
                       ),
                     ),
@@ -703,8 +705,10 @@ class NestedTabBarState extends State<NestedTabBar>
                         globals.weightIndex = _weightValue.round();
                         globals.chest = chestTypes[chestTypeController.index];
                         parent.setState(() {
-                          parent.centerIcon = chestIcons[chestTypeController.index];
-                          parent.chestIcon = chestIcons[chestTypeController.index];
+                          parent.centerIcon =
+                              chestIcons[chestTypeController.index];
+                          parent.chestIcon =
+                              chestIcons[chestTypeController.index];
                         });
                         print('set weight to: ' +
                             weightkgOptions[_weightValue.round()].toString());
@@ -737,7 +741,7 @@ class NestedTabBarState extends State<NestedTabBar>
   Widget build(BuildContext context) {
     // print("current log:" + globals.log);
 
-    final _listTiles = _citems
+    List<Widget> _listTiles = _citems
         .map((item) => CheckboxListTile(
               key: Key(item.value),
               value: item.checked ?? false,
@@ -748,11 +752,16 @@ class NestedTabBarState extends State<NestedTabBar>
                   String formattedDate = DateFormat('kk:mm').format(now);
                   globals.log =
                       globals.log + '\n' + formattedDate + '\t' + item.value;
+
+                  if (item.value == 'Capnography') {
+                    print("capnography on");
+                  }
                 }
               },
               title: Text('${item.value}'),
             ))
         .toList();
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[

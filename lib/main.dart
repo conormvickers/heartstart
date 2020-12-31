@@ -28,7 +28,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:quiver/async.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -91,6 +90,20 @@ class MyHomePageState extends State<MyHomePage>
   static AudioCache player = AudioCache();
   static AudioPlayer cutg = AudioPlayer();
 
+  bool enterCapno = false;
+  FocusNode capnoNode = FocusNode();
+  TextEditingController capnoController = TextEditingController();
+  addCapnoToLog() {
+    if (capnoController.text.length > 0) {
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('kk:mm').format(now);
+      String combined =
+          "\n" + formattedDate + "\tEtCO2 measured: " + capnoController.text;
+      globals.log = globals.log + combined;
+      capnoController.text = '';
+    }
+  }
+
   bool handsFree = true;
   double fraction = 0;
   double minPassed = 0;
@@ -116,7 +129,6 @@ class MyHomePageState extends State<MyHomePage>
     prefs.setString('log', globals.log);
     String now = DateTime.now().toIso8601String();
     prefs.setString('logSaveTime', now);
-
   }
 
   _checkForWeight() {
@@ -234,7 +246,6 @@ class MyHomePageState extends State<MyHomePage>
         ),
       );
     }
-
   }
 
   Color barColor;
@@ -288,23 +299,21 @@ class MyHomePageState extends State<MyHomePage>
 
                   fraction = fractionPulse / 120;
 
-
-                    if (fractionPulse == 120) {
-                      print('should open');
-                      askForPulse = true;
-                      _speechThis(
-                          'Stop compressions. Resume compressions within 10 seconds');
-                      barColor = Theme.of(context).accentColor;
-                      inst = "Pulse Check";
-                      centerIcon = Ionicons.ios_pulse;
-                      progressPulseCheck = false;
-                      vibrate();
-                      if (handsFree) {
-                        print('starting auto reset timer');
+                  if (fractionPulse == 120) {
+                    print('should open');
+                    askForPulse = true;
+                    _speechThis(
+                        'Stop compressions. Resume compressions within 10 seconds');
+                    barColor = Theme.of(context).accentColor;
+                    inst = "Pulse Check";
+                    centerIcon = Ionicons.ios_pulse;
+                    progressPulseCheck = false;
+                    vibrate();
+                    if (handsFree) {
+                      print('starting auto reset timer');
                       Future.delayed(Duration(seconds: 10), () {
                         autoRestartCycle();
-                      }
-                      );
+                      });
                     }
                   } else {
                     barColor = Theme.of(context).primaryColor;
@@ -374,7 +383,7 @@ class MyHomePageState extends State<MyHomePage>
         DateTime now = DateTime.now();
         String formattedDate = DateFormat('kk:mm').format(now);
         String combined = "\n" + formattedDate + "\tCode Stopped";
-        String full = combined.toString() + "\t" ;
+        String full = combined.toString() + "\t";
         globals.log = globals.log + full;
         if (playCompressions) {
           toggleSound();
@@ -436,9 +445,15 @@ class MyHomePageState extends State<MyHomePage>
       print('found log ' + test);
     }
     if (test != null) {
-      String st = prefs.getString('logSaveTime');
-      DateTime dt = DateTime.parse(st);
-      if (dt.difference(DateTime.now()).inMinutes.abs() > 30 ) {
+      String st = prefs.getString('logSaveTime') ?? null;
+      DateTime dt;
+      if (st == null) {
+        return;
+      } else {
+        dt = DateTime.parse(st);
+      }
+
+      if (dt.difference(DateTime.now()).inMinutes.abs() > 30) {
         return;
       }
       return showDialog<void>(
@@ -500,8 +515,6 @@ class MyHomePageState extends State<MyHomePage>
     fraction = 0;
 
     _triggerUpdate();
-
-
 
     Future<void>.delayed(
         Duration(seconds: 10),
@@ -618,7 +631,7 @@ class MyHomePageState extends State<MyHomePage>
     }
     metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
       print('about to play');
-     // metronome(player);
+      // metronome(player);
     });
   }
 
@@ -627,7 +640,6 @@ class MyHomePageState extends State<MyHomePage>
       print(DateTime.now());
       //player.play('2.wav');
       cutg = await player.play('longmp.mp3');
-
     }
   }
 
@@ -644,7 +656,6 @@ class MyHomePageState extends State<MyHomePage>
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
       });
-
     } else {
       setState(() {
         soundIcon = Icon(FlutterIcons.metronome_mco);
@@ -845,12 +856,21 @@ class MyHomePageState extends State<MyHomePage>
                                                   flex: 4,
                                                   child: Column(
                                                     children: [
-                                                      Expanded(child: Container(),),
-                                                      Expanded(child: Container(
-                                                        decoration: BoxDecoration(
-                                                          border: Border(top: BorderSide(width: 2, color: Colors.white) ),
+                                                      Expanded(
+                                                        child: Container(),
+                                                      ),
+                                                      Expanded(
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            border: Border(
+                                                                top: BorderSide(
+                                                                    width: 2,
+                                                                    color: Colors
+                                                                        .white)),
+                                                          ),
                                                         ),
-                                                      ),),
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
@@ -883,7 +903,7 @@ class MyHomePageState extends State<MyHomePage>
                                       decoration: BoxDecoration(
                                         color: Colors.black54,
                                         borderRadius:
-                                        BorderRadius.circular(8.0),
+                                            BorderRadius.circular(8.0),
                                       ),
                                       height: 100,
                                       child: Row(
@@ -892,7 +912,7 @@ class MyHomePageState extends State<MyHomePage>
                                             flex: 5,
                                             child: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                                  MainAxisAlignment.center,
                                               children: <Widget>[
                                                 Expanded(
                                                   flex: 4,
@@ -914,7 +934,7 @@ class MyHomePageState extends State<MyHomePage>
                                                         ).createShader(bounds);
                                                       },
                                                       blendMode:
-                                                      BlendMode.srcATop,
+                                                          BlendMode.srcATop,
                                                     ),
                                                   ),
                                                 ),
@@ -924,13 +944,13 @@ class MyHomePageState extends State<MyHomePage>
                                                     child: Container(
                                                       width: 1000,
                                                       alignment:
-                                                      Alignment.center,
+                                                          Alignment.center,
                                                       child: AutoSizeText(
                                                         'PEA - no shock',
                                                         style: TextStyle(
                                                             fontSize: 40,
                                                             color:
-                                                            Colors.white),
+                                                                Colors.white),
                                                       ),
                                                     ),
                                                   ),
@@ -1149,8 +1169,7 @@ class MyHomePageState extends State<MyHomePage>
                               DateFormat('kk:mm').format(now);
                           String combined =
                               "\n" + formattedDate + "\tShock Delivered";
-                          String full =
-                              combined.toString() + "\t";
+                          String full = combined.toString() + "\t";
                           globals.log = globals.log + full;
                           print('Shock Delivered');
                           askForPulse = false;
@@ -1375,7 +1394,6 @@ class MyHomePageState extends State<MyHomePage>
           ),
         );
       }
-
     }
 
     updateDrawer() {
@@ -1463,7 +1481,6 @@ class MyHomePageState extends State<MyHomePage>
             TimelineTile add = TimelineTile(
               alignment: TimelineAlign.manual,
               lineXY: 0.1,
-
               startChild: Container(
                 height: height,
               ),
@@ -1527,7 +1544,7 @@ class MyHomePageState extends State<MyHomePage>
                 // child:
                 add
                 // )
-            );
+                );
           }
         }
         focusEdit.requestFocus();
@@ -1583,9 +1600,9 @@ class MyHomePageState extends State<MyHomePage>
                           child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                Container(
-                                  height: 30,
-                                ),
+                            Container(
+                              height: 30,
+                            ),
                             Expanded(
                               flex: 2,
                               child: Container(
@@ -1616,9 +1633,9 @@ class MyHomePageState extends State<MyHomePage>
                                 ],
                               ),
                             ),
-                                Expanded(
-                                  child: Container(),
-                                )
+                            Expanded(
+                              child: Container(),
+                            )
                           ])),
                       backgroundColor: Colors.grey,
                       progressColor: barColor,
@@ -1651,7 +1668,20 @@ class MyHomePageState extends State<MyHomePage>
             child: Column(
               children: [
                 IconButton(
-                  icon: Icon( FlutterIcons.dog_side_mco, color: Colors.red),
+                  icon: Icon(FlutterIcons.gas_cylinder_mco, color: Colors.red),
+                  onPressed: () => {
+                    print('enter etco2 data'),
+                    setState(() {
+                      enterCapno = true;
+                      // Future.delayed(Duration(seconds: 10), () {
+                      print('requesting focus');
+                      capnoNode.requestFocus();
+                      // });
+                    }),
+                  },
+                ),
+                IconButton(
+                  icon: Icon(FlutterIcons.dog_side_mco, color: Colors.red),
                   onPressed: () => {
                     print('change weight'),
                     setState(() {
@@ -1666,12 +1696,17 @@ class MyHomePageState extends State<MyHomePage>
                   },
                 ),
                 IconButton(
-                  icon: Icon( FlutterIcons.pulse_mco, color: Colors.red, ),
+                  icon: Icon(
+                    FlutterIcons.pulse_mco,
+                    color: Colors.red,
+                  ),
                   onPressed: () => {
-    setState(() {
-                  askForPulse = true;
-
-                  },),},
+                    setState(
+                      () {
+                        askForPulse = true;
+                      },
+                    ),
+                  },
                 ),
               ],
             ),
@@ -1787,7 +1822,59 @@ class MyHomePageState extends State<MyHomePage>
                 ))),
       ],
     );
-    var fullStack = <Widget>[full];
+
+    Widget enterCapnographyData() {
+      if (enterCapno) {
+        return GestureDetector(
+          onTap: () => {
+            setState(() => {
+                  enterCapno = false,
+                })
+          },
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(30),
+                  color: Colors.black38,
+                  alignment: Alignment.center,
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: TextField(
+                      focusNode: capnoNode,
+                      // autofocus: false,
+                      decoration: InputDecoration(
+                        labelText: 'End-Title CO2 Measurement',
+                      ),
+                      controller: capnoController,
+                      keyboardType: TextInputType.number,
+                      onEditingComplete: () => {
+                        addCapnoToLog(),
+                        setState(() => {
+                              enterCapno = false,
+                            }),
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  color: Colors.black38,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return Container();
+    }
+
+    var fullStack = <Widget>[full, enterCapnographyData()];
     if (!warningDismissed) {
       fullStack = <Widget>[full, warning];
     }
@@ -1885,6 +1972,7 @@ class MyHomePageState extends State<MyHomePage>
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
       key: _scaffoldKey,
+      resizeToAvoidBottomPadding: false,
       drawer: Drawer(
         child: Column(
           children: settingItems(),
@@ -1910,7 +1998,8 @@ class MyHomePageState extends State<MyHomePage>
             Expanded(
               child: Container(
                 color: Colors.white,
-                child: ListView( //ReorderableListView(
+                child: ListView(
+                  //ReorderableListView(
                   //onReorder: onReorder,
                   children: timelineTiles,
                   //scrollController: ScrollController(),
