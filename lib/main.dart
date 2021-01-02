@@ -1668,7 +1668,12 @@ class MyHomePageState extends State<MyHomePage>
             child: Column(
               children: [
                 IconButton(
-                  icon: Icon(FlutterIcons.gas_cylinder_mco, color: Colors.red),
+                  icon: Container(
+                    width: 100,
+                    height: 100,
+
+                    child: Icon(Chesttypes.co2_1, color: Colors.red),
+                  ),
                   onPressed: () => {
                     print('enter etco2 data'),
                     setState(() {
@@ -1850,7 +1855,7 @@ class MyHomePageState extends State<MyHomePage>
                         labelText: 'End-Title CO2 Measurement',
                       ),
                       controller: capnoController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
                       onEditingComplete: () => {
                         addCapnoToLog(),
                         setState(() => {
