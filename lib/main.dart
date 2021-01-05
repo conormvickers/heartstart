@@ -1555,7 +1555,7 @@ class MyHomePageState extends State<MyHomePage>
       Stack(
         children: [
           Badge(
-            borderRadius: 10,
+            borderRadius: BorderRadius.circular(10),
             showBadge: compressorBadge,
             badgeContent: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1571,7 +1571,7 @@ class MyHomePageState extends State<MyHomePage>
               ],
             ),
             shape: BadgeShape.square,
-            position: BadgePosition.bottomRight(bottom: 50, right: 20),
+            position: BadgePosition.bottomEnd(bottom: 50, end: 20),
             child: Container(
               height: MediaQuery.of(context).size.width * 2 / 3 + 50,
               child: ListView(
@@ -1672,7 +1672,11 @@ class MyHomePageState extends State<MyHomePage>
                     width: 100,
                     height: 100,
 
-                    child: Icon(Chesttypes.co2_1, color: Colors.red),
+                    child: FittedBox(child: Text('CO\u2082', style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+
+                    ),)),//Icon(Chesttypes.co2_1, color: Colors.red),
                   ),
                   onPressed: () => {
                     print('enter etco2 data'),
