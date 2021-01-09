@@ -366,6 +366,15 @@ class MyHomePageState extends State<MyHomePage>
   ];
   _selectedPulse(String selected) {
     Navigator.of(context).pop();
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('kk:mm').format(now);
+    String combined = "\n" +
+        formattedDate +
+        "\tPulse check: " +
+        selected.toString() +
+        " identified";
+    String full = combined.toString() + "\t";
+    globals.log = globals.log + full;
     setState(() {
       if (selected == "vtach" || selected == "svt") {
         showShock = true;
@@ -399,15 +408,6 @@ class MyHomePageState extends State<MyHomePage>
         progressPulseCheck = true;
         _speechThis('Continue compressions');
       }
-      DateTime now = DateTime.now();
-      String formattedDate = DateFormat('kk:mm').format(now);
-      String combined = "\n" +
-          formattedDate +
-          "\tPulse check: " +
-          selected.toString() +
-          " identified";
-      String full = combined.toString() + "\t";
-      globals.log = globals.log + full;
     });
   }
 
@@ -489,6 +489,50 @@ class MyHomePageState extends State<MyHomePage>
         },
       );
     }
+  }
+
+  Future<void> _ensureStopCode() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Stop Code Now?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to stop the code now?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes, got pulse'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                globals.log = globals.log + '\n Code stopped: pulse found';
+                nestedKey.currentState.stopCode();
+              },
+            ),
+            TextButton(
+              child: Text('Yes, stop resuscitation'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                globals.log = globals.log +
+                    '\n Code stopped: resuscitation efforts withdrawn';
+                nestedKey.currentState.stopCode();
+              },
+            ),
+            TextButton(
+              child: Text('No resume code'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -1668,15 +1712,22 @@ class MyHomePageState extends State<MyHomePage>
             child: Column(
               children: [
                 IconButton(
+                  icon: Icon(FlutterIcons.cancel_mco, color: Colors.red),
+                  onPressed: () => {_ensureStopCode()},
+                ),
+                IconButton(
                   icon: Container(
                     width: 100,
                     height: 100,
 
-                    child: FittedBox(child: Text('CO\u2082', style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-
-                    ),)),//Icon(Chesttypes.co2_1, color: Colors.red),
+                    child: FittedBox(
+                        child: Text(
+                      'CO\u2082',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )), //Icon(Chesttypes.co2_1, color: Colors.red),
                   ),
                   onPressed: () => {
                     print('enter etco2 data'),
@@ -1859,7 +1910,8 @@ class MyHomePageState extends State<MyHomePage>
                         labelText: 'End-Title CO2 Measurement',
                       ),
                       controller: capnoController,
-                      keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
+                      keyboardType: TextInputType.numberWithOptions(
+                          signed: true, decimal: true),
                       onEditingComplete: () => {
                         addCapnoToLog(),
                         setState(() => {
@@ -1950,7 +2002,7 @@ class MyHomePageState extends State<MyHomePage>
             setState(() {
               Navigator.pop(context);
             });
-            nestedKey.currentState.stopCode();
+            _ensureStopCode();
           },
         ),
         RaisedButton(

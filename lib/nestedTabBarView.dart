@@ -104,9 +104,9 @@ final _medStrings = <String>[
   'Atropine',
   'Amiodarone',
   'Lidocaine',
-  'Naloxone',
-  'Flumazenil',
-  'Atipamezole'
+  'Naloxone (Reverse Opiods)',
+  'Flumazenil (Reverse Benzodiazepines)',
+  'Atipamezole (Reverse Alpha-2 Agonists)'
 ];
 final _doses = <String>[
   '',
@@ -561,6 +561,7 @@ class NestedTabBarState extends State<NestedTabBar>
     'Oxygen',
     'Intubation',
     'Capnography',
+    'Consider Anesthesia Reversal (Naloxone)'
   ].map((item) => _ListItem(item, false)).toList();
 
   stopCode() async {
@@ -748,13 +749,13 @@ class NestedTabBarState extends State<NestedTabBar>
               onChanged: (bool newValue) {
                 setState(() => item.checked = newValue);
                 if (newValue == true) {
-                  DateTime now = DateTime.now();
-                  String formattedDate = DateFormat('kk:mm').format(now);
-                  globals.log =
-                      globals.log + '\n' + formattedDate + '\t' + item.value;
-
-                  if (item.value == 'Capnography') {
-                    print("capnography on");
+                  if (item.value == 'Consider Anesthesia Reversal (Naloxone)') {
+                    print("don't add to log");
+                  } else {
+                    DateTime now = DateTime.now();
+                    String formattedDate = DateFormat('kk:mm').format(now);
+                    globals.log =
+                        globals.log + '\n' + formattedDate + '\t' + item.value;
                   }
                 }
               },
@@ -1176,9 +1177,9 @@ class PageTwoState extends State<PageTwo> {
             'Atropine',
             'Amiodarone',
             'Lidocaine',
-            'Naloxone',
-            'Flumazenil',
-            'Atipamezole'
+            'Naloxone (Reverse Opiods)',
+            'Flumazenil (Reverse Benzodiazepines)',
+            'Atipamezole (Reverse Alpha-2 Agonists)'
           ]) {
             if (eventSplit[i].contains(string)) {
               icon = Icons.medical_services;
@@ -1398,8 +1399,9 @@ class PageTwoState extends State<PageTwo> {
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: TextField(
                         controller: infoController,
-                        decoration:
-                            InputDecoration(hintText: 'Patient name, MRN'),
+                        decoration: InputDecoration(
+                          labelText: 'Patient Info, MRN',
+                        ),
                       ),
                     ),
                   ),
