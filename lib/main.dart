@@ -674,7 +674,6 @@ class MyHomePageState extends State<MyHomePage>
       metronomeTimer.cancel();
     }
     metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
-      print('about to play');
       // metronome(player);
     });
   }
@@ -1650,10 +1649,14 @@ class MyHomePageState extends State<MyHomePage>
                             Expanded(
                               flex: 2,
                               child: FittedBox(
-                                child: Icon(
-                                  centerIcon,
-                                  color: barColor,
-                                  size: MediaQuery.of(context).size.width / 4,
+                                fit: BoxFit.fitHeight,
+                                child: Container(
+                                  width: 1000,
+                                  child: Icon(
+                                    centerIcon,
+                                    color: barColor,
+                                    size: MediaQuery.of(context).size.width / 4,
+                                  ),
                                 ),
                               ),
                             ),
