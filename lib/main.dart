@@ -303,7 +303,7 @@ class MyHomePageState extends State<MyHomePage>
                     print('should open');
                     askForPulse = true;
                     _speechThis(
-                        'Stop compressions. Resume compressions within 10 seconds');
+                        'Stop compressions. Restart compressions within 10 seconds');
                     barColor = Theme.of(context).accentColor;
                     inst = "Pulse Check";
                     centerIcon = Ionicons.ios_pulse;
@@ -345,7 +345,7 @@ class MyHomePageState extends State<MyHomePage>
           askForPulse = false;
           nested.show = false;
           progressPulseCheck = true;
-          _speechThis('Resume Compressions');
+          _speechThis('Restart Compressions');
         }
       });
     }
@@ -1321,7 +1321,7 @@ class MyHomePageState extends State<MyHomePage>
                     askForPulse = false;
                     nested.show = false;
                     progressPulseCheck = true;
-                    _speechThis('Resume Compressions');
+                    _speechThis('Restart Compressions');
                   }
                 }),
                 child: Container(
@@ -1649,8 +1649,7 @@ class MyHomePageState extends State<MyHomePage>
                             ),
                             Expanded(
                               flex: 2,
-                              child: Container(
-                                width: 1000,
+                              child: FittedBox(
                                 child: Icon(
                                   centerIcon,
                                   color: barColor,
@@ -1660,21 +1659,23 @@ class MyHomePageState extends State<MyHomePage>
                             ),
                             Expanded(
                               flex: 2,
-                              child: Column(
-                                children: [
-                                  Text('pulse check in'),
-                                  Text(
-                                    '-' + pulseCheckCountdown,
-                                    textAlign: TextAlign.center,
-                                    key: GlobalObjectKey('timerCircle'),
-                                    style: new TextStyle(
-                                      fontSize: 40.0,
+                              child: FittedBox(
+                                child: Column(
+                                  children: [
+                                    Text('pulse check in'),
+                                    Text(
+                                      '-' + pulseCheckCountdown,
+                                      textAlign: TextAlign.center,
+                                      key: GlobalObjectKey('timerCircle'),
+                                      style: new TextStyle(
+                                        fontSize: 40.0,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    'time elapsed ' + currentTime(),
-                                  ),
-                                ],
+                                    Text(
+                                      'time elapsed ' + currentTime(),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             Expanded(
