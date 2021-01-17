@@ -51,6 +51,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Heart Start Vet',
       builder: (BuildContext context, Widget child) {
         return MediaQuery(
