@@ -1,6 +1,5 @@
 import 'dart:ui';
-
-import 'package:audioplayers/audioplayers.dart';
+//import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -21,12 +20,14 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:audioplayers/audio_cache.dart';
+//import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:quiver/async.dart';
+import 'package:just_audio/just_audio.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -87,8 +88,8 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  static AudioCache player = AudioCache();
-  static AudioPlayer cutg = AudioPlayer();
+  //static AudioCache player = AudioCache();
+  //static AudioPlayer cutg = AudioPlayer();
 
   bool enterCapno = false;
   FocusNode capnoNode = FocusNode();
@@ -421,6 +422,9 @@ class MyHomePageState extends State<MyHomePage>
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
       });
+
+    }else{
+      startMetronome();
     }
     if (!playVoice) {
       setState(() {
@@ -640,15 +644,9 @@ class MyHomePageState extends State<MyHomePage>
   Future _speak() async {
     flutterTts.setVolume(1.0);
 
-    player.play('2.wav', volume: 0);
-    await _speechThis("Start compressions right away");
-    await player.load('2.wav');
-
     flutterTts.setCompletionHandler(() {
       print('completion handler');
-      if (playCompressions) {
-        startMetronome();
-      }
+
       print('finished speaching');
     });
   }
@@ -656,63 +654,52 @@ class MyHomePageState extends State<MyHomePage>
   _speechThis(String string) async {
     if (playVoice) {
       print('about to say: ' + string);
-      if (playCompressions) {
-        if (metronomeTimer != null) {
-          metronomeTimer.cancel();
-        }
-      }
+
       var result = await flutterTts.speak(string);
     }
   }
 
   bool playCompressions = true;
   Timer metronomeTimer;
+
+
+  // metronome(AudioCache player) async {
+  //   if (playCompressions) {
+  //     print(DateTime.now());
+  //     //player.play('2.wav');
+  //     cutg.setReleaseMode(ReleaseMode.LOOP);
+  //     cutg = await player.play('longmp.mp3');
+  //
+  //   }
+  // }
+
+  AudioPlayer player = AudioPlayer();
   startMetronome() async {
-    print('start metronome');
-    if (metronomeTimer != null) {
-      print('tried to start when already running');
-      metronomeTimer.cancel();
-    }
-    metronomeTimer = Timer.periodic(Duration(milliseconds: 545), (timer) {
-      print('about to play');
-      // metronome(player);
+    setState(() {
+      soundIcon = Icon(FlutterIcons.metronome_mco);
+      soundColor = Theme.of(context).primaryColor;
+    });
+
+    await player.setLoopMode(LoopMode.one); //
+    var duration = await player.setAsset('assets/longmp.mp3');
+    player.play();
+  }
+  stopMetronome() async {
+    player.stop();
+    setState(() {
+      soundIcon = Icon(FlutterIcons.metronome_tick_mco);
+      soundColor = Colors.grey;
     });
   }
-
-  metronome(AudioCache player) async {
-    if (playCompressions) {
-      print(DateTime.now());
-      //player.play('2.wav');
-      cutg = await player.play('longmp.mp3');
-    }
-  }
-
   toggleSound() async {
     playCompressions = !playCompressions;
     savePreferences();
     print('play compressions ' + playCompressions.toString());
     if (!playCompressions) {
-      cutg.stop();
-      if (metronomeTimer != null) {
-        metronomeTimer.cancel();
-      }
-      setState(() {
-        soundIcon = Icon(FlutterIcons.metronome_tick_mco);
-        soundColor = Colors.grey;
-      });
+      stopMetronome();
+
     } else {
-      setState(() {
-        soundIcon = Icon(FlutterIcons.metronome_mco);
-        soundColor = Theme.of(context).primaryColor;
-      });
-      metronome(player);
-      // Metronome.periodic(Duration(milliseconds: 545)).listen((event) {
-      //   print('metronome ' + event.toString());
-      //   metronome(player);
-      // });
-      metronomeTimer = Timer.periodic(Duration(minutes: 5), (timer) {
-        metronome(player);
-      });
+      startMetronome();
     }
   }
 
@@ -1908,7 +1895,7 @@ class MyHomePageState extends State<MyHomePage>
                       focusNode: capnoNode,
                       // autofocus: false,
                       decoration: InputDecoration(
-                        labelText: 'End-Title CO2 Measurement',
+                        labelText: 'End-Tidal CO2 Measurement',
                       ),
                       controller: capnoController,
                       keyboardType: TextInputType.numberWithOptions(
