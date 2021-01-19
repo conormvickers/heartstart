@@ -1,5 +1,6 @@
 import 'dart:ui';
-//import 'package:audioplayers/audioplayers.dart';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Heart Start Vet',
       builder: (BuildContext context, Widget child) {
         return MediaQuery(
@@ -422,9 +424,6 @@ class MyHomePageState extends State<MyHomePage>
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
       });
-
-    }else{
-      startMetronome();
     }
     if (!playVoice) {
       setState(() {
@@ -1637,10 +1636,14 @@ class MyHomePageState extends State<MyHomePage>
                             Expanded(
                               flex: 2,
                               child: FittedBox(
-                                child: Icon(
-                                  centerIcon,
-                                  color: barColor,
-                                  size: MediaQuery.of(context).size.width / 4,
+                                fit: BoxFit.fitHeight,
+                                child: Container(
+                                  width: 1000,
+                                  child: Icon(
+                                    centerIcon,
+                                    color: barColor,
+                                    size: MediaQuery.of(context).size.width / 4,
+                                  ),
                                 ),
                               ),
                             ),
