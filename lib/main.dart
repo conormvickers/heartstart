@@ -1,6 +1,4 @@
 import 'dart:ui';
-
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -21,7 +19,6 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-//import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
