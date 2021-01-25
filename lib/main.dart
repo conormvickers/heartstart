@@ -23,7 +23,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
-import 'package:quiver/async.dart';
 import 'package:just_audio/just_audio.dart';
 
 
@@ -98,7 +97,7 @@ class MyHomePageState extends State<MyHomePage>
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('kk:mm').format(now);
       String combined =
-          "\n" + formattedDate + "\tEtCO2 measured: " + capnoController.text;
+          "\n" + formattedDate + "\t" + addEventStringlog + ' ' + capnoController.text;
       globals.log = globals.log + combined;
       capnoController.text = '';
     }
@@ -421,6 +420,8 @@ class MyHomePageState extends State<MyHomePage>
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
       });
+    }else{
+      startMetronome();
     }
     if (!playVoice) {
       setState(() {
@@ -540,7 +541,6 @@ class MyHomePageState extends State<MyHomePage>
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
     WidgetsBinding.instance.addObserver(this);
-    loadPreferences();
 
     nested = NestedTabBar(
       parent: this,
@@ -560,6 +560,8 @@ class MyHomePageState extends State<MyHomePage>
 
     _triggerUpdate();
 
+    loadPreferences();
+
     Future<void>.delayed(
         Duration(seconds: 10),
         () => {
@@ -568,8 +570,9 @@ class MyHomePageState extends State<MyHomePage>
                 {
                   switchedCompressor(),
                   askForTour = false,
-                }
-            });
+                },
+
+        });
   }
 
   bool compressorBadge = false;
@@ -721,6 +724,10 @@ class MyHomePageState extends State<MyHomePage>
   List<Widget> timelineTiles = List<Widget>();
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
   Color voiceColor = Colors.red;
+  String addEventString = 'End Tidal CO2 Measurement';
+  String addEventStringlog = 'etCO2: ';
+  TextInputType eventKeyboard = TextInputType.numberWithOptions(
+      signed: true, decimal: true);
 
   Widget handsFreeWidget = Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1384,43 +1391,57 @@ class MyHomePageState extends State<MyHomePage>
                   style: TextStyle(color: Colors.white))));
     }
 
-    Widget checkIfWeightChest() {
-      return Container();
-      if (globals.chest != null && globals.weightKG != null) {
-        return GestureDetector(
-          onTap: () => {
-            print('change weight'),
-            setState(() {
-              globals.weightKG = null;
-              globals.weightIndex = null;
-              globals.chest = null;
-              print('reset weight ' + globals.weightKG.toString());
-              nestedKey.currentState.setState(() {
-                nestedKey.currentState.nestedTabController.animateTo(1);
-              });
-            }),
-          },
-          child: Container(
-            width: 100,
-            height: 50,
-            child: Text(
-              'weight: ' +
-                  globals.weightKG.toStringAsPrecision(2) +
-                  'kg\nchest: ' +
-                  globals.chest,
-              style: TextStyle(
-                color: Colors.white,
+    Widget leftBottom() {
+      return Column(
+          children: [
+        IconButton(
+        icon: Icon(FlutterIcons.note_add_mdi, color: Colors.red),
+        onPressed: () => {
+          print('enter other data'),
+          setState(() {
+            addEventString = 'Miscellaneous Event';
+            addEventStringlog = '';
+            eventKeyboard = TextInputType.text;
+            enterCapno = true;
+            // Future.delayed(Duration(seconds: 10), () {
+            print('requesting focus');
+            capnoNode.requestFocus();
+            // });
+          }),
+        }
+        ),
+            IconButton(
+              icon: Container(
+                width: 100,
+                height: 100,
+
+                child: FittedBox(
+                    child: Text(
+                      'CO\u2082',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )), //Icon(Chesttypes.co2_1, color: Colors.red),
               ),
+              onPressed: () => {
+                print('enter etco2 data'),
+                addEventString = 'End Tidal CO2 Measurement',
+                addEventStringlog = 'etCO2: ',
+      eventKeyboard = TextInputType.numberWithOptions(
+      signed: true, decimal: true),
+                setState(() {
+                  enterCapno = true;
+                  // Future.delayed(Duration(seconds: 10), () {
+                  print('requesting focus');
+                  capnoNode.requestFocus();
+                  // });
+                }),
+              },
             ),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    bottomRight: Radius.circular(15)),
-                border: Border.all(color: Colors.red, width: 3),
-                color: Colors.red),
-          ),
-        );
-      }
+          ]
+      );
+
     }
 
     updateDrawer() {
@@ -1692,7 +1713,7 @@ class MyHomePageState extends State<MyHomePage>
           Positioned(
             left: 0,
             bottom: 40,
-            child: checkIfWeightChest(),
+            child: leftBottom(),
           ),
           Positioned(
             right: 0,
@@ -1703,31 +1724,7 @@ class MyHomePageState extends State<MyHomePage>
                   icon: Icon(FlutterIcons.cancel_mco, color: Colors.red),
                   onPressed: () => {_ensureStopCode()},
                 ),
-                IconButton(
-                  icon: Container(
-                    width: 100,
-                    height: 100,
 
-                    child: FittedBox(
-                        child: Text(
-                      'CO\u2082',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )), //Icon(Chesttypes.co2_1, color: Colors.red),
-                  ),
-                  onPressed: () => {
-                    print('enter etco2 data'),
-                    setState(() {
-                      enterCapno = true;
-                      // Future.delayed(Duration(seconds: 10), () {
-                      print('requesting focus');
-                      capnoNode.requestFocus();
-                      // });
-                    }),
-                  },
-                ),
                 IconButton(
                   icon: Icon(FlutterIcons.dog_side_mco, color: Colors.red),
                   onPressed: () => {
@@ -1893,13 +1890,11 @@ class MyHomePageState extends State<MyHomePage>
                         borderRadius: BorderRadius.circular(10)),
                     child: TextField(
                       focusNode: capnoNode,
-                      // autofocus: false,
                       decoration: InputDecoration(
-                        labelText: 'End-Tidal CO2 Measurement',
+                        labelText: addEventString,
                       ),
                       controller: capnoController,
-                      keyboardType: TextInputType.numberWithOptions(
-                          signed: true, decimal: true),
+                      keyboardType: eventKeyboard,
                       onEditingComplete: () => {
                         addCapnoToLog(),
                         setState(() => {
