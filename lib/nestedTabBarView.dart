@@ -581,9 +581,9 @@ class NestedTabBarState extends State<NestedTabBar>
 
   List<String> chestTypes = ['round', 'keel', 'flat'];
   List<IconData> chestIcons = [
-    Chesttypes.round,
+    Chesttypes.flat,
     Chesttypes.keel,
-    Chesttypes.flat
+    Chesttypes.round,
   ];
   _checkForWeight() {
     if (globals.weightKG == null) {

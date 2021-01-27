@@ -287,8 +287,6 @@ class MyHomePageState extends State<MyHomePage>
                 if (progressPulseCheck) {
                   fractionPulse++;
 
-                  // print(_printDuration(
-                  //     Duration(seconds: 120 - fractionPulse.toInt())));
                   pulseCheckCountdown = ' ' +
                       _printDuration(
                           Duration(seconds: 120 - fractionPulse.toInt()));
@@ -1270,25 +1268,61 @@ class MyHomePageState extends State<MyHomePage>
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Expanded(
-              child: Container(
-            child: AutoSizeText(
-              'HANDS FREE MODE',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 300,
-                color: Colors.white,
+              child:
+                  Container(
+                    child: AutoSizeText(
+                          'HANDS FREE MODE',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 300,
+                            color: Colors.white,
+                          ),
+                    ),
+                    alignment: Alignment.center,
+                  ),
               ),
-            ),
-            alignment: Alignment.center,
-          )),
           Expanded(
-            child: FittedBox(
+            child: Stack(
               alignment: Alignment.center,
-              child: Icon(
-                FlutterIcons.hand_ent,
-                size: 500,
-                color: Colors.white,
-              ),
+              children: [
+                FittedBox(
+                  alignment: Alignment.center,
+                  child: Icon(
+                    FlutterIcons.hand_ent,
+                    size: 500,
+                    color: Colors.white,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: Container(),),
+                    Material(
+                      color: Colors.transparent,
+                      shadowColor: Colors.blue,
+                      child: Container(
+                          height: 70,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15)
+                          ),
+                          child: Column(
+                            children: [
+                              Expanded(child: FittedBox(child: IconButton(
+
+                                icon: Icon(FlutterIcons.ios_timer_ion, color: Colors.red),
+                              onPressed: () => fractionPulse = 0,
+                              ))),
+                            ],
+                          )
+                      ),
+                    ),
+                    Container(
+                      width: 10,
+                    )
+                  ],
+                )
+              ],
             ),
           ),
         ],
