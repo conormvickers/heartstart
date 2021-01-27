@@ -532,6 +532,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.0-nullsafety.3"
+  undo:
+    dependency: "direct main"
+    description:
+      name: undo
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.3.1"
   url_launcher:
     dependency: "direct main"
     description:

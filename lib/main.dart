@@ -24,7 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:just_audio/just_audio.dart';
-
+import 'package:undo/undo.dart';
 
 void main() {
   runApp(MyApp());
@@ -96,8 +96,13 @@ class MyHomePageState extends State<MyHomePage>
     if (capnoController.text.length > 0) {
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('kk:mm').format(now);
-      String combined =
-          "\n" + formattedDate + "\t" + addEventStringlog + ' ' + capnoController.text;
+      String combined = "\n" +
+          formattedDate +
+          "\t" +
+          addEventStringlog +
+          ' ' +
+          capnoController.text;
+
       globals.log = globals.log + combined;
       capnoController.text = '';
     }
@@ -281,48 +286,46 @@ class MyHomePageState extends State<MyHomePage>
     Timer.periodic(
         Duration(seconds: 1),
         (Timer timer) => {
-              setState(() {
-                secPassed++;
-
-                if (progressPulseCheck) {
-                  fractionPulse++;
-
-                  pulseCheckCountdown = ' ' +
-                      _printDuration(
-                          Duration(seconds: 120 - fractionPulse.toInt()));
-                  if (120 - fractionPulse.toInt() == 10) {
-                    _speechThis('10 seconds to pulse check');
-                  }
-
-                  fraction = fractionPulse / 120;
-
-                  if (fractionPulse == 120) {
-                    print('should open');
-                    askForPulse = true;
-                    _speechThis(
-                        'Stop compressions. Restart compressions within 10 seconds');
-                    barColor = Theme.of(context).accentColor;
-                    inst = "Pulse Check";
-                    centerIcon = Ionicons.ios_pulse;
-                    progressPulseCheck = false;
-                    vibrate();
-                    if (handsFree) {
-                      print('starting auto reset timer');
-                      Future.delayed(Duration(seconds: 10), () {
-                        autoRestartCycle();
-                      });
-                    }
-                  } else {
-                    barColor = Theme.of(context).primaryColor;
-                    inst = "Continue Compressions";
-                    centerIcon = checkChestType();
-                  }
-                  if (fractionPulse >= 120) {
-                    fractionPulse = 0;
-                  }
-                }
-              }),
+              secPassed++,
+              if (progressPulseCheck) {fractionPulse++, updateCircle()}
             });
+  }
+
+  updateCircle() {
+    setState(() {
+      pulseCheckCountdown =
+          ' ' + _printDuration(Duration(seconds: 120 - fractionPulse.toInt()));
+      if (120 - fractionPulse.toInt() == 10) {
+        _speechThis('10 seconds to pulse check');
+      }
+
+      fraction = fractionPulse / 120;
+
+      if (fractionPulse == 120) {
+        print('should open');
+        askForPulse = true;
+        _speechThis(
+            'Stop compressions. Restart compressions within 10 seconds');
+        barColor = Theme.of(context).accentColor;
+        inst = "Pulse Check";
+        centerIcon = Ionicons.ios_pulse;
+        progressPulseCheck = false;
+        vibrate();
+        if (handsFree) {
+          print('starting auto reset timer');
+          Future.delayed(Duration(seconds: 10), () {
+            autoRestartCycle();
+          });
+        }
+      } else {
+        barColor = Theme.of(context).primaryColor;
+        inst = "Continue Compressions";
+        centerIcon = checkChestType();
+      }
+      if (fractionPulse >= 120) {
+        fractionPulse = 0;
+      }
+    });
   }
 
   IconData chestIcon;
@@ -418,7 +421,7 @@ class MyHomePageState extends State<MyHomePage>
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
         soundColor = Colors.grey;
       });
-    }else{
+    } else {
       startMetronome();
     }
     if (!playVoice) {
@@ -569,8 +572,7 @@ class MyHomePageState extends State<MyHomePage>
                   switchedCompressor(),
                   askForTour = false,
                 },
-
-        });
+            });
   }
 
   bool compressorBadge = false;
@@ -659,7 +661,6 @@ class MyHomePageState extends State<MyHomePage>
   bool playCompressions = true;
   Timer metronomeTimer;
 
-
   // metronome(AudioCache player) async {
   //   if (playCompressions) {
   //     print(DateTime.now());
@@ -681,6 +682,7 @@ class MyHomePageState extends State<MyHomePage>
     var duration = await player.setAsset('assets/longmp.mp3');
     player.play();
   }
+
   stopMetronome() async {
     player.stop();
     setState(() {
@@ -688,13 +690,13 @@ class MyHomePageState extends State<MyHomePage>
       soundColor = Colors.grey;
     });
   }
+
   toggleSound() async {
     playCompressions = !playCompressions;
     savePreferences();
     print('play compressions ' + playCompressions.toString());
     if (!playCompressions) {
       stopMetronome();
-
     } else {
       startMetronome();
     }
@@ -722,10 +724,10 @@ class MyHomePageState extends State<MyHomePage>
   List<Widget> timelineTiles = List<Widget>();
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
   Color voiceColor = Colors.red;
-  String addEventString = 'End Tidal CO2 Measurement';
-  String addEventStringlog = 'etCO2: ';
-  TextInputType eventKeyboard = TextInputType.numberWithOptions(
-      signed: true, decimal: true);
+  String addEventString = 'End Tidal CO2';
+  String addEventStringlog = 'etCO2 (mmHg): ';
+  TextInputType eventKeyboard =
+      TextInputType.numberWithOptions(signed: true, decimal: true);
 
   Widget handsFreeWidget = Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1268,19 +1270,18 @@ class MyHomePageState extends State<MyHomePage>
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Expanded(
-              child:
-                  Container(
-                    child: AutoSizeText(
-                          'HANDS FREE MODE',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 300,
-                            color: Colors.white,
-                          ),
-                    ),
-                    alignment: Alignment.center,
-                  ),
+            child: Container(
+              child: AutoSizeText(
+                'HANDS FREE MODE',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 300,
+                  color: Colors.white,
+                ),
               ),
+              alignment: Alignment.center,
+            ),
+          ),
           Expanded(
             child: Stack(
               alignment: Alignment.center,
@@ -1295,28 +1296,71 @@ class MyHomePageState extends State<MyHomePage>
                 ),
                 Row(
                   children: [
-                    Expanded(child: Container(),),
-                    Material(
-                      color: Colors.transparent,
-                      shadowColor: Colors.blue,
-                      child: Container(
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15)
-                          ),
-                          child: Column(
-                            children: [
-                              Expanded(child: FittedBox(child: IconButton(
-
-                                icon: Icon(FlutterIcons.ios_timer_ion, color: Colors.red),
-                              onPressed: () => fractionPulse = 0,
-                              ))),
-                            ],
-                          )
-                      ),
+                    Expanded(
+                      child: Container(),
                     ),
+                    Container(
+                        height: 70,
+                        width: 70,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Stack(
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                    child: Center(
+                                  child: Stack(
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Container(
+                                            height: 15,
+                                          ),
+                                          Expanded(
+                                            child: FittedBox(
+                                              child: Icon(
+                                                  FlutterIcons.clock_faw5,
+                                                  color: Colors.red),
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        children: [
+                                          Expanded(
+                                            child: Center(
+                                              child: FittedBox(
+                                                child: Icon(
+                                                    FlutterIcons.undo_alt_faw5s,
+                                                    color: Colors.red),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                              ],
+                            ),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => setState(() => {
+                                      fractionPulse = 0,
+                                      updateCircle(),
+                                    }), // handle your onTap here
+                                child: Container(),
+                              ),
+                            ),
+                          ],
+                        )),
                     Container(
                       width: 10,
                     )
@@ -1426,56 +1470,52 @@ class MyHomePageState extends State<MyHomePage>
     }
 
     Widget leftBottom() {
-      return Column(
-          children: [
+      return Column(children: [
         IconButton(
-        icon: Icon(FlutterIcons.note_add_mdi, color: Colors.red),
-        onPressed: () => {
-          print('enter other data'),
-          setState(() {
-            addEventString = 'Miscellaneous Event';
-            addEventStringlog = '';
-            eventKeyboard = TextInputType.text;
-            enterCapno = true;
-            // Future.delayed(Duration(seconds: 10), () {
-            print('requesting focus');
-            capnoNode.requestFocus();
-            // });
-          }),
-        }
-        ),
-            IconButton(
-              icon: Container(
-                width: 100,
-                height: 100,
-
-                child: FittedBox(
-                    child: Text(
-                      'CO\u2082',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )), //Icon(Chesttypes.co2_1, color: Colors.red),
-              ),
-              onPressed: () => {
-                print('enter etco2 data'),
-                addEventString = 'End Tidal CO2 Measurement',
-                addEventStringlog = 'etCO2: ',
-      eventKeyboard = TextInputType.numberWithOptions(
-      signed: true, decimal: true),
-                setState(() {
-                  enterCapno = true;
-                  // Future.delayed(Duration(seconds: 10), () {
-                  print('requesting focus');
-                  capnoNode.requestFocus();
-                  // });
+            icon: Icon(FlutterIcons.note_add_mdi, color: Colors.red),
+            onPressed: () => {
+                  print('enter other data'),
+                  setState(() {
+                    addEventString = 'Miscellaneous Event';
+                    addEventStringlog = '';
+                    eventKeyboard = TextInputType.text;
+                    enterCapno = true;
+                    // Future.delayed(Duration(seconds: 10), () {
+                    print('requesting focus');
+                    capnoNode.requestFocus();
+                    // });
+                  }),
                 }),
-              },
-            ),
-          ]
-      );
+        IconButton(
+          icon: Container(
+            width: 100,
+            height: 100,
 
+            child: FittedBox(
+                child: Text(
+              'CO\u2082',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            )), //Icon(Chesttypes.co2_1, color: Colors.red),
+          ),
+          onPressed: () => {
+            print('enter etco2 data'),
+            addEventString = 'End Tidal CO2',
+            addEventStringlog = 'etCO2: (mmHg)',
+            eventKeyboard =
+                TextInputType.numberWithOptions(signed: true, decimal: true),
+            setState(() {
+              enterCapno = true;
+              // Future.delayed(Duration(seconds: 10), () {
+              print('requesting focus');
+              capnoNode.requestFocus();
+              // });
+            }),
+          },
+        ),
+      ]);
     }
 
     updateDrawer() {
@@ -1758,7 +1798,6 @@ class MyHomePageState extends State<MyHomePage>
                   icon: Icon(FlutterIcons.cancel_mco, color: Colors.red),
                   onPressed: () => {_ensureStopCode()},
                 ),
-
                 IconButton(
                   icon: Icon(FlutterIcons.dog_side_mco, color: Colors.red),
                   onPressed: () => {
@@ -1902,6 +1941,29 @@ class MyHomePageState extends State<MyHomePage>
       ],
     );
 
+    Widget units() {
+      if (addEventString.contains('CO2')) {
+        return Column(
+          children: [
+            Container(
+              height: 20,
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.center,
+                child: Text(
+                  '   mmHg',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+
+      return Container();
+    }
+
     Widget enterCapnographyData() {
       if (enterCapno) {
         return GestureDetector(
@@ -1918,23 +1980,34 @@ class MyHomePageState extends State<MyHomePage>
                   color: Colors.black38,
                   alignment: Alignment.center,
                   child: Container(
+                    height: 100,
                     padding: EdgeInsets.all(15),
                     decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10)),
-                    child: TextField(
-                      focusNode: capnoNode,
-                      decoration: InputDecoration(
-                        labelText: addEventString,
-                      ),
-                      controller: capnoController,
-                      keyboardType: eventKeyboard,
-                      onEditingComplete: () => {
-                        addCapnoToLog(),
-                        setState(() => {
-                              enterCapno = false,
-                            }),
-                      },
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            textAlign: TextAlign.right,
+                            focusNode: capnoNode,
+                            decoration: InputDecoration(
+                              labelText: addEventString,
+                            ),
+                            controller: capnoController,
+                            keyboardType: eventKeyboard,
+                            onEditingComplete: () => {
+                              addCapnoToLog(),
+                              setState(() => {
+                                    enterCapno = false,
+                                  }),
+                            },
+                          ),
+                        ),
+                        units()
+                      ],
                     ),
                   ),
                 ),
