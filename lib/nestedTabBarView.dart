@@ -1069,10 +1069,11 @@ final Location = <String>{
 }.map((e) => _ListItem(e, false)).toList();
 final PreviousCPA = <String>{
   'No',
-  'Yes 1',
-  'Yes 3',
-  'Yes 4',
-  'Yes 5+',
+  'Yes once',
+  'Yes twice',
+  'Yes three times',
+  'Yes four times',
+  'Yes five or more times',
 }.map((e) => _ListItem(e, false)).toList();
 final PreviousMeasures = <String>{
   'Venous access, peripheral',
@@ -1083,8 +1084,71 @@ final PreviousMeasures = <String>{
 }.map((e) => _ListItem(e, false)).toList();
 final ROSC = <String>{
   'ROSC',
+  'Extubated after ROSC',
 }.map((e) => _ListItem(e, false)).toList();
-final roscKey = GlobalKey();
+final ROSCDuration = <String>{'>20 min', '>24 hours', '>30 days'}
+    .map((e) => _ListItem(e, false))
+    .toList();
+final ComorbidConditions = <String>{
+  "Arrhythmia",
+  "Sepsis",
+  "Congestive Heart Failure (prior admit)",
+  "Congestive Heart Failure (this admit)",
+  "Infectious disease",
+  "Diabetes mellitus",
+  "Metabolic/electrolyte abnormality",
+  "Pericardial effusion/tamponade",
+  'Hypotension/Hypoperfusion',
+  "Malignancy",
+  "Respiratory insufficiency",
+  "Major trauma",
+  "Pneumonia",
+  "Envenomation",
+  'Renal insufficiency',
+  "Post-operative",
+  "Hepatic insufficiency",
+  "Coagulopathy",
+  "CNS disease",
+  "None",
+  "SIRS",
+  "Unknown",
+  "IMHA/ITP"
+}.map((e) => _ListItem(e, false)).toList();
+final SuspectedCause = <String>{
+  "Non-perfusing rhythm",
+  "Sepsis/Septic shock",
+  "Respiratory failure",
+  "CNS disease",
+  "Heart failure",
+  "MODS",
+  "Truama",
+  "Metabolic/Electrolyte",
+  "Hemorrhage",
+  "Toxicosis/Overdose",
+  "Hypovolemia (non-hemorrhagic",
+  "Thromboembolic disease",
+  "Unknown",
+  "Other"
+}.map((e) => _ListItem(e, false)).toList();
+final GeneralAnesthesia = <String>{
+  "General Anesthesia at time of CPA",
+  "Induction",
+  "Recovery",
+  "Procedural"
+}.map((e) => _ListItem(e, false)).toList();
+final MechanicalVentilation = <String>{
+  "Mechanical Ventilation at time of CPA",
+}.map((e) => _ListItem(e, false)).toList();
+final Euthanasia = <String>{
+  "Euthenasia",
+  "Severity of illness",
+  "Terminal illness",
+  "Economic reasons"
+}.map((e) => _ListItem(e, false)).toList();
+final Rearrest = <String>{
+  "Re-arrrest without CPR",
+  "Re-arrest w/ CPR, but without sustained ROSC",
+}.map((e) => _ListItem(e, false)).toList();
 
 class PageTwoState extends State<PageTwo> {
   List<Widget> timelineTiles = List<Widget>();
@@ -1452,21 +1516,236 @@ class PageTwoState extends State<PageTwo> {
           ),
         )
         .toList();
-    ExpansionTile roscOpener = ExpansionTile(
-      key: GlobalKey(),
-      title: Text("Was ROSC acheived?"),
-      initiallyExpanded: ROSC.first.checked,
-      trailing: Checkbox(
-        value: ROSC.first.checked,
-        onChanged: (bool newValue) => {
-          setState(() => {
-                ROSC.first.checked = newValue,
-                if (newValue == true) {setState(() => {})}
-              })
-        },
+    final ROSCdurationL = ROSCDuration.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => {
+                    for (_ListItem a in ROSCDuration)
+                      {
+                        a.checked = false,
+                      },
+                    e.checked = newValue
+                  });
+            },
+            title: Text(e.value),
+          ),
+        ),
       ),
-      children: [...ROSCL],
-    );
+    ).toList();
+    final comorbidConditionsL = ComorbidConditions.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => e.checked = newValue);
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+    final suspectedCauseL = SuspectedCause.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => e.checked = newValue);
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+
+    final generalAnesthesiaL = GeneralAnesthesia.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => e.checked = newValue);
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+    final mechanicalVentilationL = MechanicalVentilation.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => e.checked = newValue);
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+
+    final euthanasiaL = Euthanasia.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => {e.checked = newValue});
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+    final rearrestL = Rearrest.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              print('starting...');
+              setState(() => {
+                    for (_ListItem b in Rearrest)
+                      {
+                        b.checked = false,
+                      },
+                    for (_ListItem a in Euthanasia)
+                      {
+                        a.checked = false,
+                      },
+                    e.checked = newValue
+                  });
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+
+    Widget roscOpener = Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: ExpansionTile(
+            key: GlobalKey(),
+            title: Text("Was ROSC acheived?"),
+            initiallyExpanded: ROSC.first.checked,
+            trailing: Checkbox(
+              value: ROSC.first.checked,
+              onChanged: (bool newValue) => {
+                setState(() => {
+                      ROSC.first.checked = newValue,
+                      if (newValue == true) {setState(() => {})}
+                    })
+              },
+            ),
+            children: [...ROSCL, ...ROSCdurationL],
+          ),
+        ));
+
+    Widget anesthesiaOpener = Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: ExpansionTile(
+            key: GlobalKey(),
+            title: Text("General Anesthesia at time of CPA?"),
+            initiallyExpanded: GeneralAnesthesia.first.checked,
+            trailing: Checkbox(
+              value: GeneralAnesthesia.first.checked,
+              onChanged: (bool newValue) => {
+                setState(() => {
+                      GeneralAnesthesia.first.checked = newValue,
+                      if (newValue == true) {setState(() => {})}
+                    })
+              },
+            ),
+            children: [...generalAnesthesiaL],
+          ),
+        ));
+    Widget euthanasiaOpener = Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: ExpansionTile(
+            key: GlobalKey(),
+            title: Text("Euthanasia"),
+            initiallyExpanded: Euthanasia.first.checked,
+            trailing: Checkbox(
+              value: Euthanasia.first.checked,
+              onChanged: (bool newValue) => {
+                setState(() => {
+                      for (_ListItem b in Rearrest)
+                        {
+                          b.checked = false,
+                        },
+                      Euthanasia.first.checked = newValue,
+                    })
+              },
+            ),
+            children: [
+              euthanasiaL.first,
+              Text('decission based on:'),
+              ...euthanasiaL.sublist(1, euthanasiaL.length)
+            ],
+          ),
+        ));
 
     for (Widget key in timelineTiles) {
       print('key name ' + key.toString());
@@ -1531,6 +1810,24 @@ class PageTwoState extends State<PageTwo> {
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
+                        child: Text('Comorbid conditions',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...comorbidConditionsL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('Suspected cause of CPA',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...suspectedCauseL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
                         child: Text('Previous CPA',
                             textAlign: TextAlign.center,
                             style:
@@ -1546,7 +1843,29 @@ class PageTwoState extends State<PageTwo> {
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
                       ...previousMeasuresL,
-                      roscOpener
+                      Divider(),
+                      anesthesiaOpener,
+                      Divider(),
+                      ...mechanicalVentilationL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('ROSC',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      roscOpener,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('Mode of Death after ROSC >20 min',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      euthanasiaOpener,
+                      ...rearrestL,
                     ],
                   ),
                 ));
