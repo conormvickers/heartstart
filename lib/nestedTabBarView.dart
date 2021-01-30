@@ -24,7 +24,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
-
 class NestedTabBar extends StatefulWidget {
   var show = false;
   final pass;
@@ -1050,20 +1049,48 @@ class PageTwo extends StatefulWidget {
   PageTwoState createState() => PageTwoState();
 }
 
-final diseaseL = <String> {
+final Disease = <String>{
   'Medical cardiac/non-cardiac',
   'Surgical elective/emergency',
   'Trauma',
   'DOA',
   'Unknown'
 }.map((e) => _ListItem(e, false)).toList();
+final Location = <String>{
+  'Out of hospital',
+  'Emergency Room',
+  "Intensive Care Unit",
+  "Wards",
+  "Anesthesia/Surgery",
+  "Consult Room",
+  "Diagnostic Procedures Area",
+  "Waiting Room",
+  "Other"
+}.map((e) => _ListItem(e, false)).toList();
+final PreviousCPA = <String>{
+  'No',
+  'Yes 1',
+  'Yes 3',
+  'Yes 4',
+  'Yes 5+',
+}.map((e) => _ListItem(e, false)).toList();
+final PreviousMeasures = <String>{
+  'Venous access, peripheral',
+  'Venous access central',
+  'Tracheal intubation',
+  'ECG monitoring',
+  'Arterial catheterization'
+}.map((e) => _ListItem(e, false)).toList();
+final ROSC = <String>{
+  'ROSC',
+}.map((e) => _ListItem(e, false)).toList();
+final roscKey = GlobalKey();
 
 class PageTwoState extends State<PageTwo> {
   List<Widget> timelineTiles = List<Widget>();
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
   TextEditingController timelineEditingController = TextEditingController();
-
 
   editTimeline(int i) {
     setState(() {
@@ -1312,27 +1339,134 @@ class PageTwoState extends State<PageTwo> {
   @override
   Widget build(BuildContext context) {
     print('build starting');
-    final disease = diseaseL.map((e) =>
-    Container(
-      padding: EdgeInsets.all(5),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        child: CheckboxListTile(
-          
-        key: Key(e.value),
-        value: e.checked ?? false,
-        onChanged: (bool newValue) {
-        setState(() => e.checked = newValue);
-        },
-          title: Text(e.value),
+    final diseaseL = Disease.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => e.checked = newValue);
+            },
+            title: Text(e.value),
+          ),
         ),
       ),
-    ),
     ).toList();
+
+    final locationL = Location.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => {
+                    for (_ListItem a in Location)
+                      {
+                        a.checked = false,
+                      },
+                    e.checked = newValue,
+                  });
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+
+    final previousCPAL = PreviousCPA.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => {
+                    for (_ListItem a in PreviousCPA)
+                      {
+                        a.checked = false,
+                      },
+                    e.checked = newValue,
+                  });
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+
+    final previousMeasuresL = PreviousMeasures.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              setState(() => e.checked = newValue);
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
+
+    final ROSCL = ROSC
+        .map(
+          (e) => Container(
+            padding: EdgeInsets.all(5),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              child: CheckboxListTile(
+                key: Key(e.value),
+                value: e.checked ?? false,
+                onChanged: (bool newValue) {
+                  setState(() => e.checked = newValue);
+                },
+                title: Text(e.value),
+              ),
+            ),
+          ),
+        )
+        .toList();
+    ExpansionTile roscOpener = ExpansionTile(
+      key: GlobalKey(),
+      title: Text("Was ROSC acheived?"),
+      initiallyExpanded: ROSC.first.checked,
+      trailing: Checkbox(
+        value: ROSC.first.checked,
+        onChanged: (bool newValue) => {
+          setState(() => {
+                ROSC.first.checked = newValue,
+                if (newValue == true) {setState(() => {})}
+              })
+        },
+      ),
+      children: [...ROSCL],
+    );
 
     for (Widget key in timelineTiles) {
       print('key name ' + key.toString());
@@ -1349,9 +1483,7 @@ class PageTwoState extends State<PageTwo> {
                     color: Colors.red,
                     borderRadius: BorderRadius.only(
                         topRight: Radius.circular(8),
-                        topLeft: Radius.circular(8)
-                    )
-                ),
+                        topLeft: Radius.circular(8))),
                 child: Scrollbar(
                   child: ListView(
                     controller: scrollController,
@@ -1359,24 +1491,65 @@ class PageTwoState extends State<PageTwo> {
                       Container(
                         alignment: Alignment.center,
                         height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                        ),
+                        decoration: BoxDecoration(),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text('Additional Info',
+                            Text(
+                              'Additional Info',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.white, fontSize: 40),),
-                            Icon(FlutterIcons.up_square_o_ant, color: Colors.white, size: 40,)
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 40),
+                            ),
+                            Icon(
+                              FlutterIcons.arrow_up_circle_outline_mco,
+                              color: Colors.white,
+                              size: 40,
+                            )
                           ],
                         ),
                       ),
-                      ...disease] ,
-
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text(
+                            'Disease Category at admission (all that apply)',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...diseaseL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('Location of CPA (select one)',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...locationL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('Previous CPA',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...previousCPAL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('CPR measures ALREADY in place',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...previousMeasuresL,
+                      roscOpener
+                    ],
                   ),
-                )
-            );
+                ));
           });
     }
 
@@ -1384,159 +1557,155 @@ class PageTwoState extends State<PageTwo> {
       length: 3,
       initialIndex: 1,
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text('Code Summary'),
-          elevation: 1.0,
-        ),
-        bottomNavigationBar:
-            ConvexAppBar.badge(
-              const <int, dynamic>{3: '2'},
-              style: TabStyle.reactCircle,
-              backgroundColor: Colors.red,
-              items: <TabItem>[
-                TabItem(icon: FlutterIcons.folder_ent, title: 'Saved'),
-                TabItem(icon: FlutterIcons.edit_3_fea, title: 'Edit'),
-                TabItem(icon: FlutterIcons.send_faw, title: 'Send'),
+          resizeToAvoidBottomInset: true,
+          appBar: AppBar(
+            title: Text('Code Summary'),
+            elevation: 1.0,
+          ),
+          bottomNavigationBar: ConvexAppBar.badge(
+            const <int, dynamic>{3: '2'},
+            style: TabStyle.reactCircle,
+            backgroundColor: Colors.red,
+            items: <TabItem>[
+              TabItem(icon: FlutterIcons.folder_ent, title: 'Saved'),
+              TabItem(icon: FlutterIcons.edit_3_fea, title: 'Edit'),
+              TabItem(icon: FlutterIcons.send_faw, title: 'Send'),
+            ],
+            onTap: (int i) => print(i),
+          ),
+          // BottomAppBar(
+          //   color: Colors.red,
+          //   child: Container(
+          //       color: Colors.red,
+          //       child: ButtonBar(
+          //         alignment: MainAxisAlignment.spaceEvenly,
+          //         children: <Widget>[
+          //           RaisedButton(
+          //               child: Text('New Code'),
+          //               onPressed: () {
+          //                 globals.log = "";
+          //                 globals.stopCodeNow = false;
+          //                 globals.codeStart = DateTime.now();
+          //                 timesGiven = <int>[
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                   0,
+          //                 ];
+          //                 _lastGiven = <DateTime>[
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                   DateTime.now(),
+          //                 ];
+          //                 globals.reset = true;
+          //                 globals.weightKG = null;
+          //                 globals.weightIndex = null;
+          //                 Navigator.pop(context);
+          //               }),
+          //           RaisedButton(
+          //             child: Text('Send Text File'),
+          //             onPressed: sendText,
+          //           ),
+          //           RaisedButton(
+          //             child: Text('Send PDF File'),
+          //             onPressed: sendData,
+          //           ),
+          //         ],
+          //       )),
+          // ),
+          body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              Stack(
+                children: [
+                  SizedBox.expand(
+                    child: Container(),
+                  ),
                 ],
-              onTap: (int i) => print(i),
-            ),
-        // BottomAppBar(
-        //   color: Colors.red,
-        //   child: Container(
-        //       color: Colors.red,
-        //       child: ButtonBar(
-        //         alignment: MainAxisAlignment.spaceEvenly,
-        //         children: <Widget>[
-        //           RaisedButton(
-        //               child: Text('New Code'),
-        //               onPressed: () {
-        //                 globals.log = "";
-        //                 globals.stopCodeNow = false;
-        //                 globals.codeStart = DateTime.now();
-        //                 timesGiven = <int>[
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                   0,
-        //                 ];
-        //                 _lastGiven = <DateTime>[
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                   DateTime.now(),
-        //                 ];
-        //                 globals.reset = true;
-        //                 globals.weightKG = null;
-        //                 globals.weightIndex = null;
-        //                 Navigator.pop(context);
-        //               }),
-        //           RaisedButton(
-        //             child: Text('Send Text File'),
-        //             onPressed: sendText,
-        //           ),
-        //           RaisedButton(
-        //             child: Text('Send PDF File'),
-        //             onPressed: sendData,
-        //           ),
-        //         ],
-        //       )),
-        // ),
-        body:
-        TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            Stack(
-              children: [
-                SizedBox.expand(
-                  child: Container(),
-                ),
-
-              ],
-            ),
-            Stack(
-              children: [
-                Builder(
-                  builder: (BuildContext context) => Column(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 5,
-                        child: Container(
-                          color: Colors.white,
-                          child: ReorderableListView(
-                            onReorder: onReorder,
-                            children: timelineTiles,
-                            scrollController: timelineController,
+              ),
+              Stack(
+                children: [
+                  Builder(
+                    builder: (BuildContext context) => Column(
+                      children: <Widget>[
+                        Expanded(
+                          flex: 5,
+                          child: Container(
+                            color: Colors.white,
+                            child: ReorderableListView(
+                              onReorder: onReorder,
+                              children: timelineTiles,
+                              scrollController: timelineController,
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        height: 100,
-                        color: Colors.white,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: TextField(
-                                  controller: infoController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Patient Info, MRN',
+                        Container(
+                          height: 100,
+                          color: Colors.white,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: TextField(
+                                    controller: infoController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Patient Info, MRN',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: RaisedButton(
-                                  child: Text('add event'),
-                                  onPressed: () => {
-                                    globals.log = globals.log + '\n??:??\tnew event',
-                                    updateDrawer(),
-                                    timelineController.animateTo(
-                                      timelineController.position.maxScrollExtent,
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                    ),
-                                  }),
-                            )
-                          ],
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: RaisedButton(
+                                    child: Text('add event'),
+                                    onPressed: () => {
+                                          globals.log = globals.log +
+                                              '\n??:??\tnew event',
+                                          updateDrawer(),
+                                          timelineController.animateTo(
+                                            timelineController
+                                                .position.maxScrollExtent,
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            curve: Curves.easeOut,
+                                          ),
+                                        }),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                buildDragScrollSheet(),
-              ],
-            ),
-            Container(),
-          ],
-        )
-
-      ),
+                  buildDragScrollSheet(),
+                ],
+              ),
+              Container(),
+            ],
+          )),
     );
-
   }
-
 }
