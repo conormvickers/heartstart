@@ -30,20 +30,6 @@ void main() {
   runApp(MyApp());
 }
 
-var askForPulse = false;
-var warningDismissed = false;
-final _eventScrollController = ScrollController();
-int timelineEditing = null;
-TextEditingController timelineEditingController = TextEditingController();
-
-final GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
-var nested = NestedTabBar(
-  key: nestedKey,
-);
-var showShock = false;
-var _shockType = "No weight documented";
-var handFreeColor;
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -84,14 +70,105 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
+var askForPulse = false;
+var warningDismissed = false;
+final _eventScrollController = ScrollController();
+int timelineEditing = null;
+TextEditingController timelineEditingController = TextEditingController();
+final GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
+Scaffold currentScaffold;
+GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+var nested = NestedTabBar(
+  key: nestedKey,
+);
+var showShock = false;
+var _shockType = "No weight documented";
+var handFreeColor;
+
 class MyHomePageState extends State<MyHomePage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  //static AudioCache player = AudioCache();
-  //static AudioPlayer cutg = AudioPlayer();
-
+  bool handsFree = true;
+  double fraction = 0;
+  double minPassed = 0;
+  double secPassed = 0;
+  double fractionPulse = 0;
+  double dispSec = 0;
+  double _weightValue = 5;
   bool enterCapno = false;
   FocusNode capnoNode = FocusNode();
   TextEditingController capnoController = TextEditingController();
+  Color barColor;
+  CircularPercentIndicator cycle;
+  IconData centerIcon = FlutterIcons.heart_ant;
+  String inst = "Continue Compressions";
+  DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
+  bool progressPulseCheck = true;
+  String pulseCheckCountdown = '';
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
+  }
+
+  IconData chestIcon;
+  List<String> shockDoses = [
+    'EXTERNAL: 20 J mono, 6 J bi\nINTERNAL:l 2 J mono, 1 J bi',
+    'EXTERNAL: 30 J mono, 15 J bi\nINTERNAL: 3 J mono, 2 J bi',
+    'EXTERNAL: 50 J mono, 30 J bi\nINTERNAL: 5 J mono, 3 J bi',
+    'EXTERNAL: 100 J mono, 50 J bi\nINTERNAL: 10 J mono, 5 J bi',
+    'EXTERNAL: 200 J mono, 75 J bi\nINTERNAL: 20 J mono, 6 J bi',
+    'EXTERNAL: 200 J mono, 75 J bi\nINTERNAL: 20 J mono, 8 J bi',
+    'EXTERNAL: 200 J mono, 100 J bi\nINTERNAL: 20 J mono, 9 J bi',
+    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 10 J bi',
+    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
+    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
+    'EXTERNAL: 360 J mono, 150 J bi\nINTERNAL: 50 J mono, 15 J bi',
+  ];
+  IconData checkChestType() {
+    if (chestIcon != null) {
+      return chestIcon;
+    }
+
+    return FlutterIcons.heart_ant;
+  }
+
+  int currentCoachWidget = 0;
+  List<String> coachInfo = [
+    "This is the time until next pulse check",
+    "When this ring fills completely, it is time for a pulse check",
+    "This displays the current place in the cycle",
+    "Here is your checklist",
+    "These are your medications",
+    "This will help you track compression and breath rates",
+    "This reminds you of common reversible causes of cardiopulmonary arrest",
+    "Here are other options"
+  ];
+  List<GlobalObjectKey> coachKeys = [
+    GlobalObjectKey('timerCircle'),
+    GlobalObjectKey('circleProgress'),
+    GlobalObjectKey('inst'),
+    GlobalObjectKey('tab1'),
+    GlobalObjectKey('tab2'),
+    GlobalObjectKey('tab3'),
+    GlobalObjectKey('tab4'),
+  ];
+  FlutterTts flutterTts = FlutterTts();
+  bool playCompressions = true;
+  Timer metronomeTimer;
+  AudioPlayer player = AudioPlayer();
+  AudioPlayer playerB = AudioPlayer();
+  bool playVoice = true;
+  Icon soundIcon = Icon(FlutterIcons.metronome_mco);
+  Color soundColor = Colors.red;
+  List<Widget> timelineTiles = List<Widget>();
+  Icon voiceIcon = Icon(FlutterIcons.voice_mco);
+  Color voiceColor = Colors.red;
+  String addEventString = 'End Tidal CO2';
+  String addEventStringlog = 'etCO2 (mmHg): ';
+  TextInputType eventKeyboard =
+      TextInputType.numberWithOptions(signed: true, decimal: true);
+
   addCapnoToLog() {
     if (capnoController.text.length > 0) {
       DateTime now = DateTime.now();
@@ -108,13 +185,6 @@ class MyHomePageState extends State<MyHomePage>
     }
   }
 
-  bool handsFree = true;
-  double fraction = 0;
-  double minPassed = 0;
-  double secPassed = 0;
-  double fractionPulse = 0;
-  double dispSec = 0;
-  double _weightValue = 5;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
@@ -135,144 +205,11 @@ class MyHomePageState extends State<MyHomePage>
     prefs.setString('logSaveTime', now);
   }
 
-  _checkForWeight() {
-    return Container();
-
-    if (globals.weightKG == null) {
-      return Container(
-        decoration: BoxDecoration(
-            color: Colors.grey,
-            borderRadius: BorderRadius.all(Radius.circular(5))),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              flex: 1,
-              child: AutoSizeText(
-                'Select Weight',
-                style: TextStyle(fontSize: 30),
-              ),
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: FittedBox(
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: FittedBox(
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Expanded(
-                          flex: 9,
-                          child: FittedBox(
-                            child: Icon(
-                              MaterialCommunityIcons.dog_side,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-                flex: 2,
-                child: Slider(
-                  min: 0,
-                  max: 10,
-                  divisions: 10,
-                  value: _weightValue,
-                  label: weightOptions[_weightValue.round()],
-                  onChanged: (value) {
-                    setState(
-                      () {
-                        _weightValue = value;
-                      },
-                    );
-                  },
-                )),
-            ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: [
-                RaisedButton(
-                  onPressed: () => {
-                    setState(() {
-                      globals.weightKG = weightkgOptions[_weightValue.round()];
-                      globals.weightIndex = _weightValue.round();
-
-                      print('set weight to: ' +
-                          weightkgOptions[_weightValue.round()].toString());
-                      for (MedListItem item in medItems) {
-                        item.buildSubtitle(context);
-                      }
-                    })
-                  },
-                  child: Text('DONE'),
-                )
-              ],
-            )
-          ],
-        ),
-      );
-    }
-  }
-
-  Color barColor;
-  CircularPercentIndicator cycle;
-  IconData centerIcon = FlutterIcons.heart_ant;
-
-  String inst = "Continue Compressions";
-  DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
-
   currentTime() {
     globals.publicCodeTime =
         _printDuration(Duration(seconds: secPassed.toInt()));
 
     return globals.publicCodeTime;
-  }
-
-  bool progressPulseCheck = true;
-  String pulseCheckCountdown = '';
-  String _printDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
   vibrate() async {
@@ -328,15 +265,6 @@ class MyHomePageState extends State<MyHomePage>
     });
   }
 
-  IconData chestIcon;
-  IconData checkChestType() {
-    if (chestIcon != null) {
-      return chestIcon;
-    }
-
-    return FlutterIcons.heart_ant;
-  }
-
   autoRestartCycle() {
     if (!progressPulseCheck) {
       setState(() {
@@ -351,19 +279,6 @@ class MyHomePageState extends State<MyHomePage>
     }
   }
 
-  List<String> shockDoses = [
-    'EXTERNAL: 20 J mono, 6 J bi\nINTERNAL:l 2 J mono, 1 J bi',
-    'EXTERNAL: 30 J mono, 15 J bi\nINTERNAL: 3 J mono, 2 J bi',
-    'EXTERNAL: 50 J mono, 30 J bi\nINTERNAL: 5 J mono, 3 J bi',
-    'EXTERNAL: 100 J mono, 50 J bi\nINTERNAL: 10 J mono, 5 J bi',
-    'EXTERNAL: 200 J mono, 75 J bi\nINTERNAL: 20 J mono, 6 J bi',
-    'EXTERNAL: 200 J mono, 75 J bi\nINTERNAL: 20 J mono, 8 J bi',
-    'EXTERNAL: 200 J mono, 100 J bi\nINTERNAL: 20 J mono, 9 J bi',
-    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 10 J bi',
-    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
-    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
-    'EXTERNAL: 360 J mono, 150 J bi\nINTERNAL: 50 J mono, 15 J bi',
-  ];
   _selectedPulse(String selected) {
     Navigator.of(context).pop();
     DateTime now = DateTime.now();
@@ -539,8 +454,10 @@ class MyHomePageState extends State<MyHomePage>
 
   @override
   void initState() {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     WidgetsBinding.instance.addObserver(this);
 
     nested = NestedTabBar(
@@ -567,43 +484,9 @@ class MyHomePageState extends State<MyHomePage>
         Duration(seconds: 10),
         () => {
               Wakelock.enable(),
-              if (askForTour)
-                {
-                  switchedCompressor(),
-                  askForTour = false,
-                },
             });
   }
 
-  bool compressorBadge = false;
-  switchedCompressor() {
-    setState(() {
-      compressorBadge = false;
-      lastSwitchedComp = DateTime.now();
-    });
-  }
-
-  bool askForTour = false;
-  int currentCoachWidget = 0;
-  List<String> coachInfo = [
-    "This is the time until next pulse check",
-    "When this ring fills completely, it is time for a pulse check",
-    "This displays the current place in the cycle",
-    "Here is your checklist",
-    "These are your medications",
-    "This will help you track compression and breath rates",
-    "This reminds you of common reversible causes of cardiopulmonary arrest",
-    "Here are other options"
-  ];
-  List<GlobalObjectKey> coachKeys = [
-    GlobalObjectKey('timerCircle'),
-    GlobalObjectKey('circleProgress'),
-    GlobalObjectKey('inst'),
-    GlobalObjectKey('tab1'),
-    GlobalObjectKey('tab2'),
-    GlobalObjectKey('tab3'),
-    GlobalObjectKey('tab4'),
-  ];
   showCoach() {
     CoachMark coachMark = CoachMark();
     RenderBox target =
@@ -639,7 +522,6 @@ class MyHomePageState extends State<MyHomePage>
         });
   }
 
-  FlutterTts flutterTts = FlutterTts();
   Future _speak() async {
     flutterTts.setVolume(1.0);
 
@@ -658,33 +540,25 @@ class MyHomePageState extends State<MyHomePage>
     }
   }
 
-  bool playCompressions = true;
-  Timer metronomeTimer;
-
-  // metronome(AudioCache player) async {
-  //   if (playCompressions) {
-  //     print(DateTime.now());
-  //     //player.play('2.wav');
-  //     cutg.setReleaseMode(ReleaseMode.LOOP);
-  //     cutg = await player.play('longmp.mp3');
-  //
-  //   }
-  // }
-
-  AudioPlayer player = AudioPlayer();
   startMetronome() async {
     setState(() {
       soundIcon = Icon(FlutterIcons.metronome_mco);
       soundColor = Theme.of(context).primaryColor;
     });
 
-    await player.setLoopMode(LoopMode.one); //
+    await player.setLoopMode(LoopMode.one);
+    await playerB.setLoopMode(LoopMode.one);
+
     var duration = await player.setAsset('assets/longmp.mp3');
     player.play();
+
+    var durationB = await playerB.setAsset('assets/breath.mp3');
+    playerB.play();
   }
 
   stopMetronome() async {
     player.stop();
+    playerB.stop();
     setState(() {
       soundIcon = Icon(FlutterIcons.metronome_tick_mco);
       soundColor = Colors.grey;
@@ -717,17 +591,6 @@ class MyHomePageState extends State<MyHomePage>
       });
     }
   }
-
-  bool playVoice = true;
-  Icon soundIcon = Icon(FlutterIcons.metronome_mco);
-  Color soundColor = Colors.red;
-  List<Widget> timelineTiles = List<Widget>();
-  Icon voiceIcon = Icon(FlutterIcons.voice_mco);
-  Color voiceColor = Colors.red;
-  String addEventString = 'End Tidal CO2';
-  String addEventStringlog = 'etCO2 (mmHg): ';
-  TextInputType eventKeyboard =
-      TextInputType.numberWithOptions(signed: true, decimal: true);
 
   Widget handsFreeWidget = Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -780,10 +643,6 @@ class MyHomePageState extends State<MyHomePage>
       globals.reset = false;
       progressPulseCheck = true;
     }
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
 
     var cP = Container(
       color: Colors.black54,
@@ -1167,59 +1026,53 @@ class MyHomePageState extends State<MyHomePage>
     if (showShock) {
       cP = Container(
         color: Colors.black54,
-        child: Stack(
-          children: [
-            Column(
-              children: <Widget>[
-                Flexible(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.fitHeight,
-                      child: AutoSizeText(
-                        'Continue Compressions\nWhile Charging',
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 50,
-                          color: Colors.white,
-                        ),
-                      ),
+        child: Column(
+          children: <Widget>[
+            Flexible(
+              flex: 1,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fitHeight,
+                  child: AutoSizeText(
+                    'Continue Compressions\nWhile Charging',
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                Flexible(
-                  flex: 2,
-                  child: Row(
-                    children: <Widget>[
-                      deliveredShock(
-                        onPressed: () => setState(() {
-                          DateTime now = DateTime.now();
-                          String formattedDate =
-                              DateFormat('kk:mm').format(now);
-                          String combined =
-                              "\n" + formattedDate + "\tShock Delivered";
-                          String full = combined.toString() + "\t";
-                          globals.log = globals.log + full;
-                          print('Shock Delivered');
-                          askForPulse = false;
-                          nested.show = false;
-                          showShock = false;
-                          fractionPulse = 0;
-                          progressPulseCheck = true;
-                          _speechThis('Continue Compressions');
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
-            _checkForWeight()
+            Flexible(
+              flex: 2,
+              child: Row(
+                children: <Widget>[
+                  deliveredShock(
+                    onPressed: () => setState(() {
+                      DateTime now = DateTime.now();
+                      String formattedDate = DateFormat('kk:mm').format(now);
+                      String combined =
+                          "\n" + formattedDate + "\tShock Delivered";
+                      String full = combined.toString() + "\t";
+                      globals.log = globals.log + full;
+                      print('Shock Delivered');
+                      askForPulse = false;
+                      nested.show = false;
+                      showShock = false;
+                      fractionPulse = 0;
+                      progressPulseCheck = true;
+                      _speechThis('Continue Compressions');
+                    }),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       );
@@ -1453,22 +1306,6 @@ class MyHomePageState extends State<MyHomePage>
       ));
     }
 
-    Widget content =
-        Text('Switch compressors!', style: TextStyle(color: Colors.white));
-    if (askForTour) {
-      content = GestureDetector(
-          onTap: () => {
-                switchedCompressor(),
-                showCoach(),
-                askForTour = false,
-              },
-          child: Padding(
-              padding: EdgeInsets.all(10),
-              child: Text('Tap for tour',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white))));
-    }
-
     Widget leftBottom() {
       return Column(children: [
         IconButton(
@@ -1676,99 +1513,80 @@ class MyHomePageState extends State<MyHomePage>
     Widget full = Column(children: <Widget>[
       Stack(
         children: [
-          Badge(
-            borderRadius: BorderRadius.circular(10),
-            showBadge: compressorBadge,
-            badgeContent: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                content,
-                IconButton(
-                  icon: Icon(
-                    FlutterIcons.x_circle_fea,
-                    color: Colors.white,
-                  ),
-                  onPressed: switchedCompressor,
-                )
-              ],
-            ),
-            shape: BadgeShape.square,
-            position: BadgePosition.bottomEnd(bottom: 50, end: 20),
-            child: Container(
-              height: MediaQuery.of(context).size.width * 2 / 3 + 50,
-              child: ListView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: <Widget>[
-                    cycle = CircularPercentIndicator(
-                      key: GlobalObjectKey('circleProgress'),
-                      radius: (MediaQuery.of(context).size.width * 2 / 3),
-                      lineWidth: 10.0,
-                      percent: fraction,
-                      animation: true,
-                      animationDuration: 1000,
-                      animateFromLastPercent: true,
-                      circularStrokeCap: CircularStrokeCap.round,
-                      footer: FittedBox(
-                        child: AutoSizeText(
-                          inst,
-                          key: GlobalObjectKey('inst'),
-                          style: new TextStyle(
-                            fontSize: 40.0,
-                          ),
-                          maxLines: 1,
+          Container(
+            height: MediaQuery.of(context).size.width * 2 / 3 + 50,
+            child: ListView(
+                physics: const NeverScrollableScrollPhysics(),
+                children: <Widget>[
+                  cycle = CircularPercentIndicator(
+                    key: GlobalObjectKey('circleProgress'),
+                    radius: (MediaQuery.of(context).size.width * 2 / 3),
+                    lineWidth: 10.0,
+                    percent: fraction,
+                    animation: true,
+                    animationDuration: 1000,
+                    animateFromLastPercent: true,
+                    circularStrokeCap: CircularStrokeCap.round,
+                    footer: FittedBox(
+                      child: AutoSizeText(
+                        inst,
+                        key: GlobalObjectKey('inst'),
+                        style: new TextStyle(
+                          fontSize: 40.0,
                         ),
+                        maxLines: 1,
                       ),
-                      center: Center(
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                            Container(
-                              height: 30,
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: FittedBox(
-                                fit: BoxFit.fitHeight,
-                                child: Container(
-                                  width: 1000,
-                                  child: Icon(
-                                    centerIcon,
-                                    color: barColor,
-                                    size: MediaQuery.of(context).size.width / 4,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: FittedBox(
-                                child: Column(
-                                  children: [
-                                    Text('pulse check in'),
-                                    Text(
-                                      '-' + pulseCheckCountdown,
-                                      textAlign: TextAlign.center,
-                                      key: GlobalObjectKey('timerCircle'),
-                                      style: new TextStyle(
-                                        fontSize: 40.0,
-                                      ),
-                                    ),
-                                    Text(
-                                      'time elapsed ' + currentTime(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(),
-                            )
-                          ])),
-                      backgroundColor: Colors.grey,
-                      progressColor: barColor,
                     ),
-                  ]),
-            ),
+                    center: Center(
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                          Container(
+                            height: 30,
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: FittedBox(
+                              fit: BoxFit.fitHeight,
+                              child: Container(
+                                width: 1000,
+                                child: Icon(
+                                  centerIcon,
+                                  color: barColor,
+                                  size: MediaQuery.of(context).size.width / 4,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: FittedBox(
+                              child: Column(
+                                children: [
+                                  Text('pulse check in'),
+                                  Text(
+                                    '-' + pulseCheckCountdown,
+                                    textAlign: TextAlign.center,
+                                    key: GlobalObjectKey('timerCircle'),
+                                    style: new TextStyle(
+                                      fontSize: 40.0,
+                                    ),
+                                  ),
+                                  Text(
+                                    'time elapsed ' + currentTime(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(),
+                          )
+                        ])),
+                    backgroundColor: Colors.grey,
+                    progressColor: barColor,
+                  ),
+                ]),
           ),
           Column(
             children: [
@@ -2030,19 +1848,6 @@ class MyHomePageState extends State<MyHomePage>
       fullStack = <Widget>[full, warning];
     }
 
-    onReorder(int oldIndex, int newIndex) {
-      setState(() {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        final String item = eventSplit.removeAt(oldIndex);
-        eventSplit.insert(newIndex, item);
-        globals.log = eventSplit.join('\n');
-      });
-      updateDrawer();
-    }
-
-    //print('event parts ' + eventSplit.toString());
     List<Widget> settingItems() {
       return [
         DrawerHeader(
@@ -2194,12 +1999,8 @@ class MyHomePageState extends State<MyHomePage>
       ),
     );
     return s;
-    currentScaffold = s;
   }
 }
-
-Scaffold currentScaffold;
-GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
 class OpenPulseButton extends StatelessWidget {
   OpenPulseButton({@required this.onPressed});
