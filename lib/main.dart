@@ -1169,8 +1169,9 @@ class MyHomePageState extends State<MyHomePage>
                                     children: [
                                       Column(
                                         children: [
-                                          Container(
-                                            height: 15,
+                                          Expanded(
+                                            child: Container(
+                                            ),
                                           ),
                                           Expanded(
                                             child: FittedBox(
@@ -1179,20 +1180,28 @@ class MyHomePageState extends State<MyHomePage>
                                                   color: Colors.red),
                                             ),
                                           ),
-                                          Container(
-                                            height: 15,
+                                          Expanded(
+                                            child: Container(
+                                            ),
                                           ),
                                         ],
                                       ),
                                       Column(
                                         children: [
                                           Expanded(
-                                            child: Center(
-                                              child: FittedBox(
-                                                child: Icon(
-                                                    FlutterIcons.undo_alt_faw5s,
-                                                    color: Colors.red),
-                                              ),
+                                            child: Container(
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 4,
+                                            child: FittedBox(
+                                              child: Icon(
+                                                  FlutterIcons.undo_alt_faw5s,
+                                                  color: Colors.red),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Container(
                                             ),
                                           ),
                                         ],

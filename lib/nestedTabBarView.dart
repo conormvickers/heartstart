@@ -22,6 +22,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -1048,11 +1050,20 @@ class PageTwo extends StatefulWidget {
   PageTwoState createState() => PageTwoState();
 }
 
+final diseaseL = <String> {
+  'Medical cardiac/non-cardiac',
+  'Surgical elective/emergency',
+  'Trauma',
+  'DOA',
+  'Unknown'
+}.map((e) => _ListItem(e, false)).toList();
+
 class PageTwoState extends State<PageTwo> {
   List<Widget> timelineTiles = List<Widget>();
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
   TextEditingController timelineEditingController = TextEditingController();
+
 
   editTimeline(int i) {
     setState(() {
@@ -1301,130 +1312,231 @@ class PageTwoState extends State<PageTwo> {
   @override
   Widget build(BuildContext context) {
     print('build starting');
+    final disease = diseaseL.map((e) =>
+    Container(
+      padding: EdgeInsets.all(5),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: CheckboxListTile(
+          
+        key: Key(e.value),
+        value: e.checked ?? false,
+        onChanged: (bool newValue) {
+        setState(() => e.checked = newValue);
+        },
+          title: Text(e.value),
+        ),
+      ),
+    ),
+    ).toList();
 
     for (Widget key in timelineTiles) {
       print('key name ' + key.toString());
       print(key.key);
     }
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text('Code Summary'),
-        elevation: 1.0,
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.red,
-        child: Container(
-            color: Colors.red,
-            child: ButtonBar(
-              alignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                RaisedButton(
-                    child: Text('New Code'),
-                    onPressed: () {
-                      globals.log = "";
-                      globals.stopCodeNow = false;
-                      globals.codeStart = DateTime.now();
-                      timesGiven = <int>[
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                      ];
-                      _lastGiven = <DateTime>[
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                        DateTime.now(),
-                      ];
-                      globals.reset = true;
-                      globals.weightKG = null;
-                      globals.weightIndex = null;
-                      Navigator.pop(context);
-                    }),
-                RaisedButton(
-                  child: Text('Send Text File'),
-                  onPressed: sendText,
+    DraggableScrollableSheet buildDragScrollSheet() {
+      return DraggableScrollableSheet(
+          initialChildSize: 0.2,
+          minChildSize: 0.1,
+          maxChildSize: 0.95,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return Container(
+                decoration: const BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(8),
+                        topLeft: Radius.circular(8)
+                    )
                 ),
-                RaisedButton(
-                  child: Text('Send PDF File'),
-                  onPressed: sendData,
-                ),
-              ],
-            )),
-      ),
-      body: Builder(
-        builder: (BuildContext context) => Column(
-          children: <Widget>[
-            Expanded(
-              flex: 5,
-              child: Container(
-                color: Colors.white,
-                child: ReorderableListView(
-                  onReorder: onReorder,
-                  children: timelineTiles,
-                  scrollController: timelineController,
-                ),
-              ),
-            ),
-            Container(
-              height: 100,
-              color: Colors.white,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: TextField(
-                        controller: infoController,
-                        decoration: InputDecoration(
-                          labelText: 'Patient Info, MRN',
+                child: Scrollbar(
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('Additional Info',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.white, fontSize: 40),),
+                            Icon(FlutterIcons.up_square_o_ant, color: Colors.white, size: 40,)
+                          ],
                         ),
                       ),
-                    ),
+                      ...disease] ,
+
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: RaisedButton(
-                        child: Text('add event'),
-                        onPressed: () => {
-                              globals.log = globals.log + '\n??:??\tnew event',
-                              updateDrawer(),
-                              timelineController.animateTo(
-                                timelineController.position.maxScrollExtent,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeOut,
-                              ),
-                            }),
-                  )
-                ],
-              ),
-            ),
-          ],
+                )
+            );
+          });
+    }
+
+    return DefaultTabController(
+      length: 3,
+      initialIndex: 1,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          title: Text('Code Summary'),
+          elevation: 1.0,
         ),
+        bottomNavigationBar:
+            ConvexAppBar.badge(
+              const <int, dynamic>{3: '2'},
+              style: TabStyle.reactCircle,
+              backgroundColor: Colors.red,
+              items: <TabItem>[
+                TabItem(icon: FlutterIcons.folder_ent, title: 'Saved'),
+                TabItem(icon: FlutterIcons.edit_3_fea, title: 'Edit'),
+                TabItem(icon: FlutterIcons.send_faw, title: 'Send'),
+                ],
+              onTap: (int i) => print(i),
+            ),
+        // BottomAppBar(
+        //   color: Colors.red,
+        //   child: Container(
+        //       color: Colors.red,
+        //       child: ButtonBar(
+        //         alignment: MainAxisAlignment.spaceEvenly,
+        //         children: <Widget>[
+        //           RaisedButton(
+        //               child: Text('New Code'),
+        //               onPressed: () {
+        //                 globals.log = "";
+        //                 globals.stopCodeNow = false;
+        //                 globals.codeStart = DateTime.now();
+        //                 timesGiven = <int>[
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                   0,
+        //                 ];
+        //                 _lastGiven = <DateTime>[
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                   DateTime.now(),
+        //                 ];
+        //                 globals.reset = true;
+        //                 globals.weightKG = null;
+        //                 globals.weightIndex = null;
+        //                 Navigator.pop(context);
+        //               }),
+        //           RaisedButton(
+        //             child: Text('Send Text File'),
+        //             onPressed: sendText,
+        //           ),
+        //           RaisedButton(
+        //             child: Text('Send PDF File'),
+        //             onPressed: sendData,
+        //           ),
+        //         ],
+        //       )),
+        // ),
+        body:
+        TabBarView(
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            Stack(
+              children: [
+                SizedBox.expand(
+                  child: Container(),
+                ),
+
+              ],
+            ),
+            Stack(
+              children: [
+                Builder(
+                  builder: (BuildContext context) => Column(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 5,
+                        child: Container(
+                          color: Colors.white,
+                          child: ReorderableListView(
+                            onReorder: onReorder,
+                            children: timelineTiles,
+                            scrollController: timelineController,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: 100,
+                        color: Colors.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: TextField(
+                                  controller: infoController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Patient Info, MRN',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: RaisedButton(
+                                  child: Text('add event'),
+                                  onPressed: () => {
+                                    globals.log = globals.log + '\n??:??\tnew event',
+                                    updateDrawer(),
+                                    timelineController.animateTo(
+                                      timelineController.position.maxScrollExtent,
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
+                                    ),
+                                  }),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                buildDragScrollSheet(),
+              ],
+            ),
+            Container(),
+          ],
+        )
+
       ),
     );
+
   }
+
 }
