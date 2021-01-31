@@ -8,3 +8,4 @@ double weightKG;
 int weightIndex;
 DateTime codeStart;
 String chest;
+String survey = "";

@@ -158,6 +158,7 @@ class MyHomePageState extends State<MyHomePage>
   Timer metronomeTimer;
   AudioPlayer player = AudioPlayer();
   AudioPlayer playerB = AudioPlayer();
+
   bool playVoice = true;
   Icon soundIcon = Icon(FlutterIcons.metronome_mco);
   Color soundColor = Colors.red;
@@ -247,6 +248,8 @@ class MyHomePageState extends State<MyHomePage>
         inst = "Pulse Check";
         centerIcon = Ionicons.ios_pulse;
         progressPulseCheck = false;
+        player.setVolume(0);
+        playerB.setVolume(0);
         vibrate();
         if (handsFree) {
           print('starting auto reset timer');
@@ -273,6 +276,8 @@ class MyHomePageState extends State<MyHomePage>
           askForPulse = false;
           nested.show = false;
           progressPulseCheck = true;
+          player.setVolume(1);
+          playerB.setVolume(1);
           _speechThis('Restart Compressions');
         }
       });
@@ -321,6 +326,8 @@ class MyHomePageState extends State<MyHomePage>
         nested.show = false;
         fractionPulse = 0;
         progressPulseCheck = true;
+        player.setVolume(1);
+        playerB.setVolume(1);
         _speechThis('Continue compressions');
       }
     });
@@ -642,6 +649,8 @@ class MyHomePageState extends State<MyHomePage>
       askForPulse = false;
       globals.reset = false;
       progressPulseCheck = true;
+      player.setVolume(1);
+      playerB.setVolume(1);
     }
 
     var cP = Container(
@@ -690,6 +699,8 @@ class MyHomePageState extends State<MyHomePage>
                     askForPulse = false;
                     nested.show = false;
                     progressPulseCheck = true;
+                    player.setVolume(1);
+                    playerB.setVolume(1);
                   }),
                 ),
                 OpenPulseButton(
@@ -1067,6 +1078,8 @@ class MyHomePageState extends State<MyHomePage>
                       showShock = false;
                       fractionPulse = 0;
                       progressPulseCheck = true;
+                      player.setVolume(1);
+                      playerB.setVolume(1);
                       _speechThis('Continue Compressions');
                     }),
                   ),
@@ -1251,6 +1264,8 @@ class MyHomePageState extends State<MyHomePage>
                     askForPulse = false;
                     nested.show = false;
                     progressPulseCheck = true;
+                    player.setVolume(1);
+                    playerB.setVolume(1);
                     _speechThis('Restart Compressions');
                   }
                 }),

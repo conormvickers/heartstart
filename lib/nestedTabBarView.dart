@@ -1357,7 +1357,7 @@ class PageTwoState extends State<PageTwo> {
             hasIndicator: dot,
             indicatorStyle: IndicatorStyle(
                 width: iconSize,
-                color: Colors.red,
+                color: Colors.lightBlue,
                 padding: EdgeInsets.all(8),
                 iconStyle: IconStyle(
                   iconData: icon,
@@ -1372,7 +1372,7 @@ class PageTwoState extends State<PageTwo> {
                 IconSlideAction(
                   caption: 'delete',
                   icon: FlutterIcons.delete_mdi,
-                  color: Colors.red,
+                  color: Colors.lightBlue,
                   onTap: () => {
                     setState(() => {
                           eventSplit.removeAt(i),
@@ -1400,103 +1400,184 @@ class PageTwoState extends State<PageTwo> {
   TextEditingController infoController = TextEditingController();
   ScrollController timelineController = ScrollController();
 
+  bool editing = false;
+  TextEditingController finalController =  TextEditingController();
+  Widget closeButton() {
+    if (editing) {
+      return TextButton(
+        child: Text('done', style: TextStyle(color: Colors.white),),
+        onPressed: () => {
+          saveGlobalLog(),
+          editing = false,
+          FocusScope.of(context).unfocus(),
+    },
+      );
+    }
+    return Container();
+  }
+  saveGlobalLog() {
+    String full = finalController.text;
+    if (full.contains('\n\n-Case Information-\n\n')) {
+      List<String> split = full.split('\n\n-Case Information-\n\n');
+      globals.log = split[0];
+      globals.survey = split[1];
+    }
+  }
+  updateSurvey() {
+    print('updating survey...');
+    String survey = '';
+    for (_ListItem l in Disease) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in Location) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in ComorbidConditions) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in SuspectedCause) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in PreviousCPA) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in PreviousMeasures) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in GeneralAnesthesia) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in MechanicalVentilation) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in ROSC) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in ROSCDuration) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in Euthanasia) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+    for (_ListItem l in Rearrest) {
+      if (l.checked) {
+        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+      }
+    }
+
+    globals.survey = survey;
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
+    finalController.text = globals.log + '\n\n-Case Information-\n\n' + globals.survey;
     final diseaseL = Disease.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => e.checked = newValue);
-            },
-            title: Text(e.value),
+      (e) => GestureDetector(
+        onTap: () => {
+          setState(() => {
+            e.checked = !e.checked,
+            updateSurvey(),
+          }
+        ),
+
+        },
+        child: Chip(
+          backgroundColor: Colors.white,
+          key: Key(e.value),
+          label: Text(e.value),
+          avatar: Checkbox(
+          value: e.checked ?? false,
           ),
         ),
       ),
     ).toList();
-
     final locationL = Location.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => {
-                    for (_ListItem a in Location)
-                      {
-                        a.checked = false,
-                      },
-                    e.checked = newValue,
-                  });
+          (e) => GestureDetector(
+        onTap: () => {
+          setState(() => {
+            for (_ListItem l in Location) {
+              l.checked = false,
             },
-            title: Text(e.value),
+            e.checked = !e.checked,
+            updateSurvey(),
+          }),
+
+        },
+        child: Chip(
+          backgroundColor: Colors.white,
+          key: Key(e.value),
+          label: Text(e.value),
+          avatar: Checkbox(
+            value: e.checked ?? false,
           ),
         ),
       ),
     ).toList();
-
     final previousCPAL = PreviousCPA.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => {
-                    for (_ListItem a in PreviousCPA)
-                      {
-                        a.checked = false,
-                      },
-                    e.checked = newValue,
-                  });
+          (e) => GestureDetector(
+        onTap: () => {
+          setState(() => {
+            for (_ListItem l in PreviousCPA) {
+              l.checked = false,
             },
-            title: Text(e.value),
+            e.checked = !e.checked,
+            updateSurvey(),
+          }),
+
+        },
+        child: Chip(
+          backgroundColor: Colors.white,
+          key: Key(e.value),
+          label: Text(e.value),
+          avatar: Checkbox(
+            value: e.checked ?? false,
           ),
         ),
       ),
     ).toList();
-
     final previousMeasuresL = PreviousMeasures.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
+          (e) => GestureDetector(
+        onTap: () => {
+          setState(() => {
+            e.checked = !e.checked,
+            updateSurvey(),
+          }),
+
+        },
+        child: Chip(
+          backgroundColor: Colors.white,
+          key: Key(e.value),
+          label: Text(e.value),
+          avatar: Checkbox(
             value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => e.checked = newValue);
-            },
-            title: Text(e.value),
           ),
         ),
       ),
     ).toList();
-
-    final ROSCL = ROSC
-        .map(
+    final ROSCL = ROSC.map(
           (e) => Container(
             padding: EdgeInsets.all(5),
             child: Container(
@@ -1509,13 +1590,13 @@ class PageTwoState extends State<PageTwo> {
                 value: e.checked ?? false,
                 onChanged: (bool newValue) {
                   setState(() => e.checked = newValue);
+                  updateSurvey();
                 },
                 title: Text(e.value),
               ),
             ),
           ),
-        )
-        .toList();
+        ).toList();
     final ROSCdurationL = ROSCDuration.map(
       (e) => Container(
         padding: EdgeInsets.all(5),
@@ -1535,6 +1616,7 @@ class PageTwoState extends State<PageTwo> {
                       },
                     e.checked = newValue
                   });
+              updateSurvey();
             },
             title: Text(e.value),
           ),
@@ -1542,44 +1624,43 @@ class PageTwoState extends State<PageTwo> {
       ),
     ).toList();
     final comorbidConditionsL = ComorbidConditions.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
+          (e) => GestureDetector(
+        onTap: () => {
+          setState(() => {
+            e.checked = !e.checked,
+            updateSurvey(),
+          }),
+
+        },
+        child: Chip(
+          backgroundColor: Colors.white,
+          key: Key(e.value),
+          label: Text(e.value),
+          avatar: Checkbox(
             value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => e.checked = newValue);
-            },
-            title: Text(e.value),
           ),
         ),
       ),
     ).toList();
     final suspectedCauseL = SuspectedCause.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
+          (e) => GestureDetector(
+        onTap: () => {
+          setState(() => {
+            e.checked = !e.checked,
+            updateSurvey(),
+          }),
+
+        },
+        child: Chip(
+          backgroundColor: Colors.white,
+          key: Key(e.value),
+          label: Text(e.value),
+          avatar: Checkbox(
             value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => e.checked = newValue);
-            },
-            title: Text(e.value),
           ),
         ),
       ),
     ).toList();
-
     final generalAnesthesiaL = GeneralAnesthesia.map(
       (e) => Container(
         padding: EdgeInsets.all(5),
@@ -1593,6 +1674,7 @@ class PageTwoState extends State<PageTwo> {
             value: e.checked ?? false,
             onChanged: (bool newValue) {
               setState(() => e.checked = newValue);
+              updateSurvey();
             },
             title: Text(e.value),
           ),
@@ -1612,13 +1694,13 @@ class PageTwoState extends State<PageTwo> {
             value: e.checked ?? false,
             onChanged: (bool newValue) {
               setState(() => e.checked = newValue);
+              updateSurvey();
             },
             title: Text(e.value),
           ),
         ),
       ),
     ).toList();
-
     final euthanasiaL = Euthanasia.map(
       (e) => Container(
         padding: EdgeInsets.all(5),
@@ -1632,6 +1714,7 @@ class PageTwoState extends State<PageTwo> {
             value: e.checked ?? false,
             onChanged: (bool newValue) {
               setState(() => {e.checked = newValue});
+              updateSurvey();
             },
             title: Text(e.value),
           ),
@@ -1662,13 +1745,13 @@ class PageTwoState extends State<PageTwo> {
                       },
                     e.checked = newValue
                   });
+              updateSurvey();
             },
             title: Text(e.value),
           ),
         ),
       ),
     ).toList();
-
     Widget roscOpener = Container(
         padding: EdgeInsets.all(5),
         child: Container(
@@ -1692,7 +1775,6 @@ class PageTwoState extends State<PageTwo> {
             children: [...ROSCL, ...ROSCdurationL],
           ),
         ));
-
     Widget anesthesiaOpener = Container(
         padding: EdgeInsets.all(5),
         child: Container(
@@ -1747,24 +1829,25 @@ class PageTwoState extends State<PageTwo> {
           ),
         ));
 
-    for (Widget key in timelineTiles) {
-      print('key name ' + key.toString());
-      print(key.key);
-    }
     DraggableScrollableSheet buildDragScrollSheet() {
       return DraggableScrollableSheet(
-          initialChildSize: 0.2,
-          minChildSize: 0.1,
+          initialChildSize: 0.15,
+          minChildSize: 0.15,
           maxChildSize: 0.95,
           builder: (BuildContext context, ScrollController scrollController) {
             return Container(
-                decoration: const BoxDecoration(
-                    color: Colors.red,
+                decoration: BoxDecoration(
+                    color: Colors.lightBlue,
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 3,
+                    ),
                     borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(8),
-                        topLeft: Radius.circular(8))),
+                        topRight: Radius.circular(15),
+                        topLeft: Radius.circular(15))),
                 child: Scrollbar(
                   child: ListView(
+                    physics: ClampingScrollPhysics(),
                     controller: scrollController,
                     children: [
                       Container(
@@ -1797,7 +1880,11 @@ class PageTwoState extends State<PageTwo> {
                             style:
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
-                      ...diseaseL,
+                      Wrap(
+                        children: diseaseL,
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                      ),
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
@@ -1806,7 +1893,11 @@ class PageTwoState extends State<PageTwo> {
                             style:
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
-                      ...locationL,
+                      Wrap(
+                        children: locationL,
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                      ),
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
@@ -1815,7 +1906,11 @@ class PageTwoState extends State<PageTwo> {
                             style:
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
-                      ...comorbidConditionsL,
+                      Wrap(
+                        children: comorbidConditionsL,
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                      ),
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
@@ -1824,7 +1919,11 @@ class PageTwoState extends State<PageTwo> {
                             style:
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
-                      ...suspectedCauseL,
+                      Wrap(
+                        children: suspectedCauseL,
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                      ),
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
@@ -1833,7 +1932,12 @@ class PageTwoState extends State<PageTwo> {
                             style:
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
-                      ...previousCPAL,
+                      Wrap(
+                        children: previousCPAL,
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                      ),
+
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
@@ -1842,7 +1946,12 @@ class PageTwoState extends State<PageTwo> {
                             style:
                                 TextStyle(color: Colors.white, fontSize: 20)),
                       ),
-                      ...previousMeasuresL,
+                      Wrap(
+                        children: previousMeasuresL,
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                      ),
+
                       Divider(),
                       anesthesiaOpener,
                       Divider(),
@@ -1880,11 +1989,12 @@ class PageTwoState extends State<PageTwo> {
           appBar: AppBar(
             title: Text('Code Summary'),
             elevation: 1.0,
+            actions: [closeButton()],
           ),
           bottomNavigationBar: ConvexAppBar.badge(
             const <int, dynamic>{3: '2'},
             style: TabStyle.reactCircle,
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.lightBlue,
             items: <TabItem>[
               TabItem(icon: FlutterIcons.folder_ent, title: 'Saved'),
               TabItem(icon: FlutterIcons.edit_3_fea, title: 'Edit'),
@@ -1892,67 +2002,7 @@ class PageTwoState extends State<PageTwo> {
             ],
             onTap: (int i) => print(i),
           ),
-          // BottomAppBar(
-          //   color: Colors.red,
-          //   child: Container(
-          //       color: Colors.red,
-          //       child: ButtonBar(
-          //         alignment: MainAxisAlignment.spaceEvenly,
-          //         children: <Widget>[
-          //           RaisedButton(
-          //               child: Text('New Code'),
-          //               onPressed: () {
-          //                 globals.log = "";
-          //                 globals.stopCodeNow = false;
-          //                 globals.codeStart = DateTime.now();
-          //                 timesGiven = <int>[
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                   0,
-          //                 ];
-          //                 _lastGiven = <DateTime>[
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                   DateTime.now(),
-          //                 ];
-          //                 globals.reset = true;
-          //                 globals.weightKG = null;
-          //                 globals.weightIndex = null;
-          //                 Navigator.pop(context);
-          //               }),
-          //           RaisedButton(
-          //             child: Text('Send Text File'),
-          //             onPressed: sendText,
-          //           ),
-          //           RaisedButton(
-          //             child: Text('Send PDF File'),
-          //             onPressed: sendData,
-          //           ),
-          //         ],
-          //       )),
-          // ),
+
           body: TabBarView(
             physics: NeverScrollableScrollPhysics(),
             children: [
@@ -2022,9 +2072,91 @@ class PageTwoState extends State<PageTwo> {
                   buildDragScrollSheet(),
                 ],
               ),
-              Container(),
+              Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all( 10),
+                      child: TextField(
+
+                        maxLines: null,
+                        controller: finalController,
+                        onTap: () => {
+                          if (!editing){
+                            setState(() => {
+                              editing = true
+                            })
+                          }
+                        },
+
+
+                      )
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(bottom: 20),
+                      color: Colors.lightBlue,
+                      child: ButtonBar(
+                        alignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+
+                          RaisedButton(
+                            child: Text('Send Text File'),
+                            onPressed: sendText,
+                          ),
+                          RaisedButton(
+                            child: Text('Send PDF File'),
+                            onPressed: sendData,
+                          ),
+                        ],
+                      )),
+                ],
+              ),
             ],
           )),
     );
   }
 }
+// RaisedButton(
+// child: Text('New Code'),
+// onPressed: () {
+// globals.log = "";
+// globals.stopCodeNow = false;
+// globals.codeStart = DateTime.now();
+// timesGiven = <int>[
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// 0,
+// ];
+// _lastGiven = <DateTime>[
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// DateTime.now(),
+// ];
+// globals.reset = true;
+// globals.weightKG = null;
+// globals.weightIndex = null;
+// Navigator.pop(context);
+// }),
