@@ -47,11 +47,11 @@ class MyApp extends StatelessWidget {
         );
       },
       theme: ThemeData(
-        primaryColor: Colors.red,
+        primaryColor: Colors.white,
         accentColor: Colors.blue,
-        splashColor: Colors.redAccent,
-        indicatorColor: Colors.redAccent,
-        primarySwatch: Colors.red,
+        splashColor: Colors.red,
+        indicatorColor: Colors.lightBlueAccent,
+        primarySwatch: Colors.lightBlue,
         disabledColor: Colors.grey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         textTheme: GoogleFonts.montserratTextTheme(
@@ -72,8 +72,7 @@ class MyHomePage extends StatefulWidget {
 
 var askForPulse = false;
 var warningDismissed = false;
-final _eventScrollController = ScrollController();
-int timelineEditing = null;
+int timelineEditing;
 TextEditingController timelineEditingController = TextEditingController();
 final GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
 Scaffold currentScaffold;
@@ -161,10 +160,10 @@ class MyHomePageState extends State<MyHomePage>
 
   bool playVoice = true;
   Icon soundIcon = Icon(FlutterIcons.metronome_mco);
-  Color soundColor = Colors.red;
+  Color soundColor = Colors.lightBlue;
   List<Widget> timelineTiles = List<Widget>();
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
-  Color voiceColor = Colors.red;
+  Color voiceColor = Colors.lightBlue;
   String addEventString = 'End Tidal CO2';
   String addEventStringlog = 'etCO2 (mmHg): ';
   TextInputType eventKeyboard =
@@ -258,7 +257,7 @@ class MyHomePageState extends State<MyHomePage>
           });
         }
       } else {
-        barColor = Theme.of(context).primaryColor;
+        barColor = Theme.of(context).splashColor;
         inst = "Continue Compressions";
         centerIcon = checkChestType();
       }
@@ -314,9 +313,11 @@ class MyHomePageState extends State<MyHomePage>
         String combined = "\n" + formattedDate + "\tCode Stopped";
         String full = combined.toString() + "\t";
         globals.log = globals.log + full;
-        if (playCompressions) {
-          toggleSound();
-        }
+
+        player.setVolume(0);
+        playerB.setVolume(0);
+        progressPulseCheck = false;
+
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => PageTwo()));
         askForPulse = false;
@@ -473,7 +474,7 @@ class MyHomePageState extends State<MyHomePage>
     );
 
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy/MM/dd kk:mm').format(now);
+    String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
     globals.log = formattedDate + "\tCode Started";
     globals.codeStart = now;
     super.initState();
@@ -550,7 +551,7 @@ class MyHomePageState extends State<MyHomePage>
   startMetronome() async {
     setState(() {
       soundIcon = Icon(FlutterIcons.metronome_mco);
-      soundColor = Theme.of(context).primaryColor;
+      soundColor = Theme.of(context).splashColor;
     });
 
     await player.setLoopMode(LoopMode.one);
@@ -589,7 +590,7 @@ class MyHomePageState extends State<MyHomePage>
     if (playVoice) {
       setState(() {
         voiceIcon = Icon(FlutterIcons.voice_mco);
-        voiceColor = Theme.of(context).primaryColor;
+        voiceColor = Theme.of(context).splashColor;
       });
     } else {
       setState(() {
@@ -639,7 +640,7 @@ class MyHomePageState extends State<MyHomePage>
     if (globals.reset) {
       print("reseting now");
       DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(now);
+      String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
       globals.log = formattedDate + "\tCode Started\t00:00";
       minPassed = 0;
       secPassed = 0;
@@ -884,7 +885,7 @@ class MyHomePageState extends State<MyHomePage>
                                                   FontAwesome.bolt,
                                                   size: 50,
                                                   color: Theme.of(context)
-                                                      .primaryColor,
+                                                      .splashColor,
                                                 ),
                                               )),
                                           Expanded(
@@ -936,7 +937,7 @@ class MyHomePageState extends State<MyHomePage>
                                                   FontAwesome.bolt,
                                                   size: 50,
                                                   color: Theme.of(context)
-                                                      .primaryColor,
+                                                      .splashColor,
                                                 ),
                                               )),
                                         ],
@@ -961,7 +962,7 @@ class MyHomePageState extends State<MyHomePage>
                                                   FontAwesome.bolt,
                                                   size: 50,
                                                   color: Theme.of(context)
-                                                      .primaryColor,
+                                                      .splashColor,
                                                 ),
                                               )),
                                           Expanded(
@@ -1013,7 +1014,7 @@ class MyHomePageState extends State<MyHomePage>
                                                   FontAwesome.bolt,
                                                   size: 50,
                                                   color: Theme.of(context)
-                                                      .primaryColor,
+                                                      .splashColor,
                                                 ),
                                               )),
                                         ],
@@ -1131,7 +1132,7 @@ class MyHomePageState extends State<MyHomePage>
         ],
       );
     } else {
-      handFreeColor = Theme.of(context).primaryColor;
+      handFreeColor = Theme.of(context).splashColor;
       handsFreeWidget = Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -1190,7 +1191,7 @@ class MyHomePageState extends State<MyHomePage>
                                             child: FittedBox(
                                               child: Icon(
                                                   FlutterIcons.clock_faw5,
-                                                  color: Colors.red),
+                                                  color: Colors.lightBlue),
                                             ),
                                           ),
                                           Expanded(
@@ -1210,7 +1211,7 @@ class MyHomePageState extends State<MyHomePage>
                                             child: FittedBox(
                                               child: Icon(
                                                   FlutterIcons.undo_alt_faw5s,
-                                                  color: Colors.red),
+                                                  color: Colors.lightBlue),
                                             ),
                                           ),
                                           Expanded(
@@ -1306,7 +1307,7 @@ class MyHomePageState extends State<MyHomePage>
                                 'Exit Hands Free',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
+                                  color: Theme.of(context).splashColor,
                                   fontSize: 300,
                                 ),
                               ),
@@ -1317,7 +1318,7 @@ class MyHomePageState extends State<MyHomePage>
                             child: Icon(
                               FlutterIcons.notes_medical_faw5s,
                               size: 300,
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).splashColor,
                             ),
                           ))
                         ],
@@ -1333,7 +1334,7 @@ class MyHomePageState extends State<MyHomePage>
     Widget leftBottom() {
       return Column(children: [
         IconButton(
-            icon: Icon(FlutterIcons.note_add_mdi, color: Colors.red),
+            icon: Icon(FlutterIcons.note_add_mdi, color: Colors.lightBlue),
             onPressed: () => {
                   print('enter other data'),
                   setState(() {
@@ -1356,10 +1357,10 @@ class MyHomePageState extends State<MyHomePage>
                 child: Text(
               'CO\u2082',
               style: TextStyle(
-                color: Colors.red,
+                color: Colors.lightBlue,
                 fontWeight: FontWeight.bold,
               ),
-            )), //Icon(Chesttypes.co2_1, color: Colors.red),
+            )), //Icon(Chesttypes.co2_1, color: Colors.lightBlue),
           ),
           onPressed: () => {
             print('enter etco2 data'),
@@ -1495,7 +1496,7 @@ class MyHomePageState extends State<MyHomePage>
               hasIndicator: dot,
               indicatorStyle: IndicatorStyle(
                   width: iconSize,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).splashColor,
                   padding: EdgeInsets.all(8),
                   iconStyle: IconStyle(
                     iconData: icon,
@@ -1511,7 +1512,7 @@ class MyHomePageState extends State<MyHomePage>
                 //   IconSlideAction(
                 //     caption: 'delete',
                 //     icon: FlutterIcons.delete_mdi,
-                //     color: Theme.of(context).primaryColor,
+                //     color: Theme.of(context).splashColor,
                 //     onTap: () => {
                 //       setState(() => {
                 //             eventSplit.removeAt(i),
@@ -1637,11 +1638,11 @@ class MyHomePageState extends State<MyHomePage>
             child: Column(
               children: [
                 IconButton(
-                  icon: Icon(FlutterIcons.cancel_mco, color: Colors.red),
+                  icon: Icon(FlutterIcons.cancel_mco, color: Colors.lightBlue),
                   onPressed: () => {_ensureStopCode()},
                 ),
                 IconButton(
-                  icon: Icon(FlutterIcons.dog_side_mco, color: Colors.red),
+                  icon: Icon(FlutterIcons.dog_side_mco, color: Colors.lightBlue),
                   onPressed: () => {
                     print('change weight'),
                     setState(() {
@@ -1658,7 +1659,7 @@ class MyHomePageState extends State<MyHomePage>
                 IconButton(
                   icon: Icon(
                     FlutterIcons.pulse_mco,
-                    color: Colors.red,
+                    color: Colors.lightBlue,
                   ),
                   onPressed: () => {
                     setState(
@@ -1686,7 +1687,7 @@ class MyHomePageState extends State<MyHomePage>
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(15),
                       bottomLeft: Radius.circular(15)),
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).splashColor,
                 ),
                 alignment: Alignment.center,
                 child: Icon(
@@ -1734,7 +1735,7 @@ class MyHomePageState extends State<MyHomePage>
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 100,
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).splashColor,
                     ),
                   ),
                 ))),
@@ -1768,6 +1769,7 @@ class MyHomePageState extends State<MyHomePage>
                               warningDismissed = true;
                               _speak();
                               _showMyDialog();
+
                             }),
                           ),
                         )),
@@ -2006,17 +2008,22 @@ class MyHomePageState extends State<MyHomePage>
       appBar: AppBar(
         automaticallyImplyLeading: true,
         actions: [Container()],
-        title: Text(
-          "Heart Start",
+        title: Row(
+          children: [
+            Text(
+              "RECOVER", style: TextStyle(color: Colors.lightBlue),
+            ),
+            Icon(FlutterIcons.ios_medical_ion, color: Theme.of(context).splashColor,)
+          ],
         ),
-        // leading: Builder(
-        //   builder: (context) => IconButton(
-        //     icon: Icon(FlutterIcons.timeline_alert_mco),
-        //     onPressed: () => {
-        //       updateDrawer(),
-        //       Scaffold.of(context).openDrawer()},
-        //   ),
-        // ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(FlutterIcons.ios_options_ion, color: Colors.lightBlue,),
+            onPressed: () => {
+              updateDrawer(),
+              Scaffold.of(context).openDrawer()},
+          ),
+        ),
       ),
       body: Stack(
         children: fullStack,
@@ -2035,7 +2042,7 @@ class OpenPulseButton extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(15),
         child: RawMaterialButton(
-          fillColor: Theme.of(context).accentColor,
+          fillColor: Theme.of(context).splashColor,
           splashColor: Colors.white,
           child: Padding(
             padding: EdgeInsets.all(10.0),
@@ -2089,7 +2096,7 @@ class NoCeck extends StatelessWidget {
         child: Padding(
             padding: EdgeInsets.all(15),
             child: RawMaterialButton(
-              fillColor: Colors.red,
+              fillColor: Colors.lightBlue,
               splashColor: Colors.white,
               child: Padding(
                 padding: EdgeInsets.all(10.0),
@@ -2138,7 +2145,7 @@ class deliveredShock extends StatelessWidget {
         child: Padding(
             padding: EdgeInsets.all(5),
             child: RawMaterialButton(
-              fillColor: Theme.of(context).primaryColor,
+              fillColor: Theme.of(context).splashColor,
               splashColor: Colors.white,
               child: Padding(
                 padding: EdgeInsets.all(5.0),
@@ -2179,7 +2186,7 @@ class goForCode extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return RawMaterialButton(
-      fillColor: Theme.of(context).primaryColor,
+      fillColor: Theme.of(context).splashColor,
       splashColor: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(10.0),

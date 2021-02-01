@@ -23,6 +23,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -574,9 +577,11 @@ class NestedTabBarState extends State<NestedTabBar>
     var prefs = await SharedPreferences.getInstance();
     prefs.setString('log', null);
     print('finished code');
-    if (parent.playCompressions) {
-      parent.toggleSound();
-    }
+
+    parent.player.setVolume(0);
+    parent.playerB.setVolume(0);
+    parent.progressPulseCheck = false;
+
     Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
@@ -970,7 +975,7 @@ class NestedTabBarState extends State<NestedTabBar>
                             children: <Widget>[
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor,
+                                  color: Theme.of(context).splashColor,
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
@@ -1083,7 +1088,7 @@ final PreviousMeasures = <String>{
   'Arterial catheterization'
 }.map((e) => _ListItem(e, false)).toList();
 final ROSC = <String>{
-  'ROSC',
+  'ROSC achieved',
   'Extubated after ROSC',
 }.map((e) => _ListItem(e, false)).toList();
 final ROSCDuration = <String>{'>20 min', '>24 hours', '>30 days'}
@@ -1140,7 +1145,7 @@ final MechanicalVentilation = <String>{
   "Mechanical Ventilation at time of CPA",
 }.map((e) => _ListItem(e, false)).toList();
 final Euthanasia = <String>{
-  "Euthenasia",
+  "Euthenasia performed",
   "Severity of illness",
   "Terminal illness",
   "Economic reasons"
@@ -1155,16 +1160,24 @@ class PageTwoState extends State<PageTwo> {
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
   TextEditingController timelineEditingController = TextEditingController();
-
+  pw.Document pdf;
+  Directory appDocDir;
+  String appDocPath;
+  TextEditingController infoController = TextEditingController();
+  ScrollController timelineController = ScrollController();
+  bool editing = false;
+  TextEditingController finalController =  TextEditingController();
+  String currentDocPath = 'Auto_Save';
+  List<String> savedFileString = [];
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Widget> fileTiles = List<Widget>();
+  
   editTimeline(int i) {
     setState(() {
       timelineEditing = i;
     });
   }
-
-  pw.Document pdf;
-  Directory appDocDir;
-  String appDocPath;
+  
   sendData() async {
     String log = '';
     if (infoController.text != null) {
@@ -1395,17 +1408,17 @@ class PageTwoState extends State<PageTwo> {
   @override
   void initState() {
     updateDrawer();
+    print(globals.log);
+    updateName();
+    finalController.text = globals.log + '\n\n-Case Information-\n\n' + globals.survey;
+    saveGlobalLog();
+    updateDirectory();
   }
-
-  TextEditingController infoController = TextEditingController();
-  ScrollController timelineController = ScrollController();
-
-  bool editing = false;
-  TextEditingController finalController =  TextEditingController();
+  
   Widget closeButton() {
     if (editing) {
       return TextButton(
-        child: Text('done', style: TextStyle(color: Colors.white),),
+        child: Text('done', style: TextStyle(color: Colors.lightBlue),),
         onPressed: () => {
           saveGlobalLog(),
           editing = false,
@@ -1421,78 +1434,219 @@ class PageTwoState extends State<PageTwo> {
       List<String> split = full.split('\n\n-Case Information-\n\n');
       globals.log = split[0];
       globals.survey = split[1];
+    }else{
+      globals.log = full;
+    }
+    print('starting save...');
+    saveFile(full);
+  }
+
+  saveFile(String string) async {
+    print('getting directory...');
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    print('folder: ' + appDocPath.toString());
+
+    File tobesaved = File(appDocPath + '/' + currentDocPath + '.txt');
+    print('saving as ' + tobesaved.path + ' ...');
+    tobesaved.writeAsString(string);
+    print('sucess');
+
+  }
+  deleteFile(String string) async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    print('folder: ' + appDocPath.toString());
+
+    File tobesaved = File(appDocPath + '/' + string + '.txt');
+    print('deleting ' + tobesaved.path + ' ...');
+    await tobesaved.delete();
+    print('sucess');
+    updateDirectory();
+  }
+  loadFile(String string) async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    File toLoad = File(appDocPath + '/' + string + '.txt');
+    print('loading ' + toLoad.path + ' ...');
+
+    String full = toLoad.readAsStringSync();
+    if (full.contains('\n\n-Case Information-\n\n')) {
+      List<String> split = full.split('\n\n-Case Information-\n\n');
+      globals.log = split[0];
+      globals.survey = split[1];
+    }else{
+      globals.log = full;
+    }
+    print('loaded: ' + globals.log + '||||||||' + globals.survey);
+    updateName();
+    updateDirectory();
+  }
+
+  updateName() {
+    if (globals.log.contains('Code Started')) {
+
+      currentDocPath = globals.log.substring(0, globals.log.indexOf('\t'));
+
+      print('naming current file: ' + currentDocPath  + '.');
+    }else{
+      print('did not find date to name file');
+    }
+  }
+
+  void updateDirectory() async {
+
+    savedFileString = [];
+    Directory directory = await getApplicationDocumentsDirectory();
+    List<FileSystemEntity> files = Directory(directory.path).listSync();
+    for (FileSystemEntity f in files) {
+
+      if (f.path.endsWith('.txt')) {
+        savedFileString.add(f.path.substring(f.path.lastIndexOf('/') + 1,  f.path.indexOf('.txt') ) );
+      }
+    }
+    print('saved files are: ' + savedFileString.toString());
+    createFileTiles();
+  }
+
+  Color checkSelectedColor(String e) {
+    if (e == currentDocPath) {
+      return Colors.lightBlueAccent;
+    }
+    return Colors.transparent;
+  }
+  List<Widget> checkSelectedIcon(String e) {
+    if (e == currentDocPath) {
+      return [Icon(FlutterIcons.arrow_right_thick_mco), Container(width: 10,)];
+    }
+    return [Container()];
+  }
+  createFileTiles() async{
+    if (savedFileString.length > 0) {
+      List<Widget> a = savedFileString.map((e) =>
+          Container(
+            color: checkSelectedColor(e),
+            child: ListTile(
+
+              trailing: IconButton(
+                icon: Icon(FlutterIcons.delete_mdi),
+                onPressed: () =>  {
+                  deleteFile(e)
+                },
+              ),
+              title: Row(
+                children: [
+                  ...checkSelectedIcon(e),
+                  Text(e),
+                ],
+              ),
+              onTap: () => {
+                loadFile(e)
+              },
+            ),
+          )
+      ).toList();
+      print('made tiles: ' + a.toString());
+      setState(() {
+        fileTiles = a;
+      });
+    }else{
+      fileTiles = List<Widget>();
     }
   }
   updateSurvey() {
     print('updating survey...');
-    String survey = '';
+    String survey = 'Disease category at admission:\n';
     for (_ListItem l in Disease) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nLocation of CPA:\n';
     for (_ListItem l in Location) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nComorbid conditions:\n';
     for (_ListItem l in ComorbidConditions) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +   '\n';
       }
     }
+    survey = survey + '\nSuspected cause:\n';
     for (_ListItem l in SuspectedCause) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nPrevious CPA:\n';
     for (_ListItem l in PreviousCPA) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nMeasures in place:\n';
     for (_ListItem l in PreviousMeasures) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
+    survey = survey + '\nAnesthesia:\n';
     for (_ListItem l in GeneralAnesthesia) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nVentilation:\n';
     for (_ListItem l in MechanicalVentilation) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nROSC:\n';
     for (_ListItem l in ROSC) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
+    survey = survey + '\nROSC duration:\n';
     for (_ListItem l in ROSCDuration) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
+    survey = survey + '\nEuthanasia:\n';
     for (_ListItem l in Euthanasia) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
+    survey = survey + '\nRearrest:\n';
     for (_ListItem l in Rearrest) {
       if (l.checked) {
-        survey = survey + l.value + ':  ' + l.checked.toString() +  '\n';
+        survey = survey + l.value +  '\n';
       }
     }
 
     globals.survey = survey;
   }
 
+  Timer autoSaveTimer;
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
+    if (autoSaveTimer != null) {
+      autoSaveTimer.cancel();
+    }
+    autoSaveTimer = Timer(Duration(seconds: 3), () => {
+      print('autosaving...'),
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(content: Text('auto saving...\n'), )
+      ),
+      //saveGlobalLog(),
+    });
     finalController.text = globals.log + '\n\n-Case Information-\n\n' + globals.survey;
     final diseaseL = Disease.map(
       (e) => GestureDetector(
@@ -1937,7 +2091,6 @@ class PageTwoState extends State<PageTwo> {
                         spacing: 8.0,
                         runSpacing: 4.0,
                       ),
-
                       Divider(),
                       Container(
                         padding: EdgeInsets.all(8),
@@ -1951,7 +2104,6 @@ class PageTwoState extends State<PageTwo> {
                         spacing: 8.0,
                         runSpacing: 4.0,
                       ),
-
                       Divider(),
                       anesthesiaOpener,
                       Divider(),
@@ -1986,6 +2138,7 @@ class PageTwoState extends State<PageTwo> {
       initialIndex: 1,
       child: Scaffold(
           resizeToAvoidBottomInset: true,
+          key: _scaffoldKey,
           appBar: AppBar(
             title: Text('Code Summary'),
             elevation: 1.0,
@@ -2000,16 +2153,23 @@ class PageTwoState extends State<PageTwo> {
               TabItem(icon: FlutterIcons.edit_3_fea, title: 'Edit'),
               TabItem(icon: FlutterIcons.send_faw, title: 'Send'),
             ],
-            onTap: (int i) => print(i),
+            onTap: (int i) => {print(i),
+              if (i == 0){
+                updateDirectory(),
+                createFileTiles(),
+              }
+            },
           ),
 
           body: TabBarView(
             physics: NeverScrollableScrollPhysics(),
             children: [
-              Stack(
+              Column(
                 children: [
-                  SizedBox.expand(
-                    child: Container(),
+                  Expanded(
+                    child: ListView(
+                      children: fileTiles,
+                    ),
                   ),
                 ],
               ),
@@ -2078,7 +2238,11 @@ class PageTwoState extends State<PageTwo> {
                     child: Container(
                       padding: EdgeInsets.all( 10),
                       child: TextField(
-
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          focusedBorder: InputBorder.none,
+                          labelText: 'Text File'
+                        ),
                         maxLines: null,
                         controller: finalController,
                         onTap: () => {
