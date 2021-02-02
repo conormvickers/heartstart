@@ -44,6 +44,14 @@ class _ListItem {
   bool checked;
 }
 
+class InfoBit {
+  InfoBit(this.stageName, this.codeName, this.value);
+
+  final String stageName;
+  String codeName;
+  String value;
+}
+
 class Entry {
   const Entry(this.title, [this.children = const <Entry>[]]);
 
@@ -1208,6 +1216,20 @@ class PageTwoState extends State<PageTwo> {
   int currentHistoryIndex = 0;
   FocusNode focusEdit = FocusNode();
   List<List<_ListItem>> surveyParts = List<List<_ListItem>>();
+  List<InfoBit> infoBits = [
+    'Event date',
+    'Doctor',
+    'Patient name',
+    'MRN',
+    'Client name',
+    'Sex',
+    'Date of birth',
+    'Weight',
+    'Chest',
+    'Breed'
+  ].map((e) => InfoBit(e, '', '')).toList();
+
+  List<String> codeNameRef;
 
   @override
   void initState() {
@@ -1231,7 +1253,22 @@ class PageTwoState extends State<PageTwo> {
       Euthanasia,
       Rearrest
     ];
-    print(globals.log);
+    codeNameRef = [
+      currentDocPath,
+      globals.doctor,
+      globals.patientName,
+      globals.mrn,
+      globals.clientName,
+      globals.sex,
+      globals.dob,
+      globals.weightKG.toString(),
+      globals.chest,
+      globals.breed,
+    ];
+    infoBits.asMap().forEach((key, value) {
+      value.codeName = codeNameRef[key];
+    });
+
     updateName();
     finalController.text =
         globals.log + '\n\n-Case Information-\n\n' + globals.survey;
@@ -1896,6 +1933,54 @@ class PageTwoState extends State<PageTwo> {
             });
   }
 
+  String doctor;
+  String chest;
+  String survey = "";
+  String patientName;
+  String mrn;
+  String clientName;
+  String sex;
+  String dob;
+  String breed;
+  double weightKG;
+  List<Widget> getInfoBitTiles() {
+    List<Widget> r = List<Widget>();
+    infoBits.asMap().forEach((key, value) {
+      r.add(GestureDetector(
+        onTap: () => {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) => {
+                    SimpleDialog(
+                      title: Text(value.stageName),
+                    )
+                  })
+        },
+        child: Container(
+          padding: EdgeInsets.all(5),
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text(value.stageName + ": "), Text(value.value)],
+                ),
+              ),
+              Container(
+                  width: 25,
+                  padding: EdgeInsets.all(5),
+                  child: FittedBox(
+                      child: Icon(
+                    FlutterIcons.edit_ant,
+                  )))
+            ],
+          ),
+        ),
+      ));
+    });
+    return r;
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
@@ -2257,22 +2342,54 @@ class PageTwoState extends State<PageTwo> {
                         alignment: Alignment.center,
                         height: 100,
                         decoration: BoxDecoration(),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        child: Column(
                           children: [
-                            Text(
-                              'Additional Info',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 40),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: FittedBox(
+                                      fit: BoxFit.fitHeight,
+                                      child: Icon(
+                                        FlutterIcons
+                                            .arrow_up_circle_outline_mco,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 4,
+                                    child: FittedBox(
+                                      fit: BoxFit.fitHeight,
+                                      child: Text(
+                                        'Additional Info',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: FittedBox(
+                                      child: Icon(
+                                        FlutterIcons
+                                            .arrow_up_circle_outline_mco,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                            Icon(
-                              FlutterIcons.arrow_up_circle_outline_mco,
-                              color: Colors.white,
-                              size: 40,
-                            )
                           ],
                         ),
+                      ),
+                      Divider(),
+                      Container(
+                        child: Column(children: getInfoBitTiles()),
                       ),
                       Divider(),
                       Container(
