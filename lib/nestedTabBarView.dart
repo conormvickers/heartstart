@@ -301,7 +301,9 @@ var _lastGiven = <DateTime>[
   DateTime.now(),
   DateTime.now(),
 ];
-
+bool needBadge = false;
+bool twominbadge = false;
+bool tenminbadge = false;
 final medItems = List<MedListItem>.generate(_medStrings.length, (i) {
   return MedMessageItem(_medStrings[i], _doses[i],
       'last given' + _lastGiven[i].toString() + 'min ago');
@@ -331,10 +333,6 @@ class MedMessageItem implements MedListItem {
   Widget buildTrailing(BuildContext context) => Text(trailing);
 }
 
-bool needBadge = false;
-bool twominbadge = false;
-bool tenminbadge = false;
-
 class NestedTabBarState extends State<NestedTabBar>
     with TickerProviderStateMixin {
   TabController nestedTabController;
@@ -342,6 +340,75 @@ class NestedTabBarState extends State<NestedTabBar>
   MyHomePageState parent;
 
   NestedTabBarState(this.parent);
+
+  int breathingValue = 0;
+  int breathSeconds = 0;
+  var tapTimes = <DateTime>[];
+  var tapDifs = <int>[];
+  var perc1 = 0.0;
+  var perc2 = 0.0;
+  var perc3 = 0.0;
+  var anim1 = true;
+  var anim2 = true;
+  var anim3 = true;
+  double speed = 0;
+  Timer tapResetTimer;
+  static final _citems = <String>[
+    'IV Access',
+    'Monitor',
+    'Oxygen',
+    'Intubation',
+    'Capnography',
+    'Consider Anesthesia Reversal (Naloxone)'
+  ].map((item) => _ListItem(item, false)).toList();
+  List<String> chestTypes = ['round', 'keel', 'flat'];
+  List<IconData> chestIcons = [
+    Chesttypes.flat,
+    Chesttypes.keel,
+    Chesttypes.round,
+  ];
+
+  resetEverything() {
+    print('reseting everything from nested tab bar');
+    for (_ListItem l in _citems) {
+      l.checked = false;
+    }
+    parent.centerIcon = FlutterIcons.heart_ant;
+    globals.weightKG = null;
+    globals.chest = null;
+    timesGiven = <int>[
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ];
+    _lastGiven = <DateTime>[
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+      DateTime.now(),
+    ];
+  }
 
   @override
   void initState() {
@@ -377,9 +444,6 @@ class NestedTabBarState extends State<NestedTabBar>
             });
   }
 
-  int breathingValue = 0;
-  int breathSeconds = 0;
-
   breathingBar() {
     return Container(
       padding: EdgeInsets.all(15),
@@ -392,7 +456,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Theme.of(context).primaryColor,
+                    progressColor: Theme.of(context).accentColor,
                     verticalDirection: VerticalDirection.up,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -402,7 +466,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Theme.of(context).primaryColor,
+                    progressColor: Theme.of(context).accentColor,
                     verticalDirection: VerticalDirection.down,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -439,16 +503,6 @@ class NestedTabBarState extends State<NestedTabBar>
     super.dispose();
     nestedTabController.dispose();
   }
-
-  var tapTimes = <DateTime>[];
-  var tapDifs = <int>[];
-  var perc1 = 0.0;
-  var perc2 = 0.0;
-  var perc3 = 0.0;
-  var anim1 = true;
-  var anim2 = true;
-  var anim3 = true;
-  double speed = 0;
 
   _launchURL() async {
     const url = 'https://recoverinitiative.org/';
@@ -528,8 +582,6 @@ class NestedTabBarState extends State<NestedTabBar>
             });
   }
 
-  Timer tapResetTimer;
-
   _resetTapper() {
     anim1 = false;
     anim2 = false;
@@ -558,38 +610,6 @@ class NestedTabBarState extends State<NestedTabBar>
         });
   }
 
-  static final _citems = <String>[
-    'IV Access',
-    'Monitor',
-    'Oxygen',
-    'Intubation',
-    'Capnography',
-    'Consider Anesthesia Reversal (Naloxone)'
-  ].map((item) => _ListItem(item, false)).toList();
-
-  stopCode() async {
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('kk:mm').format(now);
-    String combined = "\n" + formattedDate + "\tCode Stopped";
-    String full = combined.toString() + "\t";
-    globals.log = globals.log + full;
-    var prefs = await SharedPreferences.getInstance();
-    prefs.setString('log', null);
-    print('finished code');
-
-    parent.player.setVolume(0);
-    parent.playerB.setVolume(0);
-    parent.progressPulseCheck = false;
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
-  }
-
-  List<String> chestTypes = ['round', 'keel', 'flat'];
-  List<IconData> chestIcons = [
-    Chesttypes.flat,
-    Chesttypes.keel,
-    Chesttypes.round,
-  ];
   _checkForWeight() {
     if (globals.weightKG == null) {
       return Container(
@@ -773,8 +793,8 @@ class NestedTabBarState extends State<NestedTabBar>
       children: <Widget>[
         TabBar(
           controller: nestedTabController,
-          indicatorColor: Theme.of(context).primaryColor,
-          labelColor: Theme.of(context).primaryColor,
+          indicatorColor: Theme.of(context).accentColor,
+          labelColor: Theme.of(context).accentColor,
           unselectedLabelColor: Colors.black54,
           isScrollable: true,
           onTap: (index) {
@@ -947,11 +967,11 @@ class NestedTabBarState extends State<NestedTabBar>
                                       valueWidget: Container(),
                                       segments: [
                                         GaugeSegment('Low', 50,
-                                            Theme.of(context).primaryColor),
+                                            Theme.of(context).splashColor),
                                         GaugeSegment(
                                             'Medium', 20, Colors.white),
                                         GaugeSegment('High', 50,
-                                            Theme.of(context).primaryColor),
+                                            Theme.of(context).splashColor),
                                       ],
                                       currentValue: speed,
                                       displayWidget: Text(tapLabel,
@@ -1221,6 +1241,41 @@ class PageTwoState extends State<PageTwo> {
     updateDirectory();
   }
 
+  Future<void> makeSure(String ask, Function function) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Just checking'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to'),
+                Text(ask),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                function();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _simplePopup(int i) => PopupMenuButton<int>(
         itemBuilder: (context) => [
           PopupMenuItem(
@@ -1236,16 +1291,20 @@ class PageTwoState extends State<PageTwo> {
           print(s),
           if (s == 1)
             {
-              setState(() => {
-                    eventSplit.removeAt(i),
-                    globals.log = eventSplit.join('\n'),
-                    print(globals.log),
-                    timelineEditing = null,
-                    FocusScope.of(context).unfocus(),
-                    updateDrawer(),
-                    updateTextField(),
-                    saveGlobalLog()
-                  })
+              makeSure(
+                  'delete this item?',
+                  () => {
+                        setState(() => {
+                              eventSplit.removeAt(i),
+                              globals.log = eventSplit.join('\n'),
+                              print(globals.log),
+                              timelineEditing = null,
+                              FocusScope.of(context).unfocus(),
+                              updateDrawer(),
+                              updateTextField(),
+                              saveGlobalLog()
+                            })
+                      })
             }
           else
             {
@@ -1718,9 +1777,11 @@ class PageTwoState extends State<PageTwo> {
                 color: checkSelectedColor(e),
                 child: ListTile(
                   trailing: IconButton(
-                    icon: Icon(FlutterIcons.delete_mdi),
-                    onPressed: () => {deleteFile(e)},
-                  ),
+                      icon: Icon(FlutterIcons.delete_mdi),
+                      onPressed: () => {
+                            makeSure('perminantly delete this file?',
+                                () => {deleteFile(e)})
+                          }),
                   title: Row(
                     children: [
                       ...checkSelectedIcon(e),
@@ -2328,6 +2389,30 @@ class PageTwoState extends State<PageTwo> {
           resizeToAvoidBottomInset: false,
           key: _scaffoldKey,
           appBar: AppBar(
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: Row(
+                children: [
+                  Icon(
+                    FlutterIcons.left_ant,
+                    size: 10,
+                    color: Theme.of(context).splashColor,
+                  ),
+                  Icon(
+                    FlutterIcons.alert_decagram_mco,
+                    color: Theme.of(context).splashColor,
+                  ),
+                ],
+              ),
+              onPressed: () => {
+                makeSure(
+                    'start NEW code event?',
+                    () => {
+                          print('reset hit'),
+                          Navigator.pop(context, 'true'),
+                        })
+              },
+            ),
             title: Row(
               children: [
                 Text(
@@ -2442,46 +2527,3 @@ class PageTwoState extends State<PageTwo> {
     );
   }
 }
-// RaisedButton(
-// child: Text('New Code'),
-// onPressed: () {
-// globals.log = "";
-// globals.stopCodeNow = false;
-// globals.codeStart = DateTime.now();
-// timesGiven = <int>[
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// 0,
-// ];
-// _lastGiven = <DateTime>[
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// DateTime.now(),
-// ];
-// globals.reset = true;
-// globals.weightKG = null;
-// globals.weightIndex = null;
-// Navigator.pop(context);
-// }),

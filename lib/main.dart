@@ -73,7 +73,7 @@ var askForPulse = false;
 var warningDismissed = false;
 int timelineEditing;
 TextEditingController timelineEditingController = TextEditingController();
-final GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
+GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
 Scaffold currentScaffold;
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 var nested = NestedTabBar(
@@ -195,6 +195,30 @@ class MyHomePageState extends State<MyHomePage>
       }
       if (state == AppLifecycleState.resumed) {}
     });
+  }
+
+  resetEverything() {
+    nestedKey.currentState.resetEverything();
+    handsFree = true;
+    fraction = 0;
+    minPassed = 0;
+    secPassed = 0;
+    fractionPulse = 0;
+    dispSec = 0;
+    _weightValue = 5;
+    enterCapno = false;
+    player.setVolume(1);
+    playerB.setVolume(1);
+
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
+    globals.log = formattedDate + "\tCode Started";
+    globals.codeStart = now;
+
+    centerIcon = FlutterIcons.heart_ant;
+    inst = "Continue Compressions";
+
+    progressPulseCheck = true;
   }
 
   _saveLog() async {
@@ -320,7 +344,7 @@ class MyHomePageState extends State<MyHomePage>
     });
   }
 
-  stopAndGoToNextPage() {
+  stopAndGoToNextPage() async {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('kk:mm').format(now);
     String combined = "\n" + formattedDate + "\tCode Stopped";
@@ -333,7 +357,13 @@ class MyHomePageState extends State<MyHomePage>
     askForPulse = false;
     nested.show = false;
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
+    final reset = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => PageTwo()));
+    print('returned ' + reset.toString());
+    if (reset == 'true') {
+      print('returned reset');
+      resetEverything();
+    }
   }
 
   loadPreferences() async {
@@ -437,7 +467,7 @@ class MyHomePageState extends State<MyHomePage>
               onPressed: () {
                 Navigator.of(context).pop();
                 globals.log = globals.log + '\n Code stopped: pulse found';
-                nestedKey.currentState.stopCode();
+                stopAndGoToNextPage();
               },
             ),
             TextButton(
@@ -446,7 +476,7 @@ class MyHomePageState extends State<MyHomePage>
                 Navigator.of(context).pop();
                 globals.log = globals.log +
                     '\n Code stopped: resuscitation efforts withdrawn';
-                nestedKey.currentState.stopCode();
+                stopAndGoToNextPage();
               },
             ),
             TextButton(
@@ -468,17 +498,16 @@ class MyHomePageState extends State<MyHomePage>
       DeviceOrientation.portraitDown,
     ]);
     WidgetsBinding.instance.addObserver(this);
+    super.initState();
 
     nested = NestedTabBar(
       parent: this,
       key: nestedKey,
     );
-
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
     globals.log = formattedDate + "\tCode Started";
     globals.codeStart = now;
-    super.initState();
 
     minPassed = 0;
     secPassed = 0;
@@ -488,6 +517,12 @@ class MyHomePageState extends State<MyHomePage>
     _triggerUpdate();
 
     loadPreferences();
+    Future.delayed(
+        Duration(seconds: 5),
+        () => {
+              warningDismissed = true,
+              _speak(),
+            });
 
     Future<void>.delayed(
         Duration(seconds: 10),
