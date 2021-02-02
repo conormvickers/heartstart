@@ -24,7 +24,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:undo/undo.dart';
 
 void main() {
   runApp(MyApp());
@@ -308,20 +307,7 @@ class MyHomePageState extends State<MyHomePage>
         _speechThis(
             'Continue compressions while charging. Ensure clear before shock');
       } else if (selected == "pulse") {
-        DateTime now = DateTime.now();
-        String formattedDate = DateFormat('kk:mm').format(now);
-        String combined = "\n" + formattedDate + "\tCode Stopped";
-        String full = combined.toString() + "\t";
-        globals.log = globals.log + full;
-
-        player.setVolume(0);
-        playerB.setVolume(0);
-        progressPulseCheck = false;
-
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => PageTwo()));
-        askForPulse = false;
-        nested.show = false;
+        stopAndGoToNextPage();
       } else {
         askForPulse = false;
         nested.show = false;
@@ -332,6 +318,22 @@ class MyHomePageState extends State<MyHomePage>
         _speechThis('Continue compressions');
       }
     });
+  }
+
+  stopAndGoToNextPage() {
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('kk:mm').format(now);
+    String combined = "\n" + formattedDate + "\tCode Stopped";
+    String full = combined.toString() + "\t";
+    globals.log = globals.log + full;
+
+    player.setVolume(0);
+    playerB.setVolume(0);
+    progressPulseCheck = false;
+    askForPulse = false;
+    nested.show = false;
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => PageTwo()));
   }
 
   loadPreferences() async {
@@ -368,8 +370,7 @@ class MyHomePageState extends State<MyHomePage>
 
     if (test != null) {
       print('found log ' + test);
-    }
-    if (test != null) {
+
       String st = prefs.getString('logSaveTime') ?? null;
       DateTime dt;
       if (st == null) {
@@ -1184,8 +1185,7 @@ class MyHomePageState extends State<MyHomePage>
                                       Column(
                                         children: [
                                           Expanded(
-                                            child: Container(
-                                            ),
+                                            child: Container(),
                                           ),
                                           Expanded(
                                             child: FittedBox(
@@ -1195,16 +1195,14 @@ class MyHomePageState extends State<MyHomePage>
                                             ),
                                           ),
                                           Expanded(
-                                            child: Container(
-                                            ),
+                                            child: Container(),
                                           ),
                                         ],
                                       ),
                                       Column(
                                         children: [
                                           Expanded(
-                                            child: Container(
-                                            ),
+                                            child: Container(),
                                           ),
                                           Expanded(
                                             flex: 4,
@@ -1215,8 +1213,7 @@ class MyHomePageState extends State<MyHomePage>
                                             ),
                                           ),
                                           Expanded(
-                                            child: Container(
-                                            ),
+                                            child: Container(),
                                           ),
                                         ],
                                       ),
@@ -1642,7 +1639,8 @@ class MyHomePageState extends State<MyHomePage>
                   onPressed: () => {_ensureStopCode()},
                 ),
                 IconButton(
-                  icon: Icon(FlutterIcons.dog_side_mco, color: Colors.lightBlue),
+                  icon:
+                      Icon(FlutterIcons.dog_side_mco, color: Colors.lightBlue),
                   onPressed: () => {
                     print('change weight'),
                     setState(() {
@@ -1724,64 +1722,104 @@ class MyHomePageState extends State<MyHomePage>
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Expanded(
-            flex: 1,
-            child: Container(
-                alignment: Alignment.center,
-                color: Colors.black87,
-                child: Padding(
-                  padding: EdgeInsets.all(15),
-                  child: AutoSizeText(
-                    'THIS IS INTENDED FOR TRAINING PURPOSES ONLY',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 100,
-                      color: Theme.of(context).splashColor,
+          child: Container(
+              alignment: Alignment.center,
+              color: Colors.black87,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: EdgeInsets.all(30),
+                      child: GestureDetector(
+                          onTap: () => setState(() {
+                                print('dismiss warning');
+                                warningDismissed = true;
+                                _speak();
+                                _showMyDialog();
+                              }),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).splashColor,
+                            ),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                    child: Container(
+                                  child: FittedBox(
+                                    child: Icon(FlutterIcons.heart_ant,
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                )),
+                                Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: FittedBox(
+                                      child: Text(
+                                        'Start Code',
+                                        style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Text('auto starting in 5 seconds',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color:
+                                              Theme.of(context).primaryColor)),
+                                ),
+                              ],
+                            ),
+                          )),
                     ),
                   ),
-                ))),
-        Expanded(
-            flex: 1,
-            child: Container(
-                alignment: Alignment.center,
-                color: Colors.black87,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Flexible(
-                      flex: 1,
-                      child: AutoSizeText(
-                        'Ensure code status for the patient by referencing chart ',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 100,
-                          color: Colors.white,
-                        ),
-                      ),
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(30),
+                      child: GestureDetector(
+                          onTap: () => setState(() {
+                                print('going to files');
+                                stopAndGoToNextPage();
+                              }),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).accentColor,
+                            ),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                    child: Container(
+                                  child: FittedBox(
+                                    child: Icon(FlutterIcons.folderopen_ant,
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                )),
+                                Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: FittedBox(
+                                      child: Text('Edit Files',
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .primaryColor)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
                     ),
-                    Flexible(
-                        flex: 1,
-                        child: Container(
-                          padding: EdgeInsets.all(15),
-                          alignment: Alignment.center,
-                          child: goForCode(
-                            onPressed: () => setState(() {
-                              print('dismiss warning');
-                              warningDismissed = true;
-                              _speak();
-                              _showMyDialog();
-
-                            }),
-                          ),
-                        )),
-                    Flexible(
-                      flex: 1,
-                      child: RaisedButton(
-                        onPressed: _launchURL,
-                        child: Text('Open Source Information'),
-                      ),
-                    )
-                  ],
-                ))),
+                  ),
+                ],
+              )),
+        ),
       ],
     );
 
@@ -1838,8 +1876,15 @@ class MyHomePageState extends State<MyHomePage>
                             textAlign: TextAlign.right,
                             focusNode: capnoNode,
                             decoration: InputDecoration(
-                              labelText: addEventString,
-                            ),
+                                border: OutlineInputBorder(),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Theme.of(context).accentColor,
+                                      width: 1.0),
+                                ),
+                                labelText: addEventString,
+                                labelStyle: TextStyle(
+                                    color: Theme.of(context).accentColor)),
                             controller: capnoController,
                             keyboardType: eventKeyboard,
                             onEditingComplete: () => {
@@ -2011,17 +2056,23 @@ class MyHomePageState extends State<MyHomePage>
         title: Row(
           children: [
             Text(
-              "RECOVER", style: TextStyle(color: Colors.lightBlue),
+              "RECOVER",
+              style: TextStyle(color: Colors.lightBlue),
             ),
-            Icon(FlutterIcons.ios_medical_ion, color: Theme.of(context).splashColor,)
+            Icon(
+              FlutterIcons.ios_medical_ion,
+              color: Theme.of(context).splashColor,
+            )
           ],
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(FlutterIcons.ios_options_ion, color: Colors.lightBlue,),
-            onPressed: () => {
-              updateDrawer(),
-              Scaffold.of(context).openDrawer()},
+            icon: Icon(
+              FlutterIcons.ios_options_ion,
+              color: Colors.lightBlue,
+            ),
+            onPressed: () =>
+                {updateDrawer(), Scaffold.of(context).openDrawer()},
           ),
         ),
       ),

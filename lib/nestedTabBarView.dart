@@ -26,7 +26,6 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 
-
 class NestedTabBar extends StatefulWidget {
   var show = false;
   final pass;
@@ -1072,28 +1071,6 @@ final Location = <String>{
   "Waiting Room",
   "Other"
 }.map((e) => _ListItem(e, false)).toList();
-final PreviousCPA = <String>{
-  'No',
-  'Yes once',
-  'Yes twice',
-  'Yes three times',
-  'Yes four times',
-  'Yes five or more times',
-}.map((e) => _ListItem(e, false)).toList();
-final PreviousMeasures = <String>{
-  'Venous access, peripheral',
-  'Venous access central',
-  'Tracheal intubation',
-  'ECG monitoring',
-  'Arterial catheterization'
-}.map((e) => _ListItem(e, false)).toList();
-final ROSC = <String>{
-  'ROSC achieved',
-  'Extubated after ROSC',
-}.map((e) => _ListItem(e, false)).toList();
-final ROSCDuration = <String>{'>20 min', '>24 hours', '>30 days'}
-    .map((e) => _ListItem(e, false))
-    .toList();
 final ComorbidConditions = <String>{
   "Arrhythmia",
   "Sepsis",
@@ -1135,6 +1112,21 @@ final SuspectedCause = <String>{
   "Unknown",
   "Other"
 }.map((e) => _ListItem(e, false)).toList();
+final PreviousCPA = <String>{
+  'No',
+  'Yes once',
+  'Yes twice',
+  'Yes three times',
+  'Yes four times',
+  'Yes five or more times',
+}.map((e) => _ListItem(e, false)).toList();
+final PreviousMeasures = <String>{
+  'Venous access, peripheral',
+  'Venous access central',
+  'Tracheal intubation',
+  'ECG monitoring',
+  'Arterial catheterization'
+}.map((e) => _ListItem(e, false)).toList();
 final GeneralAnesthesia = <String>{
   "General Anesthesia at time of CPA",
   "Induction",
@@ -1144,6 +1136,13 @@ final GeneralAnesthesia = <String>{
 final MechanicalVentilation = <String>{
   "Mechanical Ventilation at time of CPA",
 }.map((e) => _ListItem(e, false)).toList();
+final ROSC = <String>{
+  'ROSC achieved',
+  'Extubated after ROSC',
+}.map((e) => _ListItem(e, false)).toList();
+final ROSCDuration = <String>{'>20 min', '>24 hours', '>30 days'}
+    .map((e) => _ListItem(e, false))
+    .toList();
 final Euthanasia = <String>{
   "Euthenasia performed",
   "Severity of illness",
@@ -1154,6 +1153,20 @@ final Rearrest = <String>{
   "Re-arrrest without CPR",
   "Re-arrest w/ CPR, but without sustained ROSC",
 }.map((e) => _ListItem(e, false)).toList();
+List<String> partNames = [
+  'Disease category at admission:\n',
+  '\nLocation of CPA:\n',
+  '\nComorbid conditions:\n',
+  '\nSuspected cause:\n',
+  '\nPrevious CPA:\n',
+  '\nMeasures in place:\n',
+  '\nAnesthesia:\n',
+  '\nVentilation:\n',
+  '\nROSC:\n',
+  '\nROSC duration:\n',
+  '\nEuthanasia:\n',
+  '\nRearrest:\n',
+];
 
 class PageTwoState extends State<PageTwo> {
   List<Widget> timelineTiles = List<Widget>();
@@ -1166,18 +1179,96 @@ class PageTwoState extends State<PageTwo> {
   TextEditingController infoController = TextEditingController();
   ScrollController timelineController = ScrollController();
   bool editing = false;
-  TextEditingController finalController =  TextEditingController();
+  TextEditingController finalController = TextEditingController();
   String currentDocPath = 'Auto_Save';
   List<String> savedFileString = [];
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Widget> fileTiles = List<Widget>();
-  
+  List<String> previousLogs = List<String>();
+  int currentHistoryIndex = 0;
+  FocusNode focusEdit = FocusNode();
+  List<List<_ListItem>> surveyParts = List<List<_ListItem>>();
+
+  @override
+  void initState() {
+    focusEdit.addListener(() {
+      if (focusEdit.hasFocus) {
+        timelineEditingController.selection = TextSelection(
+            baseOffset: 0, extentOffset: timelineEditingController.text.length);
+      }
+    });
+    surveyParts = [
+      Disease,
+      Location,
+      ComorbidConditions,
+      SuspectedCause,
+      PreviousCPA,
+      PreviousMeasures,
+      GeneralAnesthesia,
+      MechanicalVentilation,
+      ROSC,
+      ROSCDuration,
+      Euthanasia,
+      Rearrest
+    ];
+    print(globals.log);
+    updateName();
+    finalController.text =
+        globals.log + '\n\n-Case Information-\n\n' + globals.survey;
+    previousLogs.insert(0, finalController.text);
+    updateDrawer();
+    saveGlobalLog();
+    updateDirectory();
+  }
+
+  Widget _simplePopup(int i) => PopupMenuButton<int>(
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 1,
+            child: Text("Delete"),
+          ),
+          PopupMenuItem(
+            value: 2,
+            child: Text("Add"),
+          ),
+        ],
+        onSelected: (int s) => {
+          print(s),
+          if (s == 1)
+            {
+              setState(() => {
+                    eventSplit.removeAt(i),
+                    globals.log = eventSplit.join('\n'),
+                    print(globals.log),
+                    timelineEditing = null,
+                    FocusScope.of(context).unfocus(),
+                    updateDrawer(),
+                    updateTextField(),
+                    saveGlobalLog()
+                  })
+            }
+          else
+            {
+              setState(() => {
+                    eventSplit.insert(i, 'unknown event'),
+                    globals.log = eventSplit.join('\n'),
+                    print(globals.log),
+                    timelineEditing = null,
+                    FocusScope.of(context).unfocus(),
+                    updateDrawer(),
+                    updateTextField(),
+                    saveGlobalLog()
+                  })
+            }
+        },
+      );
+
   editTimeline(int i) {
     setState(() {
       timelineEditing = i;
     });
   }
-  
+
   sendData() async {
     String log = '';
     if (infoController.text != null) {
@@ -1252,10 +1343,11 @@ class PageTwoState extends State<PageTwo> {
       globals.log = eventSplit.join('\n');
     });
     updateDrawer();
+    updateTextField();
+    saveGlobalLog();
   }
 
   updateDrawer() {
-    FocusNode focusEdit = FocusNode();
     setState(() {
       print('updating drawer');
       eventSplit = globals.log.split('\n');
@@ -1326,6 +1418,8 @@ class PageTwoState extends State<PageTwo> {
                       timelineEditing = null,
                       FocusScope.of(context).unfocus(),
                       updateDrawer(),
+                      updateTextField(),
+                      saveGlobalLog(),
                     })
               },
             );
@@ -1337,6 +1431,7 @@ class PageTwoState extends State<PageTwo> {
             );
           }
           TimelineTile add = TimelineTile(
+            key: Key(i.toString() + rest),
             alignment: TimelineAlign.manual,
             lineXY: 0.1,
             startChild: Container(
@@ -1356,12 +1451,7 @@ class PageTwoState extends State<PageTwo> {
                   });
                 },
                 child: Row(
-                  children: [
-                    Expanded(child: endChild),
-                    Icon(
-                      FlutterIcons.drag_handle_mdi,
-                    ),
-                  ],
+                  children: [Expanded(child: endChild), _simplePopup(i)],
                 ),
               ),
             ),
@@ -1377,71 +1467,160 @@ class PageTwoState extends State<PageTwo> {
                   color: Colors.white,
                 )),
           );
-          timelineTiles.add(Slidable(
-              key: Key(i.toString() + 'timeline'),
-              actionPane: SlidableScrollActionPane(),
-              actionExtentRatio: 0.2,
-              secondaryActions: [
-                IconSlideAction(
-                  caption: 'delete',
-                  icon: FlutterIcons.delete_mdi,
-                  color: Colors.lightBlue,
-                  onTap: () => {
-                    setState(() => {
-                          eventSplit.removeAt(i),
-                          globals.log = eventSplit.join('\n'),
-                          print(globals.log),
-                          timelineEditing = null,
-                          FocusScope.of(context).unfocus(),
-                          updateDrawer(),
-                        })
-                  },
-                )
-              ],
-              child: add));
+          timelineTiles.add(add);
         }
       }
       focusEdit.requestFocus();
     });
   }
 
-  @override
-  void initState() {
-    updateDrawer();
-    print(globals.log);
-    updateName();
-    finalController.text = globals.log + '\n\n-Case Information-\n\n' + globals.survey;
-    saveGlobalLog();
-    updateDirectory();
-  }
-  
   Widget closeButton() {
     if (editing) {
       return TextButton(
-        child: Text('done', style: TextStyle(color: Colors.lightBlue),),
+        child: Text(
+          'done',
+          style: TextStyle(color: Colors.lightBlue),
+        ),
         onPressed: () => {
           saveGlobalLog(),
           editing = false,
           FocusScope.of(context).unfocus(),
-    },
+        },
       );
     }
     return Container();
   }
-  saveGlobalLog() {
-    String full = finalController.text;
+
+  List<Widget> undoButtons() {
+    List<Widget> r = List<Widget>();
+
+    if (previousLogs.length > 1 &&
+        currentHistoryIndex < previousLogs.length - 1) {
+      r.add(
+        IconButton(
+          icon: Icon(FlutterIcons.undo_alt_faw5s, size: 15),
+          onPressed: () => {
+            if (currentHistoryIndex < previousLogs.length - 1)
+              {
+                currentHistoryIndex++,
+              },
+            print('now on ' +
+                currentHistoryIndex.toString() +
+                'out of ' +
+                previousLogs.length.toString()),
+            parseData(previousLogs[currentHistoryIndex])
+          },
+        ),
+      );
+    } else {
+      r.add(
+        IconButton(
+          icon: Icon(FlutterIcons.undo_alt_faw5s, size: 15),
+        ),
+      );
+    }
+    if (currentHistoryIndex > 0) {
+      r.add(
+        IconButton(
+          icon: Icon(FlutterIcons.redo_alt_faw5s, size: 15),
+          onPressed: () => {
+            if (currentHistoryIndex > 0)
+              {
+                currentHistoryIndex--,
+              },
+            print('now on ' +
+                currentHistoryIndex.toString() +
+                'out of ' +
+                previousLogs.length.toString()),
+            parseData(previousLogs[currentHistoryIndex])
+          },
+        ),
+      );
+    } else {
+      r.add(
+        IconButton(
+          icon: Icon(FlutterIcons.redo_alt_faw5s, size: 15),
+        ),
+      );
+    }
+
+    return r;
+  }
+
+  parseData(String full) {
     if (full.contains('\n\n-Case Information-\n\n')) {
       List<String> split = full.split('\n\n-Case Information-\n\n');
       globals.log = split[0];
       globals.survey = split[1];
-    }else{
+    } else {
       globals.log = full;
     }
+    List<String> surveySplit = globals.survey.split('\n\n');
+    surveyParts.asMap().forEach((e, a) {
+      a.asMap().forEach((f, b) {
+        b.checked = false;
+      });
+    });
+    surveySplit.asMap().forEach((i, split) {
+      partNames.asMap().forEach((j, name) {
+        if (split.contains(name)) {
+          surveyParts[j].asMap().forEach((k, part) {
+            if (split.contains(part.value)) {
+              part.checked = true;
+            }
+          });
+        }
+      });
+    });
+
+    setState(() {
+      finalController.text = full;
+      updateDrawer();
+      updateSurvey(false);
+    });
+  }
+
+  updateTextField() {
+    setState(() {
+      finalController.text =
+          globals.log + '\n\n-Case Information-\n\n' + globals.survey;
+    });
+  }
+
+  saveGlobalLog() {
+    updateTextField();
+    String full = finalController.text;
+
+    if (full.contains('\n\n-Case Information-\n\n')) {
+      List<String> split = full.split('\n\n-Case Information-\n\n');
+      globals.log = split[0];
+      globals.survey = split[1];
+    } else {
+      globals.log = full;
+    }
+
+    if (currentHistoryIndex > 0) {
+      previousLogs.removeRange(0, currentHistoryIndex);
+      currentHistoryIndex = 0;
+    }
+    if (previousLogs[0] != full) {
+      previousLogs.insert(0, full);
+    } else {
+      print('not added, the same');
+    }
+
     print('starting save...');
+
     saveFile(full);
   }
 
   saveFile(String string) async {
+    if (_scaffoldKey.currentContext != null) {
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text('saving...\n'),
+        duration: Duration(seconds: 1),
+      ));
+    }
     print('getting directory...');
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
@@ -1451,8 +1630,8 @@ class PageTwoState extends State<PageTwo> {
     print('saving as ' + tobesaved.path + ' ...');
     tobesaved.writeAsString(string);
     print('sucess');
-
   }
+
   deleteFile(String string) async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
@@ -1464,6 +1643,7 @@ class PageTwoState extends State<PageTwo> {
     print('sucess');
     updateDirectory();
   }
+
   loadFile(String string) async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
@@ -1475,34 +1655,37 @@ class PageTwoState extends State<PageTwo> {
       List<String> split = full.split('\n\n-Case Information-\n\n');
       globals.log = split[0];
       globals.survey = split[1];
-    }else{
+    } else {
       globals.log = full;
     }
     print('loaded: ' + globals.log + '||||||||' + globals.survey);
     updateName();
     updateDirectory();
+
+    parseData(full);
   }
 
   updateName() {
     if (globals.log.contains('Code Started')) {
-
       currentDocPath = globals.log.substring(0, globals.log.indexOf('\t'));
+      if (currentDocPath.contains('\n')) {
+        currentDocPath = currentDocPath.substring(currentDocPath.indexOf('\n'));
+      }
 
-      print('naming current file: ' + currentDocPath  + '.');
-    }else{
+      print('naming current file: ' + currentDocPath + '.');
+    } else {
       print('did not find date to name file');
     }
   }
 
   void updateDirectory() async {
-
     savedFileString = [];
     Directory directory = await getApplicationDocumentsDirectory();
     List<FileSystemEntity> files = Directory(directory.path).listSync();
     for (FileSystemEntity f in files) {
-
       if (f.path.endsWith('.txt')) {
-        savedFileString.add(f.path.substring(f.path.lastIndexOf('/') + 1,  f.path.indexOf('.txt') ) );
+        savedFileString.add(f.path
+            .substring(f.path.lastIndexOf('/') + 1, f.path.indexOf('.txt')));
       }
     }
     print('saved files are: ' + savedFileString.toString());
@@ -1515,170 +1698,176 @@ class PageTwoState extends State<PageTwo> {
     }
     return Colors.transparent;
   }
+
   List<Widget> checkSelectedIcon(String e) {
     if (e == currentDocPath) {
-      return [Icon(FlutterIcons.arrow_right_thick_mco), Container(width: 10,)];
+      return [
+        Icon(FlutterIcons.arrow_right_thick_mco),
+        Container(
+          width: 10,
+        )
+      ];
     }
     return [Container()];
   }
-  createFileTiles() async{
-    if (savedFileString.length > 0) {
-      List<Widget> a = savedFileString.map((e) =>
-          Container(
-            color: checkSelectedColor(e),
-            child: ListTile(
 
-              trailing: IconButton(
-                icon: Icon(FlutterIcons.delete_mdi),
-                onPressed: () =>  {
-                  deleteFile(e)
-                },
-              ),
-              title: Row(
-                children: [
-                  ...checkSelectedIcon(e),
-                  Text(e),
-                ],
-              ),
-              onTap: () => {
-                loadFile(e)
-              },
-            ),
-          )
-      ).toList();
+  createFileTiles() async {
+    if (savedFileString.length > 0) {
+      List<Widget> a = savedFileString
+          .map((e) => Container(
+                color: checkSelectedColor(e),
+                child: ListTile(
+                  trailing: IconButton(
+                    icon: Icon(FlutterIcons.delete_mdi),
+                    onPressed: () => {deleteFile(e)},
+                  ),
+                  title: Row(
+                    children: [
+                      ...checkSelectedIcon(e),
+                      Text(e),
+                    ],
+                  ),
+                  onTap: () => {loadFile(e)},
+                ),
+              ))
+          .toList();
       print('made tiles: ' + a.toString());
       setState(() {
         fileTiles = a;
       });
-    }else{
+    } else {
       fileTiles = List<Widget>();
     }
   }
-  updateSurvey() {
+
+  updateSurvey([bool autoSave = true]) {
     print('updating survey...');
-    String survey = 'Disease category at admission:\n';
+    String survey = partNames[0];
     for (_ListItem l in Disease) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nLocation of CPA:\n';
+    survey = survey + partNames[1];
     for (_ListItem l in Location) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nComorbid conditions:\n';
+    survey = survey + partNames[2];
     for (_ListItem l in ComorbidConditions) {
       if (l.checked) {
-        survey = survey + l.value +   '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nSuspected cause:\n';
+    survey = survey + partNames[3];
     for (_ListItem l in SuspectedCause) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nPrevious CPA:\n';
+    survey = survey + partNames[4];
     for (_ListItem l in PreviousCPA) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nMeasures in place:\n';
+    survey = survey + partNames[5];
     for (_ListItem l in PreviousMeasures) {
       if (l.checked) {
         survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nAnesthesia:\n';
+    survey = survey + partNames[6];
     for (_ListItem l in GeneralAnesthesia) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nVentilation:\n';
+    survey = survey + partNames[7];
     for (_ListItem l in MechanicalVentilation) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nROSC:\n';
+    survey = survey + partNames[8];
     for (_ListItem l in ROSC) {
       if (l.checked) {
         survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nROSC duration:\n';
+    survey = survey + partNames[9];
     for (_ListItem l in ROSCDuration) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nEuthanasia:\n';
+    survey = survey + partNames[10];
     for (_ListItem l in Euthanasia) {
       if (l.checked) {
         survey = survey + l.value + '\n';
       }
     }
-    survey = survey + '\nRearrest:\n';
+    survey = survey + partNames[11];
     for (_ListItem l in Rearrest) {
       if (l.checked) {
-        survey = survey + l.value +  '\n';
+        survey = survey + l.value + '\n';
       }
     }
 
     globals.survey = survey;
+    updateTextField();
+    if (autoSave) {
+      puntAutosave();
+    }
   }
 
   Timer autoSaveTimer;
+  puntAutosave() {
+    if (autoSaveTimer != null) {
+      autoSaveTimer.cancel();
+    }
+    autoSaveTimer = Timer(
+        Duration(seconds: 3),
+        () => {
+              print('autosaving...'),
+              saveGlobalLog(),
+            });
+  }
 
   @override
   Widget build(BuildContext context) {
     print('build starting');
-    if (autoSaveTimer != null) {
-      autoSaveTimer.cancel();
-    }
-    autoSaveTimer = Timer(Duration(seconds: 3), () => {
-      print('autosaving...'),
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(content: Text('auto saving...\n'), )
-      ),
-      //saveGlobalLog(),
-    });
-    finalController.text = globals.log + '\n\n-Case Information-\n\n' + globals.survey;
+
     final diseaseL = Disease.map(
       (e) => GestureDetector(
         onTap: () => {
           setState(() => {
-            e.checked = !e.checked,
-            updateSurvey(),
-          }
-        ),
-
+                e.checked = !e.checked,
+                updateSurvey(),
+              }),
         },
         child: Chip(
           backgroundColor: Colors.white,
           key: Key(e.value),
           label: Text(e.value),
           avatar: Checkbox(
-          value: e.checked ?? false,
+            value: e.checked ?? false,
           ),
         ),
       ),
     ).toList();
     final locationL = Location.map(
-          (e) => GestureDetector(
+      (e) => GestureDetector(
         onTap: () => {
           setState(() => {
-            for (_ListItem l in Location) {
-              l.checked = false,
-            },
-            e.checked = !e.checked,
-            updateSurvey(),
-          }),
-
+                for (_ListItem l in Location)
+                  {
+                    l.checked = false,
+                  },
+                e.checked = !e.checked,
+                updateSurvey(),
+              }),
         },
         child: Chip(
           backgroundColor: Colors.white,
@@ -1691,16 +1880,16 @@ class PageTwoState extends State<PageTwo> {
       ),
     ).toList();
     final previousCPAL = PreviousCPA.map(
-          (e) => GestureDetector(
+      (e) => GestureDetector(
         onTap: () => {
           setState(() => {
-            for (_ListItem l in PreviousCPA) {
-              l.checked = false,
-            },
-            e.checked = !e.checked,
-            updateSurvey(),
-          }),
-
+                for (_ListItem l in PreviousCPA)
+                  {
+                    l.checked = false,
+                  },
+                e.checked = !e.checked,
+                updateSurvey(),
+              }),
         },
         child: Chip(
           backgroundColor: Colors.white,
@@ -1713,13 +1902,12 @@ class PageTwoState extends State<PageTwo> {
       ),
     ).toList();
     final previousMeasuresL = PreviousMeasures.map(
-          (e) => GestureDetector(
+      (e) => GestureDetector(
         onTap: () => {
           setState(() => {
-            e.checked = !e.checked,
-            updateSurvey(),
-          }),
-
+                e.checked = !e.checked,
+                updateSurvey(),
+              }),
         },
         child: Chip(
           backgroundColor: Colors.white,
@@ -1731,7 +1919,8 @@ class PageTwoState extends State<PageTwo> {
         ),
       ),
     ).toList();
-    final ROSCL = ROSC.map(
+    final ROSCL = ROSC
+        .map(
           (e) => Container(
             padding: EdgeInsets.all(5),
             child: Container(
@@ -1750,7 +1939,8 @@ class PageTwoState extends State<PageTwo> {
               ),
             ),
           ),
-        ).toList();
+        )
+        .toList();
     final ROSCdurationL = ROSCDuration.map(
       (e) => Container(
         padding: EdgeInsets.all(5),
@@ -1778,13 +1968,12 @@ class PageTwoState extends State<PageTwo> {
       ),
     ).toList();
     final comorbidConditionsL = ComorbidConditions.map(
-          (e) => GestureDetector(
+      (e) => GestureDetector(
         onTap: () => {
           setState(() => {
-            e.checked = !e.checked,
-            updateSurvey(),
-          }),
-
+                e.checked = !e.checked,
+                updateSurvey(),
+              }),
         },
         child: Chip(
           backgroundColor: Colors.white,
@@ -1797,13 +1986,12 @@ class PageTwoState extends State<PageTwo> {
       ),
     ).toList();
     final suspectedCauseL = SuspectedCause.map(
-          (e) => GestureDetector(
+      (e) => GestureDetector(
         onTap: () => {
           setState(() => {
-            e.checked = !e.checked,
-            updateSurvey(),
-          }),
-
+                e.checked = !e.checked,
+                updateSurvey(),
+              }),
         },
         child: Chip(
           backgroundColor: Colors.white,
@@ -2137,12 +2325,23 @@ class PageTwoState extends State<PageTwo> {
       length: 3,
       initialIndex: 1,
       child: Scaffold(
-          resizeToAvoidBottomInset: true,
+          resizeToAvoidBottomInset: false,
           key: _scaffoldKey,
           appBar: AppBar(
-            title: Text('Code Summary'),
+            title: Row(
+              children: [
+                Text(
+                  "RECOVER",
+                  style: TextStyle(color: Colors.lightBlue),
+                ),
+                Icon(
+                  FlutterIcons.ios_medical_ion,
+                  color: Theme.of(context).splashColor,
+                )
+              ],
+            ),
             elevation: 1.0,
-            actions: [closeButton()],
+            actions: [...undoButtons(), closeButton()],
           ),
           bottomNavigationBar: ConvexAppBar.badge(
             const <int, dynamic>{3: '2'},
@@ -2153,14 +2352,15 @@ class PageTwoState extends State<PageTwo> {
               TabItem(icon: FlutterIcons.edit_3_fea, title: 'Edit'),
               TabItem(icon: FlutterIcons.send_faw, title: 'Send'),
             ],
-            onTap: (int i) => {print(i),
-              if (i == 0){
-                updateDirectory(),
-                createFileTiles(),
-              }
+            onTap: (int i) => {
+              print(i),
+              if (i == 0)
+                {
+                  updateDirectory(),
+                  createFileTiles(),
+                }
             },
           ),
-
           body: TabBarView(
             physics: NeverScrollableScrollPhysics(),
             children: [
@@ -2192,39 +2392,6 @@ class PageTwoState extends State<PageTwo> {
                         Container(
                           height: 100,
                           color: Colors.white,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: TextField(
-                                    controller: infoController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Patient Info, MRN',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: RaisedButton(
-                                    child: Text('add event'),
-                                    onPressed: () => {
-                                          globals.log = globals.log +
-                                              '\n??:??\tnew event',
-                                          updateDrawer(),
-                                          timelineController.animateTo(
-                                            timelineController
-                                                .position.maxScrollExtent,
-                                            duration: const Duration(
-                                                milliseconds: 300),
-                                            curve: Curves.easeOut,
-                                          ),
-                                        }),
-                              )
-                            ],
-                          ),
                         ),
                       ],
                     ),
@@ -2236,34 +2403,28 @@ class PageTwoState extends State<PageTwo> {
                 children: [
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.all( 10),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          focusedBorder: InputBorder.none,
-                          labelText: 'Text File'
-                        ),
-                        maxLines: null,
-                        controller: finalController,
-                        onTap: () => {
-                          if (!editing){
-                            setState(() => {
-                              editing = true
-                            })
-                          }
-                        },
-
-
-                      )
-                    ),
+                        padding: EdgeInsets.all(10),
+                        child: TextField(
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              focusedBorder: InputBorder.none,
+                              labelText: 'Text File'),
+                          maxLines: null,
+                          controller: finalController,
+                          onTap: () => {
+                            if (!editing)
+                              {
+                                setState(() => {editing = true})
+                              }
+                          },
+                        )),
                   ),
                   Container(
-                    padding: EdgeInsets.only(bottom: 20),
+                      padding: EdgeInsets.only(bottom: 20),
                       color: Colors.lightBlue,
                       child: ButtonBar(
                         alignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-
                           RaisedButton(
                             child: Text('Send Text File'),
                             onPressed: sendText,
