@@ -392,7 +392,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Theme.of(context).primaryColor,
+                    progressColor: Theme.of(context).accentColor,
                     verticalDirection: VerticalDirection.up,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -402,7 +402,7 @@ class NestedTabBarState extends State<NestedTabBar>
                 Expanded(
                   child: FAProgressBar(
                     direction: Axis.vertical,
-                    progressColor: Theme.of(context).primaryColor,
+                    progressColor: Theme.of(context).accentColor,
                     verticalDirection: VerticalDirection.down,
                     currentValue: breathingValue,
                     animatedDuration: Duration(milliseconds: 1000),
@@ -773,8 +773,8 @@ class NestedTabBarState extends State<NestedTabBar>
       children: <Widget>[
         TabBar(
           controller: nestedTabController,
-          indicatorColor: Theme.of(context).primaryColor,
-          labelColor: Theme.of(context).primaryColor,
+          indicatorColor: Theme.of(context).accentColor,
+          labelColor: Theme.of(context).accentColor,
           unselectedLabelColor: Colors.black54,
           isScrollable: true,
           onTap: (index) {
@@ -947,11 +947,11 @@ class NestedTabBarState extends State<NestedTabBar>
                                       valueWidget: Container(),
                                       segments: [
                                         GaugeSegment('Low', 50,
-                                            Theme.of(context).primaryColor),
+                                            Theme.of(context).splashColor),
                                         GaugeSegment(
                                             'Medium', 20, Colors.white),
                                         GaugeSegment('High', 50,
-                                            Theme.of(context).primaryColor),
+                                            Theme.of(context).splashColor),
                                       ],
                                       currentValue: speed,
                                       displayWidget: Text(tapLabel,
