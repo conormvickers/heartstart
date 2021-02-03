@@ -45,10 +45,10 @@ class _ListItem {
 }
 
 class InfoBit {
-  InfoBit(this.stageName, this.codeName, this.value);
+  InfoBit(this.stageName, this.value);
 
   final String stageName;
-  String codeName;
+
   String value;
 }
 
@@ -1227,7 +1227,7 @@ class PageTwoState extends State<PageTwo> {
     'Weight',
     'Chest',
     'Breed'
-  ].map((e) => InfoBit(e, '', '')).toList();
+  ].map((e) => InfoBit(e, '')).toList();
 
   List<String> codeNameRef;
 
@@ -1253,30 +1253,21 @@ class PageTwoState extends State<PageTwo> {
       Euthanasia,
       Rearrest
     ];
-    codeNameRef = [
-      currentDocPath,
-      globals.doctor,
-      globals.patientName,
-      globals.mrn,
-      globals.clientName,
-      globals.sex,
-      globals.dob,
-      globals.weightKG.toString(),
-      globals.chest,
-      globals.breed,
-    ];
-    infoBits.asMap().forEach((key, value) {
-      value.codeName = codeNameRef[key];
-    });
 
-    updateName();
-    finalController.text =
-        globals.log + '\n\n-Case Information-\n\n' + globals.survey;
-    previousLogs.insert(0, finalController.text);
-    updateDrawer();
-    saveGlobalLog();
-    updateDirectory();
+    asyncSetup();
+
   }
+
+  asyncSetup() async {
+    await updateName();
+    await globalToInfo();
+
+    await previousLogs.insert(0, finalController.text);
+    await updateDrawer();
+
+    await saveGlobalLog();
+    await updateDirectory();
+}
 
   Future<void> makeSure(String ask, Function function) async {
     return showDialog<void>(
@@ -1651,6 +1642,16 @@ class PageTwoState extends State<PageTwo> {
     } else {
       globals.log = full;
     }
+
+    List<String> lineSplit = globals.survey.split('\n');
+    infoBits.asMap().forEach((i, infoBit) {
+      lineSplit.asMap().forEach((j, line) {
+        if(line.contains(infoBit.stageName)) {
+          infoBit.value = line.substring(line.indexOf(infoBit.value + ' '));
+        }
+      });
+    });
+
     List<String> surveySplit = globals.survey.split('\n\n');
     surveyParts.asMap().forEach((e, a) {
       a.asMap().forEach((f, b) {
@@ -1677,6 +1678,7 @@ class PageTwoState extends State<PageTwo> {
   }
 
   updateTextField() {
+
     setState(() {
       finalController.text =
           globals.log + '\n\n-Case Information-\n\n' + globals.survey;
@@ -1840,7 +1842,11 @@ class PageTwoState extends State<PageTwo> {
 
   updateSurvey([bool autoSave = true]) {
     print('updating survey...');
-    String survey = partNames[0];
+    String survey = '';
+    infoBits.asMap().forEach((key, value) {
+      survey = survey + value.stageName + ' ' + value.value + '\n';
+    });
+    survey = survey + partNames[0];
     for (_ListItem l in Disease) {
       if (l.checked) {
         survey = survey + l.value + '\n';
@@ -1926,11 +1932,70 @@ class PageTwoState extends State<PageTwo> {
       autoSaveTimer.cancel();
     }
     autoSaveTimer = Timer(
-        Duration(seconds: 3),
+        Duration(seconds: 6),
         () => {
               print('autosaving...'),
               saveGlobalLog(),
             });
+  }
+
+  // 'Event date',0
+  // 'Doctor',1
+  // 'Patient name',2
+  // 'MRN',3
+  // 'Client name',4
+  // 'Sex',5
+  // 'Date of birth',6
+  // 'Weight',7
+  // 'Chest',8
+  // 'Breed'9
+  globalToInfo() {
+    globals.info[0] = currentDocPath;
+    globals.info[7] = (globals.weightKG ?? '?').toString();
+    globals.info[8] = globals.chest ?? '?';
+    infoBits.asMap().forEach((key, value) {
+      value.value = globals.info[key] ;
+    });
+
+  }
+
+  showInfoButton(String info, String current) async {
+    TextEditingController temp = TextEditingController();
+    temp.text = current;
+    temp.selection = TextSelection(baseOffset: 0, extentOffset: temp.text.length);
+
+    String r = '';
+    if (info.toUpperCase().contains('DATE OF')){
+      await showDatePicker(
+          context: context, initialDate: DateTime.now(), firstDate: DateTime(1950), lastDate: DateTime.now() ).then((value) => {
+            r = DateFormat.yMMMMd().format(value),
+
+      });
+    }else{
+      r = await showDialog(context: context, child:
+      AlertDialog(
+        title:  Text(info),
+        content: TextField(
+          controller: temp,
+          autofocus: true,
+
+          onEditingComplete: () => {
+            Navigator.pop(context, temp.text),
+          },
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('done'),
+            onPressed: () => {
+              Navigator.pop(context, temp.text)
+            },
+          )
+        ],
+      )
+      );
+    }
+
+    return r;
   }
 
   String doctor;
@@ -1947,33 +2012,43 @@ class PageTwoState extends State<PageTwo> {
     List<Widget> r = List<Widget>();
     infoBits.asMap().forEach((key, value) {
       r.add(GestureDetector(
-        onTap: () => {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) => {
-                    SimpleDialog(
-                      title: Text(value.stageName),
-                    )
-                  })
+        onTap: () async =>  {
+          print(value.value),
+          value.value = await showInfoButton(value.stageName, value.value),
+          setState(()=>{
+            print(value.value),
+            updateSurvey(true),
+          })
         },
         child: Container(
-          padding: EdgeInsets.all(5),
-          child: Row(
-            children: [
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text(value.stageName + ": "), Text(value.value)],
+          padding: EdgeInsets.all(10),
+          child: Container(
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15)
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [Text(value.stageName + ": "), Text(value.value)],
+                      ),
+                    ),
+                    Container(
+                        width: 25,
+                        padding: EdgeInsets.all(5),
+                        child: FittedBox(
+                            child: Icon(
+                          FlutterIcons.edit_ant,
+                        )))
+                  ],
                 ),
-              ),
-              Container(
-                  width: 25,
-                  padding: EdgeInsets.all(5),
-                  child: FittedBox(
-                      child: Icon(
-                    FlutterIcons.edit_ant,
-                  )))
-            ],
+              ],
+            ),
           ),
         ),
       ));
@@ -2316,6 +2391,7 @@ class PageTwoState extends State<PageTwo> {
             ],
           ),
         ));
+
 
     DraggableScrollableSheet buildDragScrollSheet() {
       return DraggableScrollableSheet(

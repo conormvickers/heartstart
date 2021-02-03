@@ -17,3 +17,6 @@ String sex;
 String dob;
 String breed;
 double weightKG;
+List<String> info = [
+  '?','?','?','?','?','?','?','?','?','?','?',
+];

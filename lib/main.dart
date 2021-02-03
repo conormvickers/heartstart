@@ -214,6 +214,9 @@ class MyHomePageState extends State<MyHomePage>
     String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
     globals.log = formattedDate + "\tCode Started";
     globals.codeStart = now;
+    globals.info = [
+      '?','?','?','?','?','?','?','?','?','?','?',
+    ];
 
     centerIcon = FlutterIcons.heart_ant;
     inst = "Continue Compressions";
