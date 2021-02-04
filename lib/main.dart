@@ -217,6 +217,8 @@ class MyHomePageState extends State<MyHomePage>
     globals.info = [
       '?','?','?','?','?','?','?','?','?','?','?',
     ];
+    globals.chest = null;
+    globals.weightKG = null;
 
     centerIcon = FlutterIcons.heart_ant;
     inst = "Continue Compressions";
@@ -417,7 +419,7 @@ class MyHomePageState extends State<MyHomePage>
       }
       return showDialog<void>(
         context: context,
-        barrierDismissible: false, // user must tap button!
+        // user must tap button!
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Previous Code Saved'),
@@ -453,7 +455,7 @@ class MyHomePageState extends State<MyHomePage>
   Future<void> _ensureStopCode() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Stop Code Now?'),
