@@ -1262,9 +1262,9 @@ class PageTwoState extends State<PageTwo> {
     await updateName();
     await globalToInfo();
 
-    await previousLogs.insert(0, finalController.text);
     await updateDrawer();
 
+    await updateSurvey(false);
     await saveGlobalLog();
     await updateDirectory();
 }
@@ -1358,8 +1358,8 @@ class PageTwoState extends State<PageTwo> {
 
   sendData() async {
     String log = '';
-    if (infoController.text != null) {
-      log = infoController.text + '\n';
+    if (finalController.text != null) {
+      log = finalController.text + '\n';
     }
     if (globals.chest != null && globals.weightKG != null) {
       log = log +
@@ -1401,8 +1401,8 @@ class PageTwoState extends State<PageTwo> {
 
     final file = File("${appDocDir.path}/" + date + "log.txt");
     String log = '';
-    if (infoController.text != null) {
-      log = infoController.text + '\n';
+    if (finalController.text != null) {
+      log = finalController.text + '\n';
     }
     if (globals.chest != null && globals.weightKG != null) {
       log = log +
@@ -1569,6 +1569,7 @@ class PageTwoState extends State<PageTwo> {
           style: TextStyle(color: Colors.lightBlue),
         ),
         onPressed: () => {
+          parseData(finalController.text),
           saveGlobalLog(),
           editing = false,
           FocusScope.of(context).unfocus(),
@@ -1591,11 +1592,12 @@ class PageTwoState extends State<PageTwo> {
               {
                 currentHistoryIndex++,
               },
-            print('now on ' +
+            print('increasing index now on ' +
                 currentHistoryIndex.toString() +
                 'out of ' +
                 previousLogs.length.toString()),
-            parseData(previousLogs[currentHistoryIndex])
+            parseData(previousLogs[currentHistoryIndex]),
+            puntAutosave(),
           },
         ),
       );
@@ -1619,7 +1621,8 @@ class PageTwoState extends State<PageTwo> {
                 currentHistoryIndex.toString() +
                 'out of ' +
                 previousLogs.length.toString()),
-            parseData(previousLogs[currentHistoryIndex])
+            parseData(previousLogs[currentHistoryIndex]),
+            puntAutosave(),
           },
         ),
       );
@@ -1643,21 +1646,26 @@ class PageTwoState extends State<PageTwo> {
       globals.log = full;
     }
 
+
     List<String> lineSplit = globals.survey.split('\n');
     infoBits.asMap().forEach((i, infoBit) {
       lineSplit.asMap().forEach((j, line) {
         if(line.contains(infoBit.stageName)) {
-          infoBit.value = line.substring(line.indexOf(infoBit.value + ' '));
+          print(line.indexOf(infoBit.stageName + ' ' ) );
+          infoBit.value = line.substring( infoBit.stageName.length );
         }
       });
     });
 
+    print('starting big split');
     List<String> surveySplit = globals.survey.split('\n\n');
     surveyParts.asMap().forEach((e, a) {
       a.asMap().forEach((f, b) {
         b.checked = false;
       });
     });
+
+    print('survey split');
     surveySplit.asMap().forEach((i, split) {
       partNames.asMap().forEach((j, name) {
         if (split.contains(name)) {
@@ -1678,7 +1686,6 @@ class PageTwoState extends State<PageTwo> {
   }
 
   updateTextField() {
-
     setState(() {
       finalController.text =
           globals.log + '\n\n-Case Information-\n\n' + globals.survey;
@@ -1701,11 +1708,16 @@ class PageTwoState extends State<PageTwo> {
       previousLogs.removeRange(0, currentHistoryIndex);
       currentHistoryIndex = 0;
     }
-    if (previousLogs[0] != full) {
-      previousLogs.insert(0, full);
-    } else {
-      print('not added, the same');
-    }
+      if (previousLogs.length > 0) {
+        if (previousLogs[0] != full) {
+          print('ADDING' + full);
+          previousLogs.insert(0, full);
+        } else {
+          print('not added, the same');
+        }
+      }else{
+        previousLogs.add(full);
+      }
 
     print('starting save...');
 
@@ -1742,7 +1754,15 @@ class PageTwoState extends State<PageTwo> {
     updateDirectory();
   }
 
+  resetHistory()  {
+    previousLogs = List<String>();
+    currentHistoryIndex = 0;
+  }
+
   loadFile(String string) async {
+
+    resetHistory;
+
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
     File toLoad = File(appDocPath + '/' + string + '.txt');
@@ -1786,7 +1806,7 @@ class PageTwoState extends State<PageTwo> {
             .substring(f.path.lastIndexOf('/') + 1, f.path.indexOf('.txt')));
       }
     }
-    print('saved files are: ' + savedFileString.toString());
+
     createFileTiles();
   }
 
@@ -1831,7 +1851,6 @@ class PageTwoState extends State<PageTwo> {
                 ),
               ))
           .toList();
-      print('made tiles: ' + a.toString());
       setState(() {
         fileTiles = a;
       });
@@ -1939,16 +1958,7 @@ class PageTwoState extends State<PageTwo> {
             });
   }
 
-  // 'Event date',0
-  // 'Doctor',1
-  // 'Patient name',2
-  // 'MRN',3
-  // 'Client name',4
-  // 'Sex',5
-  // 'Date of birth',6
-  // 'Weight',7
-  // 'Chest',8
-  // 'Breed'9
+
   globalToInfo() {
     globals.info[0] = currentDocPath;
     globals.info[7] = (globals.weightKG ?? '?').toString();
@@ -2059,6 +2069,7 @@ class PageTwoState extends State<PageTwo> {
   @override
   Widget build(BuildContext context) {
     print('build starting');
+    print(currentHistoryIndex.toString() + previousLogs.length.toString());
 
     final diseaseL = Disease.map(
       (e) => GestureDetector(
