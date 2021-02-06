@@ -102,6 +102,9 @@ class MyHomePageState extends State<MyHomePage>
   DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
   bool progressPulseCheck = true;
   String pulseCheckCountdown = '';
+  TextEditingController doctorController = TextEditingController();
+  FocusNode doctorNode = FocusNode();
+  int autoStart = 5;
   String _printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
@@ -215,10 +218,11 @@ class MyHomePageState extends State<MyHomePage>
     globals.log = formattedDate + "\tCode Started";
     globals.codeStart = now;
     globals.info = [
-      '?','?','?','?','?','?','?','?','?','?','?',
+      '','','','','','','','','','','',
     ];
     globals.chest = null;
     globals.weightKG = null;
+    loadPreferences();
 
     centerIcon = FlutterIcons.heart_ant;
     inst = "Continue Compressions";
@@ -375,6 +379,8 @@ class MyHomePageState extends State<MyHomePage>
     var prefs = await SharedPreferences.getInstance();
     playCompressions = prefs.getBool('playCompressions') ?? true;
     playVoice = prefs.getBool('playVoice') ?? true;
+    doctorController.text = prefs.getString('doctor') ?? '';
+    globals.info[1] = doctorController.text;
     print('loaded ' + playCompressions.toString() + playVoice.toString());
     if (!playCompressions) {
       setState(() {
@@ -396,6 +402,7 @@ class MyHomePageState extends State<MyHomePage>
     var prefs = await SharedPreferences.getInstance();
     prefs.setBool('playCompressions', playCompressions);
     prefs.setBool('playVoice', playVoice);
+    prefs.setString('doctor', doctorController.text);
     print('saved ' + playCompressions.toString() + playVoice.toString());
   }
 
@@ -522,18 +529,29 @@ class MyHomePageState extends State<MyHomePage>
     _triggerUpdate();
 
     loadPreferences();
-    Future.delayed(
-        Duration(seconds: 5),
-        () => {
-              warningDismissed = true,
-              _speak(),
-            });
+    autoStartCascade();
 
     Future<void>.delayed(
         Duration(seconds: 10),
         () => {
               Wakelock.enable(),
             });
+  }
+  autoStartCascade() async {
+    if (autoStart > 0) {
+      setState(() {
+        autoStart--;
+      });
+      Future.delayed(
+          Duration(seconds: 1),
+              () => {
+            autoStartCascade()
+          });
+    }else{
+      setState(() {
+        warningDismissed = true;
+      });
+    }
   }
 
   showCoach() {
@@ -668,6 +686,103 @@ class MyHomePageState extends State<MyHomePage>
       ),
     ],
   );
+
+  List<Widget> settingItems() {
+
+    return [
+      DrawerHeader(
+        child: Column(
+          children: [
+
+            Expanded(
+              child: Container(),
+            ),
+            Expanded(
+              child: Text(
+                'Options',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Expanded(child: Icon(FlutterIcons.md_options_ion))
+          ],
+        ),
+      ),
+      Row(
+        children: [
+
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(10),
+              child: TextField(
+                controller: doctorController,
+                focusNode: doctorNode,
+                onEditingComplete: () => {
+                  doctorNode.unfocus(),
+                  globals.info[1] = doctorController.text,
+                  savePreferences(),
+                },
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).accentColor,
+                          width: 1.0),
+                    ),
+                    labelText: 'doctor',
+                    labelStyle: TextStyle(
+                        color: Theme.of(context).accentColor)),
+              ),
+            ),
+          ),
+        ],
+      ),
+      RaisedButton(
+        child: Text('Check Pulse Now'),
+        onPressed: () {
+          setState(() {
+            askForPulse = true;
+            Navigator.pop(context);
+          });
+        },
+      ),
+      RaisedButton(
+        child: Text('Change Weight'),
+        onPressed: () {
+          setState(() {
+            globals.weightKG = null;
+            globals.weightIndex = null;
+            globals.chest = null;
+            print('reset weight ' + globals.weightKG.toString());
+            nestedKey.currentState.setState(() {
+              nestedKey.currentState.nestedTabController.animateTo(1);
+            });
+
+            Navigator.pop(context);
+          });
+        },
+      ),
+      RaisedButton(
+        child: Text('Stop Code Now'),
+        onPressed: () {
+          setState(() {
+            Navigator.pop(context);
+          });
+          _ensureStopCode();
+        },
+      ),
+
+      RaisedButton(
+        onPressed: () => {
+          setState(() => {
+            Navigator.pop(context),
+          }),
+          handsFree = true
+        },
+        child: Text('Hands Free Mode'),
+      ),
+
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1808,7 +1923,7 @@ class MyHomePageState extends State<MyHomePage>
                                 ),
                                 Container(
                                   padding: EdgeInsets.all(10),
-                                  child: Text('auto starting in 5 seconds',
+                                  child: Text('auto starting in ' +  autoStart.toString() + ' seconds',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color:
@@ -1825,6 +1940,7 @@ class MyHomePageState extends State<MyHomePage>
                       child: GestureDetector(
                           onTap: () => setState(() {
                                 print('going to files');
+                                globals.ignoreCurrentLog = true;
                                 stopAndGoToNextPage();
                               }),
                           child: Container(
@@ -1959,82 +2075,8 @@ class MyHomePageState extends State<MyHomePage>
       fullStack = <Widget>[full, warning];
     }
 
-    List<Widget> settingItems() {
-      return [
-        DrawerHeader(
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(),
-              ),
-              Expanded(
-                child: Text(
-                  'Options',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Expanded(child: Icon(FlutterIcons.md_options_ion))
-            ],
-          ),
-        ),
-        RaisedButton(
-          child: Text('Check Pulse Now'),
-          onPressed: () {
-            setState(() {
-              askForPulse = true;
-              Navigator.pop(context);
-            });
-          },
-        ),
-        RaisedButton(
-          child: Text('Change Weight'),
-          onPressed: () {
-            setState(() {
-              globals.weightKG = null;
-              globals.weightIndex = null;
-              globals.chest = null;
-              print('reset weight ' + globals.weightKG.toString());
-              nestedKey.currentState.setState(() {
-                nestedKey.currentState.nestedTabController.animateTo(1);
-              });
 
-              Navigator.pop(context);
-            });
-          },
-        ),
-        RaisedButton(
-          child: Text('Stop Code Now'),
-          onPressed: () {
-            setState(() {
-              Navigator.pop(context);
-            });
-            _ensureStopCode();
-          },
-        ),
-        RaisedButton(
-          onPressed: _launchURL,
-          child: Text('Open Source Information'),
-        ),
-        RaisedButton(
-          onPressed: () => {
-            setState(() => {
-                  Navigator.pop(context),
-                }),
-            handsFree = true
-          },
-          child: Text('Hands Free Mode'),
-        ),
-        RaisedButton(
-          onPressed: () => {
-            setState(() => {
-                  Navigator.pop(context),
-                }),
-            showCoach()
-          },
-          child: Text('Start tour'),
-        ),
-      ];
-    }
+
 
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,

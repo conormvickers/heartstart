@@ -1082,8 +1082,8 @@ class PageTwo extends StatefulWidget {
 }
 
 final Disease = <String>{
-  'Medical cardiac/non-cardiac',
-  'Surgical elective/emergency',
+  'Medical cardiac or non-cardiac',
+  'Surgical elective or emergency',
   'Trauma',
   'DOA',
   'Unknown'
@@ -1093,7 +1093,7 @@ final Location = <String>{
   'Emergency Room',
   "Intensive Care Unit",
   "Wards",
-  "Anesthesia/Surgery",
+  "Anesthesia or Surgery",
   "Consult Room",
   "Diagnostic Procedures Area",
   "Waiting Room",
@@ -1182,18 +1182,18 @@ final Rearrest = <String>{
   "Re-arrest w/ CPR, but without sustained ROSC",
 }.map((e) => _ListItem(e, false)).toList();
 List<String> partNames = [
-  'Disease category at admission:\n',
-  '\nLocation of CPA:\n',
-  '\nComorbid conditions:\n',
-  '\nSuspected cause:\n',
-  '\nPrevious CPA:\n',
-  '\nMeasures in place:\n',
-  '\nAnesthesia:\n',
-  '\nVentilation:\n',
-  '\nROSC:\n',
-  '\nROSC duration:\n',
-  '\nEuthanasia:\n',
-  '\nRearrest:\n',
+  'Disease category at admission:',
+  'Location of CPA:',
+  'Comorbid conditions:',
+  'Suspected cause:',
+  'Previous CPA:',
+  'Measures in place:',
+  'Anesthesia:',
+  'Ventilation:',
+  'ROSC:',
+  'ROSC duration:',
+  'Euthanasia:',
+  'Rearrest:',
 ];
 
 class PageTwoState extends State<PageTwo> {
@@ -1215,6 +1215,7 @@ class PageTwoState extends State<PageTwo> {
   List<String> previousLogs = List<String>();
   int currentHistoryIndex = 0;
   FocusNode focusEdit = FocusNode();
+  int initTabIndex = 1;
   List<List<_ListItem>> surveyParts = List<List<_ListItem>>();
   List<InfoBit> infoBits = [
     'Event date',
@@ -1254,19 +1255,39 @@ class PageTwoState extends State<PageTwo> {
       Rearrest
     ];
 
-    asyncSetup();
+    setup();
 
   }
 
-  asyncSetup() async {
-    await updateName();
-    await globalToInfo();
+  setup()  {
+    if (globals.ignoreCurrentLog){
+      initTabIndex = 0;
+      globals.ignoreCurrentLog = false;
+      loadLastFile();
 
-    await updateDrawer();
+    }else {
+      asyncSetup();
+    }
+}
+loadLastFile() async {
+  print('ignore flag found');
+  await updateDirectory();
+  if (savedFileString.length > 0) {
 
-    await updateSurvey(false);
-    await saveGlobalLog();
-    await updateDirectory();
+    await loadFile(savedFileString[0]);
+
+  }
+
+}
+asyncSetup() async {
+  await updateName();
+  await globalToInfo();
+
+  await updateTimeline();
+
+  await updateSurvey(true, false);
+  await saveGlobalLog();
+  updateDirectory();
 }
 
   Future<void> makeSure(String ask, Function function) async {
@@ -1328,9 +1349,10 @@ class PageTwoState extends State<PageTwo> {
                               print(globals.log),
                               timelineEditing = null,
                               FocusScope.of(context).unfocus(),
-                              updateDrawer(),
+                              updateTimeline(),
                               updateTextField(),
-                              saveGlobalLog()
+                              puntAutosave(),
+                          updateHistory(),
                             })
                       })
             }
@@ -1342,9 +1364,10 @@ class PageTwoState extends State<PageTwo> {
                     print(globals.log),
                     timelineEditing = null,
                     FocusScope.of(context).unfocus(),
-                    updateDrawer(),
+                    updateTimeline(),
                     updateTextField(),
-                    saveGlobalLog()
+                    puntAutosave(),
+                updateHistory()
                   })
             }
         },
@@ -1429,12 +1452,13 @@ class PageTwoState extends State<PageTwo> {
       eventSplit.insert(newIndex, item);
       globals.log = eventSplit.join('\n');
     });
-    updateDrawer();
+    updateTimeline();
     updateTextField();
-    saveGlobalLog();
+    updateHistory();
+    puntAutosave();
   }
 
-  updateDrawer() {
+  updateTimeline() {
     setState(() {
       print('updating drawer');
       eventSplit = globals.log.split('\n');
@@ -1504,9 +1528,10 @@ class PageTwoState extends State<PageTwo> {
                       print(globals.log),
                       timelineEditing = null,
                       FocusScope.of(context).unfocus(),
-                      updateDrawer(),
+                      updateTimeline(),
                       updateTextField(),
-                      saveGlobalLog(),
+                      puntAutosave(),
+                  updateHistory()
                     })
               },
             );
@@ -1534,7 +1559,7 @@ class PageTwoState extends State<PageTwo> {
                     print('tapped' + i.toString());
                     timelineEditingController.text = eventSplit[i];
                     editTimeline(i);
-                    updateDrawer();
+                    updateTimeline();
                   });
                 },
                 child: Row(
@@ -1637,54 +1662,6 @@ class PageTwoState extends State<PageTwo> {
     return r;
   }
 
-  parseData(String full) {
-    if (full.contains('\n\n-Case Information-\n\n')) {
-      List<String> split = full.split('\n\n-Case Information-\n\n');
-      globals.log = split[0];
-      globals.survey = split[1];
-    } else {
-      globals.log = full;
-    }
-
-
-    List<String> lineSplit = globals.survey.split('\n');
-    infoBits.asMap().forEach((i, infoBit) {
-      lineSplit.asMap().forEach((j, line) {
-        if(line.contains(infoBit.stageName)) {
-          print(line.indexOf(infoBit.stageName + ' ' ) );
-          infoBit.value = line.substring( infoBit.stageName.length );
-        }
-      });
-    });
-
-    print('starting big split');
-    List<String> surveySplit = globals.survey.split('\n\n');
-    surveyParts.asMap().forEach((e, a) {
-      a.asMap().forEach((f, b) {
-        b.checked = false;
-      });
-    });
-
-    print('survey split');
-    surveySplit.asMap().forEach((i, split) {
-      partNames.asMap().forEach((j, name) {
-        if (split.contains(name)) {
-          surveyParts[j].asMap().forEach((k, part) {
-            if (split.contains(part.value)) {
-              part.checked = true;
-            }
-          });
-        }
-      });
-    });
-
-    setState(() {
-      finalController.text = full;
-      updateDrawer();
-      updateSurvey(false);
-    });
-  }
-
   updateTextField() {
     setState(() {
       finalController.text =
@@ -1692,35 +1669,31 @@ class PageTwoState extends State<PageTwo> {
     });
   }
 
+  updateHistory() {
+    String full = finalController.text;
+
+    if (currentHistoryIndex > 0) {
+      previousLogs.removeRange(0, currentHistoryIndex );
+      currentHistoryIndex = 0;
+    }
+    if (previousLogs.length > 0) {
+      if (previousLogs[0] != full) {
+        print('ADDING' + full);
+        previousLogs.insert(0, full);
+      } else {
+        print('not added, the same');
+      }
+    }else{
+      previousLogs.add(full);
+    }
+    print(currentHistoryIndex.toString() + previousLogs.length.toString());
+
+  }
+
   saveGlobalLog() {
     updateTextField();
     String full = finalController.text;
-
-    if (full.contains('\n\n-Case Information-\n\n')) {
-      List<String> split = full.split('\n\n-Case Information-\n\n');
-      globals.log = split[0];
-      globals.survey = split[1];
-    } else {
-      globals.log = full;
-    }
-
-    if (currentHistoryIndex > 0) {
-      previousLogs.removeRange(0, currentHistoryIndex);
-      currentHistoryIndex = 0;
-    }
-      if (previousLogs.length > 0) {
-        if (previousLogs[0] != full) {
-          print('ADDING' + full);
-          previousLogs.insert(0, full);
-        } else {
-          print('not added, the same');
-        }
-      }else{
-        previousLogs.add(full);
-      }
-
     print('starting save...');
-
     saveFile(full);
   }
 
@@ -1738,8 +1711,10 @@ class PageTwoState extends State<PageTwo> {
 
     File tobesaved = File(appDocPath + '/' + currentDocPath + '.txt');
     print('saving as ' + tobesaved.path + ' ...');
+    print(' saving  ' + string);
     tobesaved.writeAsString(string);
     print('sucess');
+    updateDirectory();
   }
 
   deleteFile(String string) async {
@@ -1761,7 +1736,7 @@ class PageTwoState extends State<PageTwo> {
 
   loadFile(String string) async {
 
-    resetHistory;
+    resetHistory();
 
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
@@ -1781,6 +1756,7 @@ class PageTwoState extends State<PageTwo> {
     updateDirectory();
 
     parseData(full);
+    updateSurvey(true, false);
   }
 
   updateName() {
@@ -1802,10 +1778,16 @@ class PageTwoState extends State<PageTwo> {
     List<FileSystemEntity> files = Directory(directory.path).listSync();
     for (FileSystemEntity f in files) {
       if (f.path.endsWith('.txt')) {
-        savedFileString.add(f.path
-            .substring(f.path.lastIndexOf('/') + 1, f.path.indexOf('.txt')));
+        String a = f.path
+            .substring(f.path.lastIndexOf('/') + 1, f.path.indexOf('.txt'));
+        if (!savedFileString.contains(a)) {
+          savedFileString.add(a);
+        }
       }
     }
+    savedFileString.sort((a,b) =>
+      b.toString().compareTo(a.toString())
+    );
 
     createFileTiles();
   }
@@ -1859,90 +1841,140 @@ class PageTwoState extends State<PageTwo> {
     }
   }
 
-  updateSurvey([bool autoSave = true]) {
+  updateSurvey([bool addHistory = false, bool puntSave = true]) {
     print('updating survey...');
     String survey = '';
     infoBits.asMap().forEach((key, value) {
-      survey = survey + value.stageName + ' ' + value.value + '\n';
+      survey = survey + '\n' + value.stageName + ':' + value.value ;
     });
-    survey = survey + partNames[0];
+    survey = survey + '\n' + partNames[0] ;
     for (_ListItem l in Disease) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/' ;
       }
     }
-    survey = survey + partNames[1];
+    survey = survey + '\n' + partNames[1] ;
     for (_ListItem l in Location) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[2];
+    survey = survey + '\n'+ partNames[2] ;
     for (_ListItem l in ComorbidConditions) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[3];
+    survey = survey + '\n' + partNames[3] ;
     for (_ListItem l in SuspectedCause) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[4];
+    survey = survey + '\n' + partNames[4] ;
     for (_ListItem l in PreviousCPA) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[5];
+    survey = survey + '\n' + partNames[5] ;
     for (_ListItem l in PreviousMeasures) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[6];
+    survey = survey + '\n' + partNames[6] ;
     for (_ListItem l in GeneralAnesthesia) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[7];
+    survey = survey + '\n' + partNames[7] ;
     for (_ListItem l in MechanicalVentilation) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[8];
+    survey = survey + '\n' + partNames[8] ;
     for (_ListItem l in ROSC) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[9];
+    survey = survey + '\n' + partNames[9] ;
     for (_ListItem l in ROSCDuration) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[10];
+    survey = survey + '\n' + partNames[10] ;
     for (_ListItem l in Euthanasia) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + partNames[11];
+    survey = survey + '\n' + partNames[11] ;
     for (_ListItem l in Rearrest) {
       if (l.checked) {
-        survey = survey + l.value + '\n';
+        survey = survey + l.value + '/';
       }
     }
 
     globals.survey = survey;
     updateTextField();
-    if (autoSave) {
+    if (puntSave) {
       puntAutosave();
     }
+
+    if (addHistory) {
+      updateHistory();
+    }
+  }
+
+  parseData(String full) {
+    if (full.contains('\n\n-Case Information-\n\n')) {
+      List<String> split = full.split('\n\n-Case Information-\n\n');
+      globals.log = split[0];
+      globals.survey = split[1];
+    } else {
+      globals.log = full;
+    }
+
+
+    List<String> lineSplit = globals.survey.split('\n');
+    infoBits.asMap().forEach((i, infoBit) {
+      lineSplit.asMap().forEach((j, line) {
+        if(line.contains(infoBit.stageName)) {
+
+          infoBit.value = line.substring( infoBit.stageName.length + 1);
+        }
+      });
+    });
+
+    surveyParts.asMap().forEach((e, a) {
+      a.asMap().forEach((f, b) {
+        b.checked = false;
+      });
+    });
+
+    print('survey split');
+    lineSplit.asMap().forEach((i, split) {
+      partNames.asMap().forEach((j, name) {
+        if (split.contains(name)) {
+          surveyParts[j].asMap().forEach((k, part) {
+            if (split.contains(part.value)) {
+              part.checked = true;
+            }
+          });
+        }
+      });
+    });
+
+    setState(() {
+      updateTimeline();
+      updateSurvey(false);
+      updateTextField();
+    });
   }
 
   Timer autoSaveTimer;
@@ -1961,10 +1993,15 @@ class PageTwoState extends State<PageTwo> {
 
   globalToInfo() {
     globals.info[0] = currentDocPath;
-    globals.info[7] = (globals.weightKG ?? '?').toString();
-    globals.info[8] = globals.chest ?? '?';
+    globals.info[7] = (globals.weightKG ?? '').toString();
+    globals.info[8] = globals.chest ?? '';
     infoBits.asMap().forEach((key, value) {
       value.value = globals.info[key] ;
+    });
+    surveyParts.asMap().forEach((e, a) {
+      a.asMap().forEach((f, b) {
+        b.checked = false;
+      });
     });
 
   }
@@ -2069,14 +2106,14 @@ class PageTwoState extends State<PageTwo> {
   @override
   Widget build(BuildContext context) {
     print('build starting');
-    print(currentHistoryIndex.toString() + previousLogs.length.toString());
+
 
     final diseaseL = Disease.map(
       (e) => GestureDetector(
         onTap: () => {
           setState(() => {
                 e.checked = !e.checked,
-                updateSurvey(),
+                updateSurvey(true),
               }),
         },
         child: Chip(
@@ -2098,7 +2135,7 @@ class PageTwoState extends State<PageTwo> {
                     l.checked = false,
                   },
                 e.checked = !e.checked,
-                updateSurvey(),
+                updateSurvey(true),
               }),
         },
         child: Chip(
@@ -2120,7 +2157,7 @@ class PageTwoState extends State<PageTwo> {
                     l.checked = false,
                   },
                 e.checked = !e.checked,
-                updateSurvey(),
+                updateSurvey(true),
               }),
         },
         child: Chip(
@@ -2138,7 +2175,7 @@ class PageTwoState extends State<PageTwo> {
         onTap: () => {
           setState(() => {
                 e.checked = !e.checked,
-                updateSurvey(),
+                updateSurvey(true),
               }),
         },
         child: Chip(
@@ -2165,7 +2202,7 @@ class PageTwoState extends State<PageTwo> {
                 value: e.checked ?? false,
                 onChanged: (bool newValue) {
                   setState(() => e.checked = newValue);
-                  updateSurvey();
+                  updateSurvey(true);
                 },
                 title: Text(e.value),
               ),
@@ -2192,7 +2229,7 @@ class PageTwoState extends State<PageTwo> {
                       },
                     e.checked = newValue
                   });
-              updateSurvey();
+              updateSurvey(true);
             },
             title: Text(e.value),
           ),
@@ -2204,7 +2241,7 @@ class PageTwoState extends State<PageTwo> {
         onTap: () => {
           setState(() => {
                 e.checked = !e.checked,
-                updateSurvey(),
+                updateSurvey(true),
               }),
         },
         child: Chip(
@@ -2222,7 +2259,7 @@ class PageTwoState extends State<PageTwo> {
         onTap: () => {
           setState(() => {
                 e.checked = !e.checked,
-                updateSurvey(),
+                updateSurvey(true),
               }),
         },
         child: Chip(
@@ -2248,7 +2285,7 @@ class PageTwoState extends State<PageTwo> {
             value: e.checked ?? false,
             onChanged: (bool newValue) {
               setState(() => e.checked = newValue);
-              updateSurvey();
+              updateSurvey(true);
             },
             title: Text(e.value),
           ),
@@ -2268,7 +2305,7 @@ class PageTwoState extends State<PageTwo> {
             value: e.checked ?? false,
             onChanged: (bool newValue) {
               setState(() => e.checked = newValue);
-              updateSurvey();
+              updateSurvey(true);
             },
             title: Text(e.value),
           ),
@@ -2288,7 +2325,7 @@ class PageTwoState extends State<PageTwo> {
             value: e.checked ?? false,
             onChanged: (bool newValue) {
               setState(() => {e.checked = newValue});
-              updateSurvey();
+              updateSurvey(true);
             },
             title: Text(e.value),
           ),
@@ -2319,7 +2356,7 @@ class PageTwoState extends State<PageTwo> {
                       },
                     e.checked = newValue
                   });
-              updateSurvey();
+              updateSurvey(true);
             },
             title: Text(e.value),
           ),
@@ -2588,7 +2625,7 @@ class PageTwoState extends State<PageTwo> {
 
     return DefaultTabController(
       length: 3,
-      initialIndex: 1,
+      initialIndex: initTabIndex,
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           key: _scaffoldKey,
@@ -2692,20 +2729,26 @@ class PageTwoState extends State<PageTwo> {
                 children: [
                   Expanded(
                     child: Container(
-                        padding: EdgeInsets.all(10),
-                        child: TextField(
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              focusedBorder: InputBorder.none,
-                              labelText: 'Text File'),
-                          maxLines: null,
-                          controller: finalController,
-                          onTap: () => {
-                            if (!editing)
-                              {
-                                setState(() => {editing = true})
-                              }
-                          },
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        child: SingleChildScrollView(
+                          child: Container(
+                            padding: EdgeInsets.all(5),
+                            child: TextField(
+                              decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  focusedBorder: InputBorder.none,
+                                  labelText: 'Text File'),
+                              maxLines: null,
+                              controller: finalController,
+                              enabled: false,
+                              onTap: () => {
+                                if (!editing)
+                                  {
+                                    setState(() => {editing = true})
+                                  }
+                              },
+                            ),
+                          ),
                         )),
                   ),
                   Container(
