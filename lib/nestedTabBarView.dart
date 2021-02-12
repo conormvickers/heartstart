@@ -25,6 +25,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -1282,9 +1284,7 @@ loadLastFile() async {
 asyncSetup() async {
   await updateName();
   await globalToInfo();
-
   await updateTimeline();
-
   await updateSurvey(true, false);
   await saveGlobalLog();
   updateDirectory();
@@ -1759,12 +1759,19 @@ asyncSetup() async {
     updateSurvey(true, false);
   }
 
+  List<String> unsafe = [';', ':', ' ', '.', '/', '\n'];
   updateName() {
     if (globals.log.contains('Code Started')) {
       currentDocPath = globals.log.substring(0, globals.log.indexOf('\t'));
       if (currentDocPath.contains('\n')) {
-        currentDocPath = currentDocPath.substring(currentDocPath.indexOf('\n'));
+        currentDocPath = currentDocPath.substring(currentDocPath.lastIndexOf('\n'));
       }
+      unsafe.forEach((element) {
+        if (currentDocPath.contains(element)) {
+          currentDocPath = currentDocPath.replaceAll(element, '_');
+        }
+      });
+
 
       print('naming current file: ' + currentDocPath + '.');
     } else {
@@ -1990,6 +1997,35 @@ asyncSetup() async {
             });
   }
 
+  filePickerFunction() async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['txt', ],
+
+    );
+
+    if(result != null) {
+      File file = File(result.files.single.path);
+      String st = await file.readAsString();
+      await parseData(st);
+      await updateName();
+      print('current doc ' + currentDocPath);
+      await updateTimeline();
+      await updateSurvey(true, false);
+      await saveGlobalLog();
+      updateDirectory();
+      if (_scaffoldKey.currentContext != null) {
+        _scaffoldKey.currentState.removeCurrentSnackBar();
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('loaded file auto named: ' + currentDocPath),
+          duration: Duration(seconds: 3),
+        ));
+      }
+    } else {
+      // User canceled the picker
+    }
+
+  }
 
   globalToInfo() {
     globals.info[0] = currentDocPath;
@@ -2697,6 +2733,22 @@ asyncSetup() async {
                       children: fileTiles,
                     ),
                   ),
+                  GestureDetector(
+                    onTap: () => filePickerFunction(),
+                    child: Container(
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.all(15),
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.lightBlue,
+                        ),
+                        child: Icon(FlutterIcons.addfile_ant, color: Colors.white, size: 40,)
+                        //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
+                      )
+                    ),
+                  )
                 ],
               ),
               Stack(

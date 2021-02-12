@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,6 +25,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:drawing_animation/drawing_animation.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -99,7 +103,6 @@ class MyHomePageState extends State<MyHomePage>
   CircularPercentIndicator cycle;
   IconData centerIcon = FlutterIcons.heart_ant;
   String inst = "Continue Compressions";
-  DateTime lastSwitchedComp = DateTime.now().add(Duration(minutes: 2));
   bool progressPulseCheck = true;
   String pulseCheckCountdown = '';
   TextEditingController doctorController = TextEditingController();
@@ -159,7 +162,9 @@ class MyHomePageState extends State<MyHomePage>
   Timer metronomeTimer;
   AudioPlayer player = AudioPlayer();
   AudioPlayer playerB = AudioPlayer();
-
+  bool animate = true;
+  bool run = true;
+  AnimationController animCont;
   bool playVoice = true;
   Icon soundIcon = Icon(FlutterIcons.metronome_mco);
   Color soundColor = Colors.lightBlue;
@@ -170,11 +175,15 @@ class MyHomePageState extends State<MyHomePage>
   String addEventStringlog = 'etCO2 (mmHg): ';
   TextInputType eventKeyboard =
       TextInputType.numberWithOptions(signed: true, decimal: true);
+  String getFormatedTime() {
+    DateTime a = DateTime.now();
+    String formattedDate = DateFormat('kk:mm').format(a);
+    return formattedDate;
+  }
 
   addCapnoToLog() {
     if (capnoController.text.length > 0) {
-      DateTime now = DateTime.now();
-      String formattedDate = DateFormat('kk:mm').format(now);
+      String formattedDate = getFormatedTime();
       String combined = "\n" +
           formattedDate +
           "\t" +
@@ -317,8 +326,7 @@ class MyHomePageState extends State<MyHomePage>
 
   _selectedPulse(String selected) {
     Navigator.of(context).pop();
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('kk:mm').format(now);
+    String formattedDate = getFormatedTime();
     String combined = "\n" +
         formattedDate +
         "\tPulse check: " +
@@ -352,13 +360,20 @@ class MyHomePageState extends State<MyHomePage>
       }
     });
   }
+  addToLog(String string) {
+    String formattedDate = getFormatedTime();
+    String combined = "\n" + formattedDate + "\t" + string;
 
-  stopAndGoToNextPage() async {
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('kk:mm').format(now);
-    String combined = "\n" + formattedDate + "\tCode Stopped";
-    String full = combined.toString() + "\t";
-    globals.log = globals.log + full;
+    globals.log = globals.log + combined;
+  }
+
+  stopAndGoToNextPage([String reason = '']) async {
+    print('sdf');
+    String formattedDate = getFormatedTime();
+    String combined = "\n" + formattedDate + "\tCode Stopped: " + reason;
+
+    globals.log = globals.log + combined;
+    print('added log');
 
     player.setVolume(0);
     playerB.setVolume(0);
@@ -478,17 +493,14 @@ class MyHomePageState extends State<MyHomePage>
               child: Text('Yes, got pulse'),
               onPressed: () {
                 Navigator.of(context).pop();
-                globals.log = globals.log + '\n Code stopped: pulse found';
-                stopAndGoToNextPage();
+                stopAndGoToNextPage('pulse found');
               },
             ),
             TextButton(
               child: Text('Yes, stop resuscitation'),
               onPressed: () {
                 Navigator.of(context).pop();
-                globals.log = globals.log +
-                    '\n Code stopped: resuscitation efforts withdrawn';
-                stopAndGoToNextPage();
+                stopAndGoToNextPage('resuscitation efforts withdrawn');
               },
             ),
             TextButton(
@@ -530,6 +542,7 @@ class MyHomePageState extends State<MyHomePage>
 
     loadPreferences();
     autoStartCascade();
+    animCont = AnimationController(vsync: this );
 
     Future<void>.delayed(
         Duration(seconds: 10),
@@ -853,6 +866,7 @@ class MyHomePageState extends State<MyHomePage>
                 NoCeck(
                   onPressed: () => setState(() {
                     print('no pcheck');
+                    addToLog('pulse check deferred');
                     askForPulse = false;
                     nested.show = false;
                     progressPulseCheck = true;
@@ -1223,8 +1237,7 @@ class MyHomePageState extends State<MyHomePage>
                 children: <Widget>[
                   deliveredShock(
                     onPressed: () => setState(() {
-                      DateTime now = DateTime.now();
-                      String formattedDate = DateFormat('kk:mm').format(now);
+                      String formattedDate = getFormatedTime();
                       String combined =
                           "\n" + formattedDate + "\tShock Delivered";
                       String full = combined.toString() + "\t";
@@ -1381,6 +1394,7 @@ class MyHomePageState extends State<MyHomePage>
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () => setState(() => {
+                                  addToLog('Timer reset in Hands-Free Mode'),
                                       fractionPulse = 0,
                                       updateCircle(),
                                     }), // handle your onTap here
@@ -1902,12 +1916,15 @@ class MyHomePageState extends State<MyHomePage>
                             child: Column(
                               children: [
                                 Expanded(
-                                    child: Container(
+                                    child:
+                                    Container(
                                   child: FittedBox(
-                                    child: Icon(FlutterIcons.heart_ant,
+                                    child:
+                                    Icon(FlutterIcons.heart_ant,
                                         color: Theme.of(context).primaryColor),
                                   ),
-                                )),
+                                )
+                                ),
                                 Expanded(
                                   child: Container(
                                     padding: EdgeInsets.all(10),
@@ -1941,7 +1958,7 @@ class MyHomePageState extends State<MyHomePage>
                           onTap: () => setState(() {
                                 print('going to files');
                                 globals.ignoreCurrentLog = true;
-                                stopAndGoToNextPage();
+                                stopAndGoToNextPage('pulse found');
                               }),
                           child: Container(
                             decoration: BoxDecoration(

@@ -148,6 +148,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
+  drawing_animation:
+    dependency: "direct main"
+    description:
+      name: drawing_animation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.4"
   fake_async:
     dependency: transitive
     description:
@@ -169,6 +176,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.2.1"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.6"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -195,6 +209,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.5"
+  flutter_native_splash:
+    dependency: "direct main"
+    description:
+      name: flutter_native_splash
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.11"
   flutter_slidable:
     dependency: "direct main"
     description:
