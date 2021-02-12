@@ -27,7 +27,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 
-
 class NestedTabBar extends StatefulWidget {
   var show = false;
   final pass;
@@ -1183,6 +1182,10 @@ final Rearrest = <String>{
   "Re-arrrest without CPR",
   "Re-arrest w/ CPR, but without sustained ROSC",
 }.map((e) => _ListItem(e, false)).toList();
+final Outcome = <String>{
+  "Hospital Discharge",
+  "In-hospital Death",
+}.map((e) => _ListItem(e, false)).toList();
 List<String> partNames = [
   'Disease category at admission:',
   'Location of CPA:',
@@ -1196,6 +1199,7 @@ List<String> partNames = [
   'ROSC duration:',
   'Euthanasia:',
   'Rearrest:',
+  'Outcome:'
 ];
 
 class PageTwoState extends State<PageTwo> {
@@ -1254,41 +1258,39 @@ class PageTwoState extends State<PageTwo> {
       ROSC,
       ROSCDuration,
       Euthanasia,
-      Rearrest
+      Rearrest,
+      Outcome
     ];
 
     setup();
-
   }
 
-  setup()  {
-    if (globals.ignoreCurrentLog){
+  setup() {
+    if (globals.ignoreCurrentLog) {
       initTabIndex = 0;
       globals.ignoreCurrentLog = false;
       loadLastFile();
-
-    }else {
+    } else {
       asyncSetup();
     }
-}
-loadLastFile() async {
-  print('ignore flag found');
-  await updateDirectory();
-  if (savedFileString.length > 0) {
-
-    await loadFile(savedFileString[0]);
-
   }
 
-}
-asyncSetup() async {
-  await updateName();
-  await globalToInfo();
-  await updateTimeline();
-  await updateSurvey(true, false);
-  await saveGlobalLog();
-  updateDirectory();
-}
+  loadLastFile() async {
+    print('ignore flag found');
+    await updateDirectory();
+    if (savedFileString.length > 0) {
+      await loadFile(savedFileString[0]);
+    }
+  }
+
+  asyncSetup() async {
+    await updateName();
+    await globalToInfo();
+    await updateTimeline();
+    await updateSurvey(true, false);
+    await saveGlobalLog();
+    updateDirectory();
+  }
 
   Future<void> makeSure(String ask, Function function) async {
     return showDialog<void>(
@@ -1352,7 +1354,7 @@ asyncSetup() async {
                               updateTimeline(),
                               updateTextField(),
                               puntAutosave(),
-                          updateHistory(),
+                              updateHistory(),
                             })
                       })
             }
@@ -1367,7 +1369,7 @@ asyncSetup() async {
                     updateTimeline(),
                     updateTextField(),
                     puntAutosave(),
-                updateHistory()
+                    updateHistory()
                   })
             }
         },
@@ -1531,7 +1533,7 @@ asyncSetup() async {
                       updateTimeline(),
                       updateTextField(),
                       puntAutosave(),
-                  updateHistory()
+                      updateHistory()
                     })
               },
             );
@@ -1673,7 +1675,7 @@ asyncSetup() async {
     String full = finalController.text;
 
     if (currentHistoryIndex > 0) {
-      previousLogs.removeRange(0, currentHistoryIndex );
+      previousLogs.removeRange(0, currentHistoryIndex);
       currentHistoryIndex = 0;
     }
     if (previousLogs.length > 0) {
@@ -1683,11 +1685,10 @@ asyncSetup() async {
       } else {
         print('not added, the same');
       }
-    }else{
+    } else {
       previousLogs.add(full);
     }
     print(currentHistoryIndex.toString() + previousLogs.length.toString());
-
   }
 
   saveGlobalLog() {
@@ -1729,13 +1730,12 @@ asyncSetup() async {
     updateDirectory();
   }
 
-  resetHistory()  {
+  resetHistory() {
     previousLogs = List<String>();
     currentHistoryIndex = 0;
   }
 
   loadFile(String string) async {
-
     resetHistory();
 
     Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -1764,14 +1764,14 @@ asyncSetup() async {
     if (globals.log.contains('Code Started')) {
       currentDocPath = globals.log.substring(0, globals.log.indexOf('\t'));
       if (currentDocPath.contains('\n')) {
-        currentDocPath = currentDocPath.substring(currentDocPath.lastIndexOf('\n'));
+        currentDocPath =
+            currentDocPath.substring(currentDocPath.lastIndexOf('\n'));
       }
       unsafe.forEach((element) {
         if (currentDocPath.contains(element)) {
           currentDocPath = currentDocPath.replaceAll(element, '_');
         }
       });
-
 
       print('naming current file: ' + currentDocPath + '.');
     } else {
@@ -1792,9 +1792,7 @@ asyncSetup() async {
         }
       }
     }
-    savedFileString.sort((a,b) =>
-      b.toString().compareTo(a.toString())
-    );
+    savedFileString.sort((a, b) => b.toString().compareTo(a.toString()));
 
     createFileTiles();
   }
@@ -1852,76 +1850,82 @@ asyncSetup() async {
     print('updating survey...');
     String survey = '';
     infoBits.asMap().forEach((key, value) {
-      survey = survey + '\n' + value.stageName + ':' + value.value ;
+      survey = survey + '\n' + value.stageName + ':' + value.value;
     });
-    survey = survey + '\n' + partNames[0] ;
+    survey = survey + '\n' + partNames[0];
     for (_ListItem l in Disease) {
       if (l.checked) {
-        survey = survey + l.value + '/' ;
+        survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[1] ;
+    survey = survey + '\n' + partNames[1];
     for (_ListItem l in Location) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n'+ partNames[2] ;
+    survey = survey + '\n' + partNames[2];
     for (_ListItem l in ComorbidConditions) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[3] ;
+    survey = survey + '\n' + partNames[3];
     for (_ListItem l in SuspectedCause) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[4] ;
+    survey = survey + '\n' + partNames[4];
     for (_ListItem l in PreviousCPA) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[5] ;
+    survey = survey + '\n' + partNames[5];
     for (_ListItem l in PreviousMeasures) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[6] ;
+    survey = survey + '\n' + partNames[6];
     for (_ListItem l in GeneralAnesthesia) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[7] ;
+    survey = survey + '\n' + partNames[7];
     for (_ListItem l in MechanicalVentilation) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[8] ;
+    survey = survey + '\n' + partNames[8];
     for (_ListItem l in ROSC) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[9] ;
+    survey = survey + '\n' + partNames[9];
     for (_ListItem l in ROSCDuration) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[10] ;
+    survey = survey + '\n' + partNames[10];
     for (_ListItem l in Euthanasia) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
     }
-    survey = survey + '\n' + partNames[11] ;
+    survey = survey + '\n' + partNames[11];
     for (_ListItem l in Rearrest) {
+      if (l.checked) {
+        survey = survey + l.value + '/';
+      }
+    }
+    survey = survey + '\n' + partNames[12];
+    for (_ListItem l in Outcome) {
       if (l.checked) {
         survey = survey + l.value + '/';
       }
@@ -1947,13 +1951,11 @@ asyncSetup() async {
       globals.log = full;
     }
 
-
     List<String> lineSplit = globals.survey.split('\n');
     infoBits.asMap().forEach((i, infoBit) {
       lineSplit.asMap().forEach((j, line) {
-        if(line.contains(infoBit.stageName)) {
-
-          infoBit.value = line.substring( infoBit.stageName.length + 1);
+        if (line.contains(infoBit.stageName)) {
+          infoBit.value = line.substring(infoBit.stageName.length + 1);
         }
       });
     });
@@ -2000,11 +2002,12 @@ asyncSetup() async {
   filePickerFunction() async {
     FilePickerResult result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['txt', ],
-
+      allowedExtensions: [
+        'txt',
+      ],
     );
 
-    if(result != null) {
+    if (result != null) {
       File file = File(result.files.single.path);
       String st = await file.readAsString();
       await parseData(st);
@@ -2024,7 +2027,6 @@ asyncSetup() async {
     } else {
       // User canceled the picker
     }
-
   }
 
   globalToInfo() {
@@ -2032,50 +2034,54 @@ asyncSetup() async {
     globals.info[7] = (globals.weightKG ?? '').toString();
     globals.info[8] = globals.chest ?? '';
     infoBits.asMap().forEach((key, value) {
-      value.value = globals.info[key] ;
+      value.value = globals.info[key];
     });
     surveyParts.asMap().forEach((e, a) {
       a.asMap().forEach((f, b) {
         b.checked = false;
       });
     });
-
   }
 
   showInfoButton(String info, String current) async {
     TextEditingController temp = TextEditingController();
     temp.text = current;
-    temp.selection = TextSelection(baseOffset: 0, extentOffset: temp.text.length);
+    temp.selection =
+        TextSelection(baseOffset: 0, extentOffset: temp.text.length);
 
     String r = '';
-    if (info.toUpperCase().contains('DATE OF')){
+    if (info.toUpperCase().contains('DATE OF')) {
       await showDatePicker(
-          context: context, initialDate: DateTime.now(), firstDate: DateTime(1950), lastDate: DateTime.now() ).then((value) => {
-            r = DateFormat.yMMMMd().format(value),
-
-      });
-    }else{
-      r = await showDialog(context: context, child:
-      AlertDialog(
-        title:  Text(info),
-        content: TextField(
-          controller: temp,
-          autofocus: true,
-
-          onEditingComplete: () => {
-            Navigator.pop(context, temp.text),
-          },
-        ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('done'),
-            onPressed: () => {
-              Navigator.pop(context, temp.text)
-            },
-          )
-        ],
-      )
-      );
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1950),
+              lastDate: DateTime.now())
+          .then((value) => {
+                if (value != null)
+                  {
+                    r = DateFormat.yMMMMd().format(value),
+                  }
+              });
+    } else {
+      r = await showDialog(
+              context: context,
+              child: AlertDialog(
+                title: Text(info),
+                content: TextField(
+                  controller: temp,
+                  autofocus: true,
+                  onEditingComplete: () => {
+                    Navigator.pop(context, temp.text),
+                  },
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('done'),
+                    onPressed: () => {Navigator.pop(context, temp.text)},
+                  )
+                ],
+              )) ??
+          '';
     }
 
     return r;
@@ -2095,22 +2101,20 @@ asyncSetup() async {
     List<Widget> r = List<Widget>();
     infoBits.asMap().forEach((key, value) {
       r.add(GestureDetector(
-        onTap: () async =>  {
+        onTap: () async => {
           print(value.value),
           value.value = await showInfoButton(value.stageName, value.value),
-          setState(()=>{
-            print(value.value),
-            updateSurvey(true),
-          })
+          setState(() => {
+                print(value.value),
+                updateSurvey(true),
+              })
         },
         child: Container(
           padding: EdgeInsets.all(10),
           child: Container(
             padding: EdgeInsets.all(5),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15)
-            ),
+                color: Colors.white, borderRadius: BorderRadius.circular(15)),
             child: Column(
               children: [
                 Row(
@@ -2118,7 +2122,10 @@ asyncSetup() async {
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [Text(value.stageName + ": "), Text(value.value)],
+                        children: [
+                          Text(value.stageName + ": "),
+                          Text(value.value)
+                        ],
                       ),
                     ),
                     Container(
@@ -2142,7 +2149,6 @@ asyncSetup() async {
   @override
   Widget build(BuildContext context) {
     print('build starting');
-
 
     final diseaseL = Disease.map(
       (e) => GestureDetector(
@@ -2399,6 +2405,33 @@ asyncSetup() async {
         ),
       ),
     ).toList();
+    final outcomeL = Outcome.map(
+      (e) => Container(
+        padding: EdgeInsets.all(5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: CheckboxListTile(
+            key: Key(e.value),
+            value: e.checked ?? false,
+            onChanged: (bool newValue) {
+              print('starting...');
+              setState(() => {
+                    for (_ListItem b in Outcome)
+                      {
+                        b.checked = false,
+                      },
+                    e.checked = newValue
+                  });
+              updateSurvey(true);
+            },
+            title: Text(e.value),
+          ),
+        ),
+      ),
+    ).toList();
     Widget roscOpener = Container(
         padding: EdgeInsets.all(5),
         child: Container(
@@ -2476,6 +2509,22 @@ asyncSetup() async {
           ),
         ));
 
+    double getPercentDone() {
+      int i = surveyParts.length;
+      int p = 0;
+      surveyParts.asMap().forEach((key, value) {
+        bool done = false;
+        value.forEach((element) {
+          if (element.checked) {
+            done = true;
+          }
+        });
+        if (done) {
+          p++;
+        }
+      });
+      return p / i;
+    }
 
     DraggableScrollableSheet buildDragScrollSheet() {
       return DraggableScrollableSheet(
@@ -2653,6 +2702,15 @@ asyncSetup() async {
                       ),
                       euthanasiaOpener,
                       ...rearrestL,
+                      Divider(),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        child: Text('Outcome',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
+                      ),
+                      ...outcomeL,
                     ],
                   ),
                 ));
@@ -2736,18 +2794,21 @@ asyncSetup() async {
                   GestureDetector(
                     onTap: () => filePickerFunction(),
                     child: Container(
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.all(15),
-                      child: Container(
+                        alignment: Alignment.centerRight,
                         padding: EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Colors.lightBlue,
-                        ),
-                        child: Icon(FlutterIcons.addfile_ant, color: Colors.white, size: 40,)
-                        //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
-                      )
-                    ),
+                        child: Container(
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.lightBlue,
+                            ),
+                            child: Icon(
+                              FlutterIcons.addfile_ant,
+                              color: Colors.white,
+                              size: 40,
+                            )
+                            //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
+                            )),
                   )
                 ],
               ),
@@ -2756,6 +2817,12 @@ asyncSetup() async {
                   Builder(
                     builder: (BuildContext context) => Column(
                       children: <Widget>[
+                        LinearPercentIndicator(
+                          animateFromLastPercent: true,
+                          animation: true,
+                          animationDuration: 2,
+                          percent: getPercentDone(),
+                        ),
                         Expanded(
                           flex: 5,
                           child: Container(
@@ -2781,7 +2848,8 @@ asyncSetup() async {
                 children: [
                   Expanded(
                     child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         child: SingleChildScrollView(
                           child: Container(
                             padding: EdgeInsets.all(5),

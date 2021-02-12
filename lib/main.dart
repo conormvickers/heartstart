@@ -28,7 +28,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:drawing_animation/drawing_animation.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -227,7 +226,17 @@ class MyHomePageState extends State<MyHomePage>
     globals.log = formattedDate + "\tCode Started";
     globals.codeStart = now;
     globals.info = [
-      '','','','','','','','','','','',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
     ];
     globals.chest = null;
     globals.weightKG = null;
@@ -360,6 +369,7 @@ class MyHomePageState extends State<MyHomePage>
       }
     });
   }
+
   addToLog(String string) {
     String formattedDate = getFormatedTime();
     String combined = "\n" + formattedDate + "\t" + string;
@@ -542,7 +552,7 @@ class MyHomePageState extends State<MyHomePage>
 
     loadPreferences();
     autoStartCascade();
-    animCont = AnimationController(vsync: this );
+    animCont = AnimationController(vsync: this);
 
     Future<void>.delayed(
         Duration(seconds: 10),
@@ -550,17 +560,14 @@ class MyHomePageState extends State<MyHomePage>
               Wakelock.enable(),
             });
   }
+
   autoStartCascade() async {
     if (autoStart > 0) {
       setState(() {
         autoStart--;
       });
-      Future.delayed(
-          Duration(seconds: 1),
-              () => {
-            autoStartCascade()
-          });
-    }else{
+      Future.delayed(Duration(seconds: 1), () => {autoStartCascade()});
+    } else {
       setState(() {
         warningDismissed = true;
       });
@@ -701,18 +708,16 @@ class MyHomePageState extends State<MyHomePage>
   );
 
   List<Widget> settingItems() {
-
     return [
       DrawerHeader(
         child: Column(
           children: [
-
             Expanded(
               child: Container(),
             ),
             Expanded(
               child: Text(
-                'Options',
+                'OPTIONS',
                 textAlign: TextAlign.center,
               ),
             ),
@@ -722,7 +727,6 @@ class MyHomePageState extends State<MyHomePage>
       ),
       Row(
         children: [
-
           Expanded(
             child: Container(
               padding: EdgeInsets.all(10),
@@ -738,62 +742,42 @@ class MyHomePageState extends State<MyHomePage>
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                          color: Theme.of(context).accentColor,
-                          width: 1.0),
+                          color: Theme.of(context).accentColor, width: 1.0),
                     ),
-                    labelText: 'doctor',
-                    labelStyle: TextStyle(
-                        color: Theme.of(context).accentColor)),
+                    labelText: 'Doctor/user',
+                    labelStyle:
+                        TextStyle(color: Theme.of(context).accentColor)),
               ),
             ),
           ),
         ],
       ),
       RaisedButton(
-        child: Text('Check Pulse Now'),
-        onPressed: () {
-          setState(() {
-            askForPulse = true;
-            Navigator.pop(context);
-          });
-        },
-      ),
-      RaisedButton(
-        child: Text('Change Weight'),
-        onPressed: () {
-          setState(() {
-            globals.weightKG = null;
-            globals.weightIndex = null;
-            globals.chest = null;
-            print('reset weight ' + globals.weightKG.toString());
-            nestedKey.currentState.setState(() {
-              nestedKey.currentState.nestedTabController.animateTo(1);
-            });
-
-            Navigator.pop(context);
-          });
-        },
-      ),
-      RaisedButton(
-        child: Text('Stop Code Now'),
-        onPressed: () {
-          setState(() {
-            Navigator.pop(context);
-          });
-          _ensureStopCode();
-        },
-      ),
-
-      RaisedButton(
         onPressed: () => {
-          setState(() => {
-            Navigator.pop(context),
-          }),
-          handsFree = true
+          globals.ignoreCurrentLog = true,
+          stopAndGoToNextPage(),
         },
-        child: Text('Hands Free Mode'),
+        color: Theme.of(context).splashColor,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Go To Files',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Icon(FlutterIcons.folder_ent, color: Colors.white),
+          ],
+        ),
       ),
-
+      Expanded(
+        child: Container(),
+      ),
+      Text('Become certified (insert link to online courses)'),
+      Divider(),
+      Text(
+          "Created by Conor Vickers, MD and Ally Hartzell, VMD in cooperation with Recover Initiative"),
+      Divider()
     ];
   }
 
@@ -1394,7 +1378,8 @@ class MyHomePageState extends State<MyHomePage>
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () => setState(() => {
-                                  addToLog('Timer reset in Hands-Free Mode'),
+                                      addToLog(
+                                          'Timer reset in Hands-Free Mode'),
                                       fractionPulse = 0,
                                       updateCircle(),
                                     }), // handle your onTap here
@@ -1916,15 +1901,12 @@ class MyHomePageState extends State<MyHomePage>
                             child: Column(
                               children: [
                                 Expanded(
-                                    child:
-                                    Container(
+                                    child: Container(
                                   child: FittedBox(
-                                    child:
-                                    Icon(FlutterIcons.heart_ant,
+                                    child: Icon(FlutterIcons.heart_ant,
                                         color: Theme.of(context).primaryColor),
                                   ),
-                                )
-                                ),
+                                )),
                                 Expanded(
                                   child: Container(
                                     padding: EdgeInsets.all(10),
@@ -1940,7 +1922,10 @@ class MyHomePageState extends State<MyHomePage>
                                 ),
                                 Container(
                                   padding: EdgeInsets.all(10),
-                                  child: Text('auto starting in ' +  autoStart.toString() + ' seconds',
+                                  child: Text(
+                                      'auto starting in ' +
+                                          autoStart.toString() +
+                                          ' seconds',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color:
@@ -2091,9 +2076,6 @@ class MyHomePageState extends State<MyHomePage>
     if (!warningDismissed) {
       fullStack = <Widget>[full, warning];
     }
-
-
-
 
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
