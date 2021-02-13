@@ -2133,27 +2133,35 @@ class MyHomePageState extends State<MyHomePage>
       ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        actions: [Container()],
+        actions: [Container(width: 100,)],
         title: Row(
           children: [
-            Text(
-              "RECOVER",
-              style: TextStyle(color: Colors.lightBlue),
-            ),
-            Icon(
-              FlutterIcons.ios_medical_ion,
-              color: Theme.of(context).splashColor,
+            Expanded(
+              child: Container(
+                  height: 50,
+                  child: Image.asset('assets/recover-logo-250.png', fit: BoxFit.fitHeight,)),
             )
+            // Text(
+            //   "RECOVER",
+            //   style: TextStyle(color: Colors.lightBlue),
+            // ),
+            // Icon(
+            //   FlutterIcons.ios_medical_ion,
+            //   color: Theme.of(context).splashColor,
+            // )
           ],
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(
-              FlutterIcons.ios_options_ion,
-              color: Colors.lightBlue,
+        leading: Container(
+          width: 100,
+          child: Builder(
+            builder: (context) => IconButton(
+              icon: Icon(
+                FlutterIcons.ios_options_ion,
+                color: Colors.lightBlue,
+              ),
+              onPressed: () =>
+                  {updateDrawer(), Scaffold.of(context).openDrawer()},
             ),
-            onPressed: () =>
-                {updateDrawer(), Scaffold.of(context).openDrawer()},
           ),
         ),
       ),

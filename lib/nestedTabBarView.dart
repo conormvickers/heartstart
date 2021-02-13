@@ -1179,7 +1179,7 @@ final Euthanasia = <String>{
   "Economic reasons"
 }.map((e) => _ListItem(e, false)).toList();
 final Rearrest = <String>{
-  "Re-arrrest without CPR",
+  "Re-arrest without CPR",
   "Re-arrest w/ CPR, but without sustained ROSC",
 }.map((e) => _ListItem(e, false)).toList();
 final Outcome = <String>{
@@ -1395,6 +1395,8 @@ class PageTwoState extends State<PageTwo> {
           'kg\n';
     }
     log = log + globals.log;
+    log = log.replaceAll(',', '');
+    log = log.replaceAll("'", '');
 
     pdf = pw.Document();
 
@@ -1708,12 +1710,13 @@ class PageTwoState extends State<PageTwo> {
     print('getting directory...');
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
-    print('folder: ' + appDocPath.toString());
+
 
     File tobesaved = File(appDocPath + '/' + currentDocPath + '.txt');
-    print('saving as ' + tobesaved.path + ' ...');
+
+    string = getPercentDone().toString() + ']' + string;
     print(' saving  ' + string);
-    tobesaved.writeAsString(string);
+    await tobesaved.writeAsString(string);
     print('sucess');
     updateDirectory();
   }
@@ -1744,6 +1747,11 @@ class PageTwoState extends State<PageTwo> {
     print('loading ' + toLoad.path + ' ...');
 
     String full = toLoad.readAsStringSync();
+    if (full.contains(']')){
+      if (full.indexOf(']') < 30 ){
+        full = full.substring(full.indexOf(']') + 1 );
+      }
+    }
     if (full.contains('\n\n-Case Information-\n\n')) {
       List<String> split = full.split('\n\n-Case Information-\n\n');
       globals.log = split[0];
@@ -1779,8 +1787,10 @@ class PageTwoState extends State<PageTwo> {
     }
   }
 
+  List<double> statuses = List<double>();
   void updateDirectory() async {
     savedFileString = [];
+    statuses = [];
     Directory directory = await getApplicationDocumentsDirectory();
     List<FileSystemEntity> files = Directory(directory.path).listSync();
     for (FileSystemEntity f in files) {
@@ -1793,8 +1803,25 @@ class PageTwoState extends State<PageTwo> {
       }
     }
     savedFileString.sort((a, b) => b.toString().compareTo(a.toString()));
-
+    print('finished sorting');
+     savedFileString.forEach((element)  {
+      double a = loadFileStatus(element, directory);
+       statuses.add( a );
+    });
+    print('got statuses' + statuses.toString());
     createFileTiles();
+  }
+  double loadFileStatus(String string, Directory appDocDir)  {
+
+    String appDocPath = appDocDir.path;
+    File toLoad = File(appDocPath + '/' + string + '.txt');
+    String full =  toLoad.readAsStringSync();
+    if (full.contains(']')) {
+      double r = double.parse(full.substring(0, full.indexOf(']')));
+      return r;
+    }
+    print(full);
+    return 0.69;
   }
 
   Color checkSelectedColor(String e) {
@@ -1818,26 +1845,36 @@ class PageTwoState extends State<PageTwo> {
 
   createFileTiles() async {
     if (savedFileString.length > 0) {
-      List<Widget> a = savedFileString
-          .map((e) => Container(
-                color: checkSelectedColor(e),
-                child: ListTile(
-                  trailing: IconButton(
-                      icon: Icon(FlutterIcons.delete_mdi),
-                      onPressed: () => {
-                            makeSure('perminantly delete this file?',
-                                () => {deleteFile(e)})
-                          }),
-                  title: Row(
-                    children: [
-                      ...checkSelectedIcon(e),
-                      Text(e),
-                    ],
-                  ),
-                  onTap: () => {loadFile(e)},
-                ),
-              ))
-          .toList();
+      List<Widget> a = List<Widget> ();
+      savedFileString.asMap().forEach((key, e) {
+        a.add( Container(
+            color: checkSelectedColor(e),
+            child: ListTile(
+              trailing: IconButton(
+                  icon: Icon(FlutterIcons.delete_mdi),
+                  onPressed: () =>
+                  {
+                    makeSure('perminantly delete this file?',
+                            () => {deleteFile(e)})
+                  }),
+              title: Row(
+                children: [
+                  ...checkSelectedIcon(e),
+                  Expanded(child: Text(e, maxLines: 1,)),
+                  Expanded(
+                    child: Container(
+                      child: CircularPercentIndicator(
+                        radius: 30,
+                        percent: statuses[key],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              onTap: () => {loadFile(e)},
+            ))
+        );
+      });
       setState(() {
         fileTiles = a;
       });
@@ -2085,6 +2122,40 @@ class PageTwoState extends State<PageTwo> {
     }
 
     return r;
+  }
+
+  double getPercentDone() {
+    int i = surveyParts.length + infoBits.length;
+    int p = 0;
+    surveyParts.asMap().forEach((key, value) {
+      bool done = false;
+      if (value.first.value.contains("General Anesthesia")
+          || value.first.value.contains("Ventilation")
+          || value.first.value.contains("ROSC")
+          || value.first.value.contains("20 min")
+          || value.first.value.contains("arrest")
+          || value.first.value.contains("Euthenasia")
+          || value.first.value.contains("Venous")
+      ){
+        done = true;
+      }
+      value.forEach((element) {
+        if (element.checked) {
+          done = true;
+        }
+      });
+      if (done) {
+        p++;
+      }else{
+        print('not ' + value.first.value);
+      }
+    });
+    infoBits.asMap().forEach((key, value) {
+      if (value.value != '') {
+        p++;
+      }
+    });
+    return p / i;
   }
 
   String doctor;
@@ -2509,23 +2580,6 @@ class PageTwoState extends State<PageTwo> {
           ),
         ));
 
-    double getPercentDone() {
-      int i = surveyParts.length;
-      int p = 0;
-      surveyParts.asMap().forEach((key, value) {
-        bool done = false;
-        value.forEach((element) {
-          if (element.checked) {
-            done = true;
-          }
-        });
-        if (done) {
-          p++;
-        }
-      });
-      return p / i;
-    }
-
     DraggableScrollableSheet buildDragScrollSheet() {
       return DraggableScrollableSheet(
           initialChildSize: 0.15,
@@ -2725,43 +2779,57 @@ class PageTwoState extends State<PageTwo> {
           key: _scaffoldKey,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            leading: IconButton(
-              icon: Row(
-                children: [
-                  Icon(
-                    FlutterIcons.left_ant,
-                    size: 10,
-                    color: Theme.of(context).splashColor,
-                  ),
-                  Icon(
-                    FlutterIcons.alert_decagram_mco,
-                    color: Theme.of(context).splashColor,
-                  ),
-                ],
+            leading: Container(
+              width: 100,
+              child: IconButton(
+                icon: Row(
+                  children: [
+                    Icon(
+                      FlutterIcons.left_ant,
+                      size: 10,
+                      color: Theme.of(context).splashColor,
+                    ),
+                    Icon(
+                      FlutterIcons.alert_decagram_mco,
+                      color: Theme.of(context).splashColor,
+                    ),
+                  ],
+                ),
+                onPressed: () => {
+                  makeSure(
+                      'start NEW code event?',
+                      () => {
+                            print('reset hit'),
+                            Navigator.pop(context, 'true'),
+                          })
+                },
               ),
-              onPressed: () => {
-                makeSure(
-                    'start NEW code event?',
-                    () => {
-                          print('reset hit'),
-                          Navigator.pop(context, 'true'),
-                        })
-              },
             ),
             title: Row(
               children: [
-                Text(
-                  "RECOVER",
-                  style: TextStyle(color: Colors.lightBlue),
-                ),
-                Icon(
-                  FlutterIcons.ios_medical_ion,
-                  color: Theme.of(context).splashColor,
+
+                Expanded(
+                  child: Container(
+                      height: 50,
+                      child: Image.asset('assets/recover-logo-250.png', fit: BoxFit.fitHeight,)),
                 )
+                // Text(
+                //   "RECOVER",
+                //   style: TextStyle(color: Colors.lightBlue),
+                // ),
+                // Icon(
+                //   FlutterIcons.ios_medical_ion,
+                //   color: Theme.of(context).splashColor,
+                // )
               ],
             ),
             elevation: 1.0,
-            actions: [...undoButtons(), closeButton()],
+            actions: [Container(
+              width: 100,
+              child: Row(
+                children: [...undoButtons(), closeButton()],
+              ),
+            ),]
           ),
           bottomNavigationBar: ConvexAppBar.badge(
             const <int, dynamic>{3: '2'},
@@ -2803,7 +2871,7 @@ class PageTwoState extends State<PageTwo> {
                               color: Colors.lightBlue,
                             ),
                             child: Icon(
-                              FlutterIcons.addfile_ant,
+                              FlutterIcons.folder_upload_mco,
                               color: Colors.white,
                               size: 40,
                             )
@@ -2878,12 +2946,31 @@ class PageTwoState extends State<PageTwo> {
                         alignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           RaisedButton(
-                            child: Text('Send Text File'),
+                            child: Container(child: Column(
+    children: [
+    Icon(FlutterIcons.text_ent),
+    Text('Text'),
+    ],
+    )),
                             onPressed: sendText,
                           ),
                           RaisedButton(
-                            child: Text('Send PDF File'),
+                            child: Container(child: Column(
+    children: [
+    Icon(FlutterIcons.file_pdf_faw5),
+    Text('PDF'),
+    ],
+    ),),
                             onPressed: sendData,
+                          ),
+                          RaisedButton(
+                            child: Container(child: Column(
+                              children: [
+                                Icon(FlutterIcons.cloud_upload_alt_faw5s),
+                                Text('Cloud'),
+                              ],
+                            )),
+                            onPressed: () => {},
                           ),
                         ],
                       )),
