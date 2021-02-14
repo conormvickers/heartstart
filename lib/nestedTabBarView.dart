@@ -1386,17 +1386,9 @@ class PageTwoState extends State<PageTwo> {
     if (finalController.text != null) {
       log = finalController.text + '\n';
     }
-    if (globals.chest != null && globals.weightKG != null) {
-      log = log +
-          ' ' +
-          globals.chest +
-          ' chest, ' +
-          globals.weightKG.toStringAsPrecision(2) +
-          'kg\n';
-    }
-    log = log + globals.log;
-    log = log.replaceAll(',', '');
-    log = log.replaceAll("'", '');
+    //
+    // log = log.replaceAll(',', '');
+    // log = log.replaceAll("'", '');
 
     pdf = pw.Document();
 
@@ -1431,15 +1423,7 @@ class PageTwoState extends State<PageTwo> {
     if (finalController.text != null) {
       log = finalController.text + '\n';
     }
-    if (globals.chest != null && globals.weightKG != null) {
-      log = log +
-          ' ' +
-          globals.chest +
-          ' chest, ' +
-          globals.weightKG.toStringAsPrecision(2) +
-          'kg\n';
-    }
-    log = log + globals.log;
+
 
     await file.writeAsString(log);
 
