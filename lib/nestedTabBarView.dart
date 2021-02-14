@@ -1415,20 +1415,16 @@ class PageTwoState extends State<PageTwo> {
 
   sendText() async {
     appDocDir = await getApplicationDocumentsDirectory();
-    DateTime now = DateTime.now();
-    String date = DateFormat('yyyy_MM_dd').format(now);
 
-    final file = File("${appDocDir.path}/" + date + "log.txt");
+    final file = File("${appDocDir.path}/" + "temp_log.txt");
     String log = '';
     if (finalController.text != null) {
       log = finalController.text + '\n';
     }
 
-
     await file.writeAsString(log);
 
-    Share.shareFiles(["${appDocDir.path}/" + date + "log.txt"],
-        text: "TXT log");
+    Share.shareFiles(["${appDocDir.path}/" + "temp_log.txt"], text: "TXT log");
   }
 
   onReorder(int oldIndex, int newIndex) {
@@ -1695,7 +1691,6 @@ class PageTwoState extends State<PageTwo> {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
 
-
     File tobesaved = File(appDocPath + '/' + currentDocPath + '.txt');
 
     string = getPercentDone().toString() + ']' + string;
@@ -1731,9 +1726,9 @@ class PageTwoState extends State<PageTwo> {
     print('loading ' + toLoad.path + ' ...');
 
     String full = toLoad.readAsStringSync();
-    if (full.contains(']')){
-      if (full.indexOf(']') < 30 ){
-        full = full.substring(full.indexOf(']') + 1 );
+    if (full.contains(']')) {
+      if (full.indexOf(']') < 30) {
+        full = full.substring(full.indexOf(']') + 1);
       }
     }
     if (full.contains('\n\n-Case Information-\n\n')) {
@@ -1781,25 +1776,25 @@ class PageTwoState extends State<PageTwo> {
       if (f.path.endsWith('.txt')) {
         String a = f.path
             .substring(f.path.lastIndexOf('/') + 1, f.path.indexOf('.txt'));
-        if (!savedFileString.contains(a)) {
+        if (!savedFileString.contains(a) && !a.contains('temp')) {
           savedFileString.add(a);
         }
       }
     }
     savedFileString.sort((a, b) => b.toString().compareTo(a.toString()));
     print('finished sorting');
-     savedFileString.forEach((element)  {
+    savedFileString.forEach((element) {
       double a = loadFileStatus(element, directory);
-       statuses.add( a );
+      statuses.add(a);
     });
     print('got statuses' + statuses.toString());
     createFileTiles();
   }
-  double loadFileStatus(String string, Directory appDocDir)  {
 
+  double loadFileStatus(String string, Directory appDocDir) {
     String appDocPath = appDocDir.path;
     File toLoad = File(appDocPath + '/' + string + '.txt');
-    String full =  toLoad.readAsStringSync();
+    String full = toLoad.readAsStringSync();
     if (full.contains(']')) {
       double r = double.parse(full.substring(0, full.indexOf(']')));
       return r;
@@ -1829,22 +1824,25 @@ class PageTwoState extends State<PageTwo> {
 
   createFileTiles() async {
     if (savedFileString.length > 0) {
-      List<Widget> a = List<Widget> ();
+      List<Widget> a = List<Widget>();
       savedFileString.asMap().forEach((key, e) {
-        a.add( Container(
+        a.add(Container(
             color: checkSelectedColor(e),
             child: ListTile(
               trailing: IconButton(
                   icon: Icon(FlutterIcons.delete_mdi),
-                  onPressed: () =>
-                  {
-                    makeSure('perminantly delete this file?',
+                  onPressed: () => {
+                        makeSure('perminantly delete this file?',
                             () => {deleteFile(e)})
-                  }),
+                      }),
               title: Row(
                 children: [
                   ...checkSelectedIcon(e),
-                  Expanded(child: Text(e, maxLines: 1,)),
+                  Expanded(
+                      child: Text(
+                    e,
+                    maxLines: 1,
+                  )),
                   Expanded(
                     child: Container(
                       child: CircularPercentIndicator(
@@ -1856,8 +1854,7 @@ class PageTwoState extends State<PageTwo> {
                 ],
               ),
               onTap: () => {loadFile(e)},
-            ))
-        );
+            )));
       });
       setState(() {
         fileTiles = a;
@@ -2113,14 +2110,13 @@ class PageTwoState extends State<PageTwo> {
     int p = 0;
     surveyParts.asMap().forEach((key, value) {
       bool done = false;
-      if (value.first.value.contains("General Anesthesia")
-          || value.first.value.contains("Ventilation")
-          || value.first.value.contains("ROSC")
-          || value.first.value.contains("20 min")
-          || value.first.value.contains("arrest")
-          || value.first.value.contains("Euthenasia")
-          || value.first.value.contains("Venous")
-      ){
+      if (value.first.value.contains("General Anesthesia") ||
+          value.first.value.contains("Ventilation") ||
+          value.first.value.contains("ROSC") ||
+          value.first.value.contains("20 min") ||
+          value.first.value.contains("arrest") ||
+          value.first.value.contains("Euthenasia") ||
+          value.first.value.contains("Venous")) {
         done = true;
       }
       value.forEach((element) {
@@ -2130,7 +2126,7 @@ class PageTwoState extends State<PageTwo> {
       });
       if (done) {
         p++;
-      }else{
+      } else {
         print('not ' + value.first.value);
       }
     });
@@ -2575,7 +2571,7 @@ class PageTwoState extends State<PageTwo> {
                     color: Colors.lightBlue,
                     border: Border.all(
                       color: Colors.grey,
-                      width: 3,
+                      width: 2,
                     ),
                     borderRadius: BorderRadius.only(
                         topRight: Radius.circular(15),
@@ -2762,59 +2758,62 @@ class PageTwoState extends State<PageTwo> {
           resizeToAvoidBottomInset: false,
           key: _scaffoldKey,
           appBar: AppBar(
-            automaticallyImplyLeading: false,
-            leading: Container(
-              width: 100,
-              child: IconButton(
-                icon: Row(
-                  children: [
-                    Icon(
-                      FlutterIcons.left_ant,
-                      size: 10,
-                      color: Theme.of(context).splashColor,
-                    ),
-                    Icon(
-                      FlutterIcons.alert_decagram_mco,
-                      color: Theme.of(context).splashColor,
-                    ),
-                  ],
+              automaticallyImplyLeading: false,
+              leading: Container(
+                width: 100,
+                child: IconButton(
+                  icon: Row(
+                    children: [
+                      Icon(
+                        FlutterIcons.left_ant,
+                        size: 10,
+                        color: Theme.of(context).splashColor,
+                      ),
+                      Icon(
+                        FlutterIcons.alert_decagram_mco,
+                        color: Theme.of(context).splashColor,
+                      ),
+                    ],
+                  ),
+                  onPressed: () => {
+                    makeSure(
+                        'start NEW code event?',
+                        () => {
+                              print('reset hit'),
+                              Navigator.pop(context, 'true'),
+                            })
+                  },
                 ),
-                onPressed: () => {
-                  makeSure(
-                      'start NEW code event?',
-                      () => {
-                            print('reset hit'),
-                            Navigator.pop(context, 'true'),
-                          })
-                },
               ),
-            ),
-            title: Row(
-              children: [
-
-                Expanded(
-                  child: Container(
-                      height: 50,
-                      child: Image.asset('assets/recover-logo-250.png', fit: BoxFit.fitHeight,)),
-                )
-                // Text(
-                //   "RECOVER",
-                //   style: TextStyle(color: Colors.lightBlue),
-                // ),
-                // Icon(
-                //   FlutterIcons.ios_medical_ion,
-                //   color: Theme.of(context).splashColor,
-                // )
-              ],
-            ),
-            elevation: 1.0,
-            actions: [Container(
-              width: 100,
-              child: Row(
-                children: [...undoButtons(), closeButton()],
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                        height: 50,
+                        child: Image.asset(
+                          'assets/recover-logo-250.png',
+                          fit: BoxFit.fitHeight,
+                        )),
+                  )
+                  // Text(
+                  //   "RECOVER",
+                  //   style: TextStyle(color: Colors.lightBlue),
+                  // ),
+                  // Icon(
+                  //   FlutterIcons.ios_medical_ion,
+                  //   color: Theme.of(context).splashColor,
+                  // )
+                ],
               ),
-            ),]
-          ),
+              elevation: 1.0,
+              actions: [
+                Container(
+                  width: 100,
+                  child: Row(
+                    children: [...undoButtons(), closeButton()],
+                  ),
+                ),
+              ]),
           bottomNavigationBar: ConvexAppBar.badge(
             const <int, dynamic>{3: '2'},
             style: TabStyle.reactCircle,
@@ -2843,24 +2842,63 @@ class PageTwoState extends State<PageTwo> {
                       children: fileTiles,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => filePickerFunction(),
-                    child: Container(
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.all(15),
-                        child: Container(
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: Colors.black))),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
                             padding: EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              color: Colors.lightBlue,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => launch(
+                                      'https://recoverinitiative.org/veterinary-professionals/'),
+                                  child: Container(
+                                    padding: EdgeInsets.all(15),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text('Become certified',
+                                            textAlign: TextAlign.center,
+                                            style:
+                                                TextStyle(color: Colors.white)),
+                                        Icon(FlutterIcons.graduation_cap_ent,
+                                            color: Colors.white)
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                            child: Icon(
-                              FlutterIcons.folder_upload_mco,
-                              color: Colors.white,
-                              size: 40,
-                            )
-                            //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
-                            )),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => filePickerFunction(),
+                          child: Container(
+                              padding: EdgeInsets.all(15),
+                              child: Container(
+                                  padding: EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    color: Colors.lightBlue,
+                                  ),
+                                  child: Icon(
+                                    FlutterIcons.folder_upload_mco,
+                                    color: Colors.white,
+                                    size: 40,
+                                  )
+                                  //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
+                                  )),
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),
@@ -2930,25 +2968,29 @@ class PageTwoState extends State<PageTwo> {
                         alignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           RaisedButton(
-                            child: Container(child: Column(
-    children: [
-    Icon(FlutterIcons.text_ent),
-    Text('Text'),
-    ],
-    )),
+                            child: Container(
+                                child: Column(
+                              children: [
+                                Icon(FlutterIcons.text_ent),
+                                Text('Text'),
+                              ],
+                            )),
                             onPressed: sendText,
                           ),
                           RaisedButton(
-                            child: Container(child: Column(
-    children: [
-    Icon(FlutterIcons.file_pdf_faw5),
-    Text('PDF'),
-    ],
-    ),),
+                            child: Container(
+                              child: Column(
+                                children: [
+                                  Icon(FlutterIcons.file_pdf_faw5),
+                                  Text('PDF'),
+                                ],
+                              ),
+                            ),
                             onPressed: sendData,
                           ),
                           RaisedButton(
-                            child: Container(child: Column(
+                            child: Container(
+                                child: Column(
                               children: [
                                 Icon(FlutterIcons.cloud_upload_alt_faw5s),
                                 Text('Cloud'),

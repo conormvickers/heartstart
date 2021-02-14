@@ -54,7 +54,7 @@ dependencies:
   file_picker: ^2.1.6
   drawing_animation: ^0.1.4
   flutter_native_splash: ^0.3.0
-
+  transparent_image: ^1.0.0
 
 
 

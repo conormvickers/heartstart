@@ -1,9 +1,8 @@
 import 'dart:ui';
-import 'dart:math';
+// import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutterheart/chesttypes_icons.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -14,19 +13,16 @@ import 'globals.dart' as globals;
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:badges/badges.dart';
 import 'package:highlighter_coachmark/highlighter_coachmark.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:wakelock/wakelock.dart';
-import 'package:device_info/device_info.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:drawing_animation/drawing_animation.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:transparent_image/transparent_image.dart'
+    show kTransparentImage;
 
 void main() {
   runApp(MyApp());
@@ -98,7 +94,7 @@ class MyHomePageState extends State<MyHomePage>
   bool enterCapno = false;
   FocusNode capnoNode = FocusNode();
   TextEditingController capnoController = TextEditingController();
-  Color barColor;
+  MaterialColor barColor;
   CircularPercentIndicator cycle;
   IconData centerIcon = FlutterIcons.heart_ant;
   String inst = "Continue Compressions";
@@ -166,10 +162,10 @@ class MyHomePageState extends State<MyHomePage>
   AnimationController animCont;
   bool playVoice = true;
   Icon soundIcon = Icon(FlutterIcons.metronome_mco);
-  Color soundColor = Colors.lightBlue;
+  MaterialColor soundColor = Colors.lightBlue;
   List<Widget> timelineTiles = List<Widget>();
   Icon voiceIcon = Icon(FlutterIcons.voice_mco);
-  Color voiceColor = Colors.lightBlue;
+  MaterialColor voiceColor = Colors.lightBlue;
   String addEventString = 'End Tidal CO2';
   String addEventStringlog = 'etCO2 (mmHg): ';
   TextInputType eventKeyboard =
@@ -591,7 +587,7 @@ class MyHomePageState extends State<MyHomePage>
               width: MediaQuery.of(context).size.width,
               child: Text(coachInfo[currentCoachWidget],
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24.0,
                     fontStyle: FontStyle.italic,
                     color: Colors.white,
@@ -773,7 +769,41 @@ class MyHomePageState extends State<MyHomePage>
       Expanded(
         child: Container(),
       ),
-      Text('Become certified (insert link to online courses)'),
+      Expanded(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 100),
+          child: FadeInImage.memoryNetwork(
+            placeholder: kTransparentImage,
+            image:
+                'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
+            fit: BoxFit.fitWidth,
+          ),
+        ),
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).accentColor,
+                  borderRadius: BorderRadius.circular(15)),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => launch(
+                      'https://recoverinitiative.org/veterinary-professionals/'),
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    child: Text('Become RECOVER certified',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       Divider(),
       Text(
           "Created by Conor Vickers, MD and Ally Hartzell, VMD in cooperation with Recover Initiative"),
@@ -2133,13 +2163,20 @@ class MyHomePageState extends State<MyHomePage>
       ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        actions: [Container(width: 100,)],
+        actions: [
+          Container(
+            width: 100,
+          )
+        ],
         title: Row(
           children: [
             Expanded(
               child: Container(
                   height: 50,
-                  child: Image.asset('assets/recover-logo-250.png', fit: BoxFit.fitHeight,)),
+                  child: Image.asset(
+                    'assets/recover-logo-250.png',
+                    fit: BoxFit.fitHeight,
+                  )),
             )
             // Text(
             //   "RECOVER",
