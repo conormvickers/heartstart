@@ -48,7 +48,7 @@ android {
         applicationId 'com.laminarmedical.heartstart'
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 5
+        versionCode 6
         versionName flutterVersionName
     }
     signingConfigs {

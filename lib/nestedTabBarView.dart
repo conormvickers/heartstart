@@ -8,6 +8,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:customgauge/customgauge.dart';
 import 'globals.dart' as globals;
+import 'BluePass.dart' as bluepass;
 import 'main.dart' as rootFile;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
@@ -2197,6 +2198,12 @@ class PageTwoState extends State<PageTwo> {
     return r;
   }
 
+  moveToBluePass() async {
+    final reset = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => bluepass.BluePass(startString: finalController.text ,)));
+    print('recieved back on main::: ' + reset);
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
@@ -2997,6 +3004,18 @@ class PageTwoState extends State<PageTwo> {
                               ],
                             )),
                             onPressed: () => {},
+                          ),
+                          RaisedButton(
+                            child: Container(
+                                child: Column(
+                                  children: [
+                                    Icon(FlutterIcons.lighthouse_mco),
+                                    Text('Blue-Pass'),
+                                  ],
+                                )),
+                            onPressed: () => {
+                              moveToBluePass(),
+                            },
                           ),
                         ],
                       )),
