@@ -51,13 +51,15 @@ class _BluePassState extends State<BluePass> {
             content: new Text(recieved),
             actions: [
               SimpleDialogOption(
-                onPressed: () { Navigator.pop(context); },
+                onPressed: () { Navigator.pop(context ); },
                 child: const Text('Something is wrong try again'),
               ),
               SimpleDialogOption(
                 onPressed: () {
-                  Navigator.pop(context);
+
                   Navigator.pop(context, recieved);
+                  Navigator.pop(context, recieved);
+
 
                 },
                 child: const Text('Looks good, import'),
@@ -73,6 +75,8 @@ class _BluePassState extends State<BluePass> {
 
     });
   }
+
+
 
   TextEditingController sendController = TextEditingController();
 

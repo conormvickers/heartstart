@@ -40,7 +40,7 @@ import CoreBluetooth
     var ble: BLE!
 
     func receiveBatteryLevel(result: FlutterResult) {
-        self.ble = BLE()
+       // self.ble = BLE()
         result(1)
     }
 }
