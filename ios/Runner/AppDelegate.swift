@@ -94,7 +94,7 @@ class BLE:  NSObject, CBPeripheralManagerDelegate {
                 peripheralManager.add(serialService)
 
                 print("added service")
-                let advertisementData = [CBAdvertisementDataLocalNameKey: "a228b618Some iPhone", CBAdvertisementDataServiceDataKey: "a228b618"]
+                let advertisementData = [CBAdvertisementDataLocalNameKey: "a228b618iPhone", CBAdvertisementDataServiceDataKey: "a228b618"]
                 peripheralManager.startAdvertising(advertisementData)
 
                 print("done")

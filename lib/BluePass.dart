@@ -35,20 +35,24 @@ class _BluePassState extends State<BluePass> {
   String _batteryLevel = 'Unknown battery level.';
 
   Future<void> _methodCallHandler(MethodCall call) async {
-    print(call.method.toString());
+    print('INCOMING DATA!!!' + call.method.toString());
     setState(() {
       String t = call.method.toString();
       if (t.length > 3) {
         if (t.substring(0, 3).contains( 'add' ) ){
+          print('found add');
           recieved = recieved + t.substring(3);
         }else if (t.substring(0, 3).contains( 'new' ) ){
+          print('found new');
           recieved = t.substring(3);
         }else if (t.substring(0, 3).contains( 'las' ) ){
+          print('found last');
           recieved = recieved + t.substring(3);
-          showDialog(context: context, child:
-          AlertDialog(
-            title: new Text("Caught Some Data!"),
-            content: new Text(recieved),
+
+          showDialog(context: context, builder: (BuildContext context) {
+            return AlertDialog(
+            title:  Text("Caught Some Data!"),
+            content:  SingleChildScrollView(child: Text(recieved)),
             actions: [
               SimpleDialogOption(
                 onPressed: () { Navigator.pop(context ); },
@@ -63,8 +67,7 @@ class _BluePassState extends State<BluePass> {
 
                 },
                 child: const Text('Looks good, import'),
-              ),],
-          )
+              ),],);}
           );
         }else{
           recieved = t;
@@ -90,7 +93,7 @@ class _BluePassState extends State<BluePass> {
     scanBLE();
   }
   setupServer() async {
-    final int result = await platform.invokeMethod('getBatteryLevel');
+    // final int result = await platform.invokeMethod('getBatteryLevel');
   }
   List<BluetoothDevice> devices = List<BluetoothDevice>();
   List<String> names = List<String>();
@@ -100,6 +103,8 @@ class _BluePassState extends State<BluePass> {
     setState(() {
       scanning = true;
     });
+    aimedDevice = null;
+    aimedDeviceName = null;
     Fluttertoast.showToast(
         msg: "Looking around...",
         toastLength: Toast.LENGTH_LONG,
@@ -114,6 +119,12 @@ class _BluePassState extends State<BluePass> {
       names = List<String>();
     });
     flutterBlue.startScan(timeout: Duration(seconds: 4));
+    Future.delayed(Duration(milliseconds: 250), () => {
+    setState(() {
+    devices =  List<BluetoothDevice>();
+    names = List<String>();
+    })
+    });
     Future.delayed(Duration(seconds: 4), () => {
       print('stop scan'),
       setState(() {
@@ -150,7 +161,7 @@ class _BluePassState extends State<BluePass> {
   BluetoothDevice aimedDevice;
   double progress = 0.0;
 
-  Color checkActive(String a, String b){
+  Color checkActive(BluetoothDevice a, BluetoothDevice b){
     if (a == b) {
       return Theme.of(context).accentColor;
     }
@@ -168,7 +179,7 @@ class _BluePassState extends State<BluePass> {
 
                 Container(
                   decoration: BoxDecoration(
-                      color: checkActive(e.name, aimedDeviceName),
+                      color: checkActive(e, aimedDevice),
                       shape: BoxShape.circle
                   ),
 
@@ -268,7 +279,7 @@ class _BluePassState extends State<BluePass> {
         }
 
       }else{
-        characteristic.write(
+        await characteristic.write(utf8.encode('las') +
             a, withoutResponse: false);
       }
     } else {
@@ -332,7 +343,30 @@ class _BluePassState extends State<BluePass> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Blue-Pass'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(FlutterIcons.md_bluetooth_ion, color: Colors.blue,),
+            Text('Blue-Pass '),
+            Icon(FlutterIcons.handshake_faw5, color: Colors.red,)
+          ],
+        ),
+        actions: [
+          Column(
+
+            mainAxisSize: MainAxisSize.min,
+            children: const <Widget>[
+              Icon(FlutterIcons.lighthouse_on_mco, color: Colors.blue),
+              Text(
+                "Beacon ON ",
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.blue),
+              ),
+            ],
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.blue,
@@ -344,19 +378,7 @@ class _BluePassState extends State<BluePass> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Column(
 
-                  mainAxisSize: MainAxisSize.min,
-                  children: const <Widget>[
-                    Icon(FlutterIcons.lighthouse_on_mco, color: Colors.white, size: 40),
-                    Text(
-                      "Beacon ON\nReady to catch data",
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
                 RawMaterialButton(
                   fillColor: sendButtonFill(),
                   splashColor: sendButtonSplash(),
@@ -364,15 +386,10 @@ class _BluePassState extends State<BluePass> {
                   child: Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Column(
-
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children:  <Widget>[
-                        Row(
-                          children: [
-                            Icon(FlutterIcons.sailing_mco, color: Colors.white, size: 40,),
-                            Icon(FlutterIcons.arrow_right_thick_mco, color:  Colors.white)
-                          ],
-                        ),
+                        FittedBox(child: Icon(FlutterIcons.handshake_faw5, color: Colors.white,)),
                         Text(
                           "Pass",
                           maxLines: 1,
@@ -397,10 +414,21 @@ class _BluePassState extends State<BluePass> {
           child: Column(
 
             children: [
-              refreshOrNah(),
-              Expanded(child: GridView.count(
-                crossAxisCount: 3,
-                children: deviceTiles(),
+              Container(
+                color: Colors.black12,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    refreshOrNah(),
+                  ],
+                ),
+              ),
+              Expanded(child: Container(
+                color: Colors.black12,
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  children: deviceTiles(),
+                ),
               )),
               Container(
                 height: 70,

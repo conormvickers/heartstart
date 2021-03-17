@@ -23,6 +23,7 @@ import 'package:vibration/vibration.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:transparent_image/transparent_image.dart'
     show kTransparentImage;
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 void main() {
   runApp(MyApp());
@@ -703,6 +704,17 @@ class MyHomePageState extends State<MyHomePage>
     ],
   );
 
+  sendEmail() async {
+    final Email email = Email(
+      body:
+          'Wow this app is awesome and the team behind it must be so smart\nBUT...\n',
+      subject: 'RECOVER APP FEEDBACK',
+      recipients: ['conormvickers@gmail.com'],
+    );
+
+    await FlutterEmailSender.send(email);
+  }
+
   List<Widget> settingItems() {
     return [
       DrawerHeader(
@@ -748,12 +760,11 @@ class MyHomePageState extends State<MyHomePage>
           ),
         ],
       ),
-      RaisedButton(
+      ElevatedButton(
         onPressed: () => {
           globals.ignoreCurrentLog = true,
           stopAndGoToNextPage(),
         },
-        color: Theme.of(context).splashColor,
         child: Row(
           children: [
             Expanded(
@@ -763,6 +774,20 @@ class MyHomePageState extends State<MyHomePage>
               ),
             ),
             Icon(FlutterIcons.folder_ent, color: Colors.white),
+          ],
+        ),
+      ),
+      ElevatedButton(
+        onPressed: () => {sendEmail()},
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Feedback',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Icon(FlutterIcons.speech_sli, color: Colors.white),
           ],
         ),
       ),
@@ -805,8 +830,11 @@ class MyHomePageState extends State<MyHomePage>
         ],
       ),
       Divider(),
-      Text(
-          "Created by Conor Vickers, MD and Ally Hartzell, VMD in cooperation with Recover Initiative"),
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: Text(
+            "Created by Conor Vickers, MD and Alexandra Hartzell, VMD in cooperation with Recover Initiative"),
+      ),
       Divider()
     ];
   }
@@ -2110,7 +2138,6 @@ class MyHomePageState extends State<MyHomePage>
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
       key: _scaffoldKey,
-      resizeToAvoidBottomPadding: false,
       drawer: Drawer(
         child: Column(
           children: settingItems(),

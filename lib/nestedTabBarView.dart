@@ -27,6 +27,8 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -1682,12 +1684,22 @@ class PageTwoState extends State<PageTwo> {
   }
 
   saveFile(String string) async {
-    if (_scaffoldKey.currentContext != null) {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text('saving...\n'),
-        duration: Duration(seconds: 1),
-      ));
-    }
+    // if (_scaffoldKey.currentContext != null) {
+    //   _scaffoldKey.currentState.showSnackBar(SnackBar(
+    //
+    //     content: Text('saving...\n'),
+    //     duration: Duration(seconds: 1),
+    //   ));
+    // }
+    Fluttertoast.showToast(
+        msg: "saving...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.lightBlueAccent,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     print('getting directory...');
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
@@ -1764,6 +1776,7 @@ class PageTwoState extends State<PageTwo> {
       print('naming current file: ' + currentDocPath + '.');
     } else {
       print('did not find date to name file');
+      currentDocPath = "Unknown_Date";
     }
   }
 
@@ -2084,7 +2097,8 @@ class PageTwoState extends State<PageTwo> {
     } else {
       r = await showDialog(
               context: context,
-              child: AlertDialog(
+          builder: (BuildContext context) {
+            return AlertDialog(
                 title: Text(info),
                 content: TextField(
                   controller: temp,
@@ -2099,7 +2113,7 @@ class PageTwoState extends State<PageTwo> {
                     onPressed: () => {Navigator.pop(context, temp.text)},
                   )
                 ],
-              )) ??
+              );}) ??
           '';
     }
 
@@ -2201,10 +2215,11 @@ class PageTwoState extends State<PageTwo> {
   moveToBluePass() async {
     final reset = await Navigator.push(
         context, MaterialPageRoute(builder: (context) => bluepass.BluePass(startString: finalController.text ,)));
-    print('recieved back on main::: ' + reset);
+    print('received back on main::: ' + reset);
     parseData(reset);
     updateSurvey(true, false);
     updateName();
+    saveGlobalLog();
   }
 
   @override
@@ -2981,7 +2996,7 @@ class PageTwoState extends State<PageTwo> {
                             child: Container(
                                 child: Column(
                               children: [
-                                Icon(FlutterIcons.text_ent),
+                                Icon(FlutterIcons.text_ent, color: Colors.blue,),
                                 Text('Text'),
                               ],
                             )),
@@ -2991,7 +3006,7 @@ class PageTwoState extends State<PageTwo> {
                             child: Container(
                               child: Column(
                                 children: [
-                                  Icon(FlutterIcons.file_pdf_faw5),
+                                  FittedBox(child: Icon(FlutterIcons.file_pdf_faw5, color: Colors.blue,)),
                                   Text('PDF'),
                                 ],
                               ),
@@ -3002,7 +3017,7 @@ class PageTwoState extends State<PageTwo> {
                             child: Container(
                                 child: Column(
                               children: [
-                                Icon(FlutterIcons.cloud_upload_alt_faw5s),
+                                Icon(FlutterIcons.cloud_upload_alt_faw5s, color: Colors.blue,),
                                 Text('Cloud'),
                               ],
                             )),
@@ -3012,7 +3027,7 @@ class PageTwoState extends State<PageTwo> {
                             child: Container(
                                 child: Column(
                                   children: [
-                                    Icon(FlutterIcons.lighthouse_mco),
+                                    Icon(FlutterIcons.handshake_faw5, color: Colors.blue,),
                                     Text('Blue-Pass'),
                                   ],
                                 )),
