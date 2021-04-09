@@ -373,7 +373,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				MARKETING_VERSION = 1.9.38;
+				MARKETING_VERSION = 1.9.39;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.flutterheart-vetversion";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -512,7 +512,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				MARKETING_VERSION = 1.9.38;
+				MARKETING_VERSION = 1.9.39;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.flutterheart-vetversion";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -545,7 +545,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				MARKETING_VERSION = 1.9.38;
+				MARKETING_VERSION = 1.9.39;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.flutterheart-vetversion";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";

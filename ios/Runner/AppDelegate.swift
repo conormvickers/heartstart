@@ -2,6 +2,11 @@ import UIKit
 import Flutter
 import CoreBluetooth
 
+var  a = "r"
+var  b = "g"
+var  c = "b"
+
+
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
 
@@ -12,9 +17,17 @@ import CoreBluetooth
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let batteryChannel = FlutterMethodChannel(name: "samples.flutter.dev/battery",
                                               binaryMessenger: controller.binaryMessenger)
+
+
+    let colors : [String] = ["r","o","y", "g", "b" , "v" ]
+    a = colors[Int.random(in: 0..<5)]
+    b = colors[Int.random(in: 0..<5)]
+    c = colors[ Int.random(in: 0..<5)]
+   
     batteryChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
       // Note: this method is invoked on the UI thread.
+    batteryChannel.invokeMethod("set colors: " + a + b + c, arguments: nil, result: nil)
       guard call.method == "getBatteryLevel" else {
         result(FlutterMethodNotImplemented)
         return
@@ -26,13 +39,11 @@ import CoreBluetooth
             //call any function
         self.ble = BLE()
         self.ble.channel = batteryChannel
-        batteryChannel.invokeMethod("test", arguments: nil, result: nil)
+        batteryChannel.invokeMethod("set colors: " + a + b + c, arguments: nil, result: nil)
 
     }
 
-
     print("here")
-
 
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -41,7 +52,8 @@ import CoreBluetooth
 
     func receiveBatteryLevel(result: FlutterResult) {
        // self.ble = BLE()
-        result(1)
+        result(a + b + c)
+//        result(1)
     }
 }
 
@@ -94,7 +106,7 @@ class BLE:  NSObject, CBPeripheralManagerDelegate {
                 peripheralManager.add(serialService)
 
                 print("added service")
-                let advertisementData = [CBAdvertisementDataLocalNameKey: "a228b618iPhone", CBAdvertisementDataServiceDataKey: "a228b618"]
+                let advertisementData = [CBAdvertisementDataLocalNameKey: "a228b" + a + b + c]
                 peripheralManager.startAdvertising(advertisementData)
 
                 print("done")

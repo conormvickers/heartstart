@@ -33,11 +33,16 @@ class _BluePassState extends State<BluePass> {
   FlutterBlue flutterBlue;
   // Get battery level.
   String _batteryLevel = 'Unknown battery level.';
+  Color a = Colors.white;
+  Color b = Colors.white;
+  Color c = Colors.white;
 
   Future<void> _methodCallHandler(MethodCall call) async {
     print('INCOMING DATA!!!' + call.method.toString());
+
     setState(() {
       String t = call.method.toString();
+      print(t.substring(0, 10) );
       if (t.length > 3) {
         if (t.substring(0, 3).contains( 'add' ) ){
           print('found add');
@@ -69,12 +74,56 @@ class _BluePassState extends State<BluePass> {
                 child: const Text('Looks good, import'),
               ),],);}
           );
+        }else if (t.substring(0, 10).contains( 'set colors' ) ) {
+          setColorFromString(t);
+
         }else{
           recieved = t;
         }
       }else{
         recieved = t;
       }
+
+    });
+  }
+
+  setColorFromString(String t) {
+    if (t.length < 13 ) {
+      return 1;
+    }
+    final chars =  t.substring(12);
+    int i = 0;
+    print('++++++++ colors ' + chars);
+    chars.characters.forEach((e) {
+      String element = e.toString();
+      Color alter = Colors.white;
+      print('checking ' + element);
+      if (element == 'r') {
+        alter = Colors.red;
+      }else if (element == 'o'){
+        alter = Colors.orange;
+      }else if (element == 'y'){
+        alter = Colors.yellow;
+      }else if (element == 'g'){
+        alter = Colors.green;
+      }else if (element == 'b'){
+        alter = Colors.blue;
+      }else if (element == 'v'){
+        alter = Colors.purple;
+      }else{
+        print('didnt find color');
+      }
+      print(alter);
+      if (i == 0) {
+        a = alter;
+      }else if (i ==1 ) {
+        b = alter;
+      }else{
+        c = alter;
+      }
+      i++;
+    });
+    setState(() {
 
     });
   }
@@ -91,6 +140,7 @@ class _BluePassState extends State<BluePass> {
 
     setupServer();
     scanBLE();
+    _getBatteryLevel();
   }
   setupServer() async {
     // final int result = await platform.invokeMethod('getBatteryLevel');
@@ -132,24 +182,27 @@ class _BluePassState extends State<BluePass> {
       }),
     });
 // Listen to scan results
-    var subscription = flutterBlue.scanResults.listen((results) {
+    flutterBlue.scanResults.listen((results) {
       // do something with scan results
       for (ScanResult r in results) {
-        if (!devices.contains(r.device))
+
+        if (!devices.contains(r.device)) {
           if (r.device.name.contains(
-              "a228b618" ) ) {
+              "a228b")) {
             print(r.device.name + "||" + r.device.id.id);
             setState(() {
-              if (r.device.name == 'a228b618'){
-                names.add("Android Device");
-                print('adding Android Device');
-              }else{
-                names.add(r.device.name.substring(r.device.name.indexOf('a228b618') + 8 ));
-                print('adding ' + r.device.name.substring(r.device.name.indexOf('a228b618' ) + 8));
-              }
               devices.add(r.device);
+              names.add(r.device.name);
+            });
+          }else if (r.advertisementData.localName.contains(
+              "a228b")) {
+            print(r.device.id.id + "||" + r.advertisementData.localName);
+            setState(() {
+              devices.add(r.device);
+              names.add(r.advertisementData.localName);
             });
           }
+        }
       }
     });/**/
 
@@ -178,12 +231,20 @@ class _BluePassState extends State<BluePass> {
               children: [
 
                 Container(
+                  padding: EdgeInsets.all(5),
                   decoration: BoxDecoration(
                       color: checkActive(e, aimedDevice),
                       shape: BoxShape.circle
                   ),
 
-                  child: Center(child: Text(names[key], maxLines: 2, style: TextStyle(color: Colors.white),)),
+                  child: Center(child: Column(
+                    children: [
+                      Expanded(child: Container()),
+                      Expanded(child: FittedBox(child: Text("Nearby Device", maxLines: 2, style: TextStyle(color: Colors.white),))),
+                      Expanded(child: getColorRow( names[key].substring(5))),
+                      Expanded(child: Container()),
+                    ],
+                  )),
                 ),
                 Column(
                   children: [
@@ -256,6 +317,8 @@ class _BluePassState extends State<BluePass> {
     if (sendController.text.length > 1) {
       final nob = sendController.text.toString();
       final a = utf8.encode(nob);
+      int packetSize = 250;
+      aimedDevice.mtu.forEach((element) { print("MTU" + element.toString());});
       if (a.length > 500) {
 
         int secs = (a.length ~/ 500);
@@ -299,13 +362,14 @@ class _BluePassState extends State<BluePass> {
   Future<void> _getBatteryLevel() async {
 
     scanBLE();
-    // String batteryLevel;
-    // try {
-    //   final int result = await platform.invokeMethod('getBatteryLevel');
-    //   batteryLevel = 'Battery level at $result % .';
-    // } on PlatformException catch (e) {
-    //   batteryLevel = "Failed to get battery level: '${e.message}'.";
-    // }
+    String batteryLevel;
+    try {
+      final String result = await platform.invokeMethod('getBatteryLevel');
+      setColorFromString(result);
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    }
     //
     // setState(() {
     //   _batteryLevel = batteryLevel;
@@ -330,6 +394,67 @@ class _BluePassState extends State<BluePass> {
   }
   String recieved = '';
   bool scanning = false;
+  Widget colorRow() {
+
+    return Row(children: [
+      Expanded(child: Container(decoration: BoxDecoration(color: a, border: Border.all(width: 2, color: Colors.grey), borderRadius: BorderRadius.circular(15)),)),
+      Expanded(child: Container(decoration: BoxDecoration(color: b, border: Border.all(width: 2, color: Colors.grey), borderRadius: BorderRadius.circular(15)),)),
+      Expanded(child: Container(decoration: BoxDecoration(color: c, border: Border.all(width: 2, color: Colors.grey), borderRadius: BorderRadius.circular(15)),))],);
+  }
+  Widget getColorRow(String a) {
+    if (a.length == 3) {
+      Color x;
+      Color y;
+      Color z;
+      String chars = a;
+      int i = 0;
+      print('++++++++ colors ' + chars);
+      chars.characters.forEach((e) {
+        String element = e.toString();
+        Color alter = Colors.white;
+        print('checking ' + element);
+        if (element == 'r') {
+          alter = Colors.red;
+        } else if (element == 'o') {
+          alter = Colors.orange;
+        } else if (element == 'y') {
+          alter = Colors.yellow;
+        } else if (element == 'g') {
+          alter = Colors.green;
+        } else if (element == 'b') {
+          alter = Colors.blue;
+        } else if (element == 'v') {
+          alter = Colors.purple;
+        } else {
+          print('didnt find color');
+        }
+        print(alter);
+        if (i == 0) {
+          x = alter;
+        } else if (i == 1) {
+          y = alter;
+        } else {
+          z = alter;
+        }
+        i++;
+      });
+
+      return Row(children: [
+        Expanded(child: Container(decoration: BoxDecoration(color: x,
+            border: Border.all(width: 2, color: Colors.grey),
+            borderRadius: BorderRadius.circular(15)),)),
+        Expanded(child: Container(decoration: BoxDecoration(color: y,
+            border: Border.all(width: 2, color: Colors.grey),
+            borderRadius: BorderRadius.circular(15)),)),
+        Expanded(child: Container(decoration: BoxDecoration(color: z,
+            border: Border.all(width: 2, color: Colors.grey),
+            borderRadius: BorderRadius.circular(15)),))
+      ],);
+    }else{
+      return Container();
+    }
+  }
+
   Widget refreshOrNah() {
     if (scanning){
       return SpinKitChasingDots(color: Colors.blue,);
@@ -356,14 +481,18 @@ class _BluePassState extends State<BluePass> {
           Column(
 
             mainAxisSize: MainAxisSize.min,
-            children: const <Widget>[
-              Icon(FlutterIcons.lighthouse_on_mco, color: Colors.blue),
-              Text(
-                "Beacon ON ",
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.blue),
+            children: <Widget>[
+              Expanded(flex: 2, child: FittedBox(child: Icon(FlutterIcons.lighthouse_on_mco, color: Colors.blue))),
+
+              Expanded(
+                child: Text(
+                  "Beacon ON ",
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.blue),
+                ),
               ),
+              Expanded(child: Container(width: 100,child: colorRow()))
             ],
           ),
         ],
@@ -414,6 +543,7 @@ class _BluePassState extends State<BluePass> {
           child: Column(
 
             children: [
+
               Container(
                 color: Colors.black12,
                 child: Row(

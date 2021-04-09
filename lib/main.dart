@@ -52,10 +52,12 @@ class MyApp extends StatelessWidget {
         indicatorColor: Colors.lightBlueAccent,
         primarySwatch: Colors.lightBlue,
         disabledColor: Colors.grey,
+        accentTextTheme: TextTheme(bodyText2: TextStyle(color: Colors.white)),
         visualDensity: VisualDensity.adaptivePlatformDensity,
         textTheme: GoogleFonts.montserratTextTheme(
           Theme.of(context).textTheme,
         ),
+
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -205,7 +207,7 @@ class MyHomePageState extends State<MyHomePage>
     });
   }
 
-  resetEverything() {
+  resetEverything([bool resetlog = true]) {
     nestedKey.currentState.resetEverything();
     handsFree = true;
     fraction = 0;
@@ -220,23 +222,25 @@ class MyHomePageState extends State<MyHomePage>
 
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
-    globals.log = formattedDate + "\tCode Started";
-    globals.codeStart = now;
-    globals.info = [
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-    ];
-    globals.chest = null;
-    globals.weightKG = null;
+    if (resetlog) {
+      globals.log = formattedDate + "\tCode Started";
+      globals.codeStart = now;
+      globals.info = [
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+      ];
+      globals.chest = null;
+      globals.weightKG = null;
+    }
     loadPreferences();
 
     centerIcon = FlutterIcons.heart_ant;
@@ -394,6 +398,10 @@ class MyHomePageState extends State<MyHomePage>
     if (reset == 'true') {
       print('returned reset');
       resetEverything();
+    }else{
+      print('rearest or continue');
+      addToLog('Patient Rearrested');
+      resetEverything(false);
     }
   }
 
@@ -707,8 +715,8 @@ class MyHomePageState extends State<MyHomePage>
   sendEmail() async {
     final Email email = Email(
       body:
-          'Wow this app is awesome and the team behind it must be so smart\nBUT...\n',
-      subject: 'RECOVER APP FEEDBACK',
+          'Wow this app is awesome and the team behind it must be so smart!\n\nI was thinking...',
+      subject: 'RECOVER APP FEEDBACK/BUG REPORT',
       recipients: ['conormvickers@gmail.com'],
     );
 
@@ -805,29 +813,22 @@ class MyHomePageState extends State<MyHomePage>
           ),
         ),
       ),
-      Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).accentColor,
-                  borderRadius: BorderRadius.circular(15)),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => launch(
-                      'https://recoverinitiative.org/veterinary-professionals/'),
-                  child: Container(
-                    padding: EdgeInsets.all(15),
-                    child: Text('Become RECOVER certified',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                ),
+      ElevatedButton(
+        onPressed: () => launch(
+            'https://recoverinitiative.org/veterinary-professionals/'),
+        child: Container(
+          padding: EdgeInsets.all(15),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text('Become RECOVER certified',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white)),
               ),
-            ),
+              Icon(FlutterIcons.graduation_cap_ent, color: Colors.white)
+            ],
           ),
-        ],
+        ),
       ),
       Divider(),
       Container(
@@ -1343,7 +1344,7 @@ class MyHomePageState extends State<MyHomePage>
         ],
       );
     } else {
-      handFreeColor = Theme.of(context).splashColor;
+      handFreeColor = Colors.white;//Theme.of(context).splashColor;
       handsFreeWidget = Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -1354,7 +1355,7 @@ class MyHomePageState extends State<MyHomePage>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 300,
-                  color: Colors.white,
+                  //color: Colors.white,
                 ),
               ),
               alignment: Alignment.center,
@@ -1369,7 +1370,7 @@ class MyHomePageState extends State<MyHomePage>
                   child: Icon(
                     FlutterIcons.hand_ent,
                     size: 500,
-                    color: Colors.white,
+                    color: Colors.grey,
                   ),
                 ),
                 Row(
@@ -1381,7 +1382,7 @@ class MyHomePageState extends State<MyHomePage>
                         height: 70,
                         width: 70,
                         decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.lightBlue,
                             borderRadius: BorderRadius.circular(15)),
                         child: Stack(
                           children: [
@@ -1401,7 +1402,7 @@ class MyHomePageState extends State<MyHomePage>
                                             child: FittedBox(
                                               child: Icon(
                                                   FlutterIcons.clock_faw5,
-                                                  color: Colors.lightBlue),
+                                                  color: Colors.white),
                                             ),
                                           ),
                                           Expanded(
@@ -1419,7 +1420,7 @@ class MyHomePageState extends State<MyHomePage>
                                             child: FittedBox(
                                               child: Icon(
                                                   FlutterIcons.undo_alt_faw5s,
-                                                  color: Colors.lightBlue),
+                                                  color: Colors.white),
                                             ),
                                           ),
                                           Expanded(
@@ -1494,18 +1495,22 @@ class MyHomePageState extends State<MyHomePage>
                 flex: 1,
                 child: Container(
                   child: Container(
+
                     decoration: BoxDecoration(
                         border: Border.all(
                           color: Colors.grey,
                           width: 2,
                         ),
+                        color: Theme.of(context).splashColor,
                         borderRadius: BorderRadius.all(Radius.circular(15))),
                     child: TextButton(
+
                       onPressed: () => {
                         setState(() => {
                               handsFree = false,
                             })
                       },
+
                       child: Row(
                         children: [
                           Expanded(
@@ -1516,7 +1521,7 @@ class MyHomePageState extends State<MyHomePage>
                                 'Exit Hands Free',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Theme.of(context).splashColor,
+                                  color: Colors.white,
                                   fontSize: 300,
                                 ),
                               ),
@@ -1527,7 +1532,7 @@ class MyHomePageState extends State<MyHomePage>
                             child: Icon(
                               FlutterIcons.notes_medical_faw5s,
                               size: 300,
-                              color: Theme.of(context).splashColor,
+                              color: Colors.white,
                             ),
                           ))
                         ],
@@ -1542,49 +1547,69 @@ class MyHomePageState extends State<MyHomePage>
 
     Widget leftBottom() {
       return Column(children: [
-        IconButton(
-            icon: Icon(FlutterIcons.note_add_mdi, color: Colors.lightBlue),
-            onPressed: () => {
-                  print('enter other data'),
-                  setState(() {
-                    addEventString = 'Miscellaneous Event';
-                    addEventStringlog = '';
-                    eventKeyboard = TextInputType.text;
-                    enterCapno = true;
-                    // Future.delayed(Duration(seconds: 10), () {
-                    print('requesting focus');
-                    capnoNode.requestFocus();
-                    // });
-                  }),
+        Tooltip(
+          message: "Hands Free Mode",
+          preferBelow: false,
+          child: IconButton(
+              icon: Icon(FlutterIcons.hand_ent, color: Colors.lightBlue),
+              onPressed: () => {
+                print('hand free'),
+                setState(() {
+                  handsFree = true;
                 }),
-        IconButton(
-          icon: Container(
-            width: 100,
-            height: 100,
+              }),
+        ),
+        Tooltip(
+          preferBelow: false,
+          message: "Misc Event",
+          child: IconButton(
+              icon: Icon(FlutterIcons.note_add_mdi, color: Colors.lightBlue),
+              onPressed: () => {
+                    print('enter other data'),
+                    setState(() {
+                      addEventString = 'Miscellaneous Event';
+                      addEventStringlog = '';
+                      eventKeyboard = TextInputType.text;
+                      enterCapno = true;
+                      // Future.delayed(Duration(seconds: 10), () {
+                      print('requesting focus');
+                      capnoNode.requestFocus();
+                      // });
+                    }),
+                  }),
+        ),
+        Tooltip(
+          preferBelow: false,
+          message: "Record CO2",
+          child: IconButton(
+            icon: Container(
+              width: 100,
+              height: 100,
 
-            child: FittedBox(
-                child: Text(
-              'CO\u2082',
-              style: TextStyle(
-                color: Colors.lightBlue,
-                fontWeight: FontWeight.bold,
-              ),
-            )), //Icon(Chesttypes.co2_1, color: Colors.lightBlue),
+              child: FittedBox(
+                  child: Text(
+                'CO\u2082',
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+              )), //Icon(Chesttypes.co2_1, color: Colors.lightBlue),
+            ),
+            onPressed: () => {
+              print('enter etco2 data'),
+              addEventString = 'End Tidal CO2',
+              addEventStringlog = 'etCO2: (mmHg)',
+              eventKeyboard =
+                  TextInputType.numberWithOptions(signed: true, decimal: true),
+              setState(() {
+                enterCapno = true;
+                // Future.delayed(Duration(seconds: 10), () {
+                print('requesting focus');
+                capnoNode.requestFocus();
+                // });
+              }),
+            },
           ),
-          onPressed: () => {
-            print('enter etco2 data'),
-            addEventString = 'End Tidal CO2',
-            addEventStringlog = 'etCO2: (mmHg)',
-            eventKeyboard =
-                TextInputType.numberWithOptions(signed: true, decimal: true),
-            setState(() {
-              enterCapno = true;
-              // Future.delayed(Duration(seconds: 10), () {
-              print('requesting focus');
-              capnoNode.requestFocus();
-              // });
-            }),
-          },
         ),
       ]);
     }
@@ -1846,38 +1871,50 @@ class MyHomePageState extends State<MyHomePage>
             bottom: 40,
             child: Column(
               children: [
-                IconButton(
-                  icon: Icon(FlutterIcons.cancel_mco, color: Colors.lightBlue),
-                  onPressed: () => {_ensureStopCode()},
-                ),
-                IconButton(
-                  icon:
-                      Icon(FlutterIcons.dog_side_mco, color: Colors.lightBlue),
-                  onPressed: () => {
-                    print('change weight'),
-                    setState(() {
-                      globals.weightKG = null;
-                      globals.weightIndex = null;
-                      globals.chest = null;
-                      print('reset weight ' + globals.weightKG.toString());
-                      nestedKey.currentState.setState(() {
-                        nestedKey.currentState.nestedTabController.animateTo(1);
-                      });
-                    }),
-                  },
-                ),
-                IconButton(
-                  icon: Icon(
-                    FlutterIcons.pulse_mco,
-                    color: Colors.lightBlue,
+                Tooltip(
+                  message: "Stop Code",
+                  preferBelow: false,
+                  child: IconButton(
+                    icon: Icon(FlutterIcons.cancel_mco, color: Colors.lightBlue),
+                    onPressed: () => {_ensureStopCode()},
                   ),
-                  onPressed: () => {
-                    setState(
-                      () {
-                        askForPulse = true;
-                      },
+                ),
+                Tooltip(
+                  message: "Change Weight",
+                  preferBelow: false,
+                  child: IconButton(
+                    icon:
+                        Icon(FlutterIcons.dog_side_mco, color: Colors.lightBlue),
+                    onPressed: () => {
+                      print('change weight'),
+                      setState(() {
+                        globals.weightKG = null;
+                        globals.weightIndex = null;
+                        globals.chest = null;
+                        print('reset weight ' + globals.weightKG.toString());
+                        nestedKey.currentState.setState(() {
+                          nestedKey.currentState.nestedTabController.animateTo(1);
+                        });
+                      }),
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: "Check Pulse",
+                  preferBelow: false,
+                  child: IconButton(
+                    icon: Icon(
+                      FlutterIcons.pulse_mco,
+                      color: Colors.lightBlue,
                     ),
-                  },
+                    onPressed: () => {
+                      setState(
+                        () {
+                          askForPulse = true;
+                        },
+                      ),
+                    },
+                  ),
                 ),
               ],
             ),
@@ -2137,6 +2174,7 @@ class MyHomePageState extends State<MyHomePage>
 
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
+      resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
       drawer: Drawer(
         child: Column(

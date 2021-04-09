@@ -1,5 +1,6 @@
 package com.HeartStartVet
 
+import android.Manifest
 import io.flutter.embedding.android.FlutterActivity
 
 import android.bluetooth.*
@@ -10,24 +11,37 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.*
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.Log
 import androidx.annotation.NonNull
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "samples.flutter.dev/battery"
     private var bluetoothGattServer: BluetoothGattServer? = null
 
+    var a = "r"
+    var b = "r"
+    var c = "r"
+    val colors = arrayOf("r", "o", "y" , "g" , "b" , "v")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.e("heeeeelo", ";lkjasdf;lkjasdf;lkjadslfkj")
-        getBatteryLevel()
+        a = colors[nextInt (0, 5)]
+        b = colors[nextInt(0, 5)]
+        c = colors[ nextInt(0, 5)]
+        startServer()
     }
 
 
@@ -36,6 +50,7 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             // Note: this method is invoked on the main thread.
             call, result ->
+            MethodChannel(flutterEngine?.dartExecutor?.binaryMessenger, CHANNEL).invokeMethod( "set colors: " + a + b + c , null)
             if (call.method == "getBatteryLevel") {
                 val batteryLevel = getBatteryLevel()
 
@@ -52,8 +67,22 @@ class MainActivity: FlutterActivity() {
 
 
     }
-
     private fun getBatteryLevel(): Int {
+        return 100
+    }
+
+    private fun startServer(): Int {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(baseContext,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                val MY_PERMISSION = 0
+                ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), MY_PERMISSION)
+            }
+        }
 
         val gattServerCallback = object : BluetoothGattServerCallback() {
 
@@ -83,7 +112,7 @@ class MainActivity: FlutterActivity() {
             }
         }
         val pUuid = ParcelUuid(UUID.fromString("a228b618-d7a0-4ec7-87a5-a7b4e6b865cf"))
-        val advertiser = BluetoothAdapter.getDefaultAdapter().bluetoothLeAdvertiser
+        val advertiser = BluetoothAdapter.getDefaultAdapter().bluetoothLeAdvertiser ?: return 0
         var service: BluetoothGattService = BluetoothGattService(UUID.fromString("a228b618-d7a0-4ec7-87a5-a7b4e6b865cf"),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY)
         var characteristic: BluetoothGattCharacteristic = BluetoothGattCharacteristic(
@@ -105,7 +134,13 @@ class MainActivity: FlutterActivity() {
                 .build()
 
 
-        BluetoothAdapter.getDefaultAdapter().setName("a228b618")
+
+
+
+
+        MethodChannel(flutterEngine?.dartExecutor?.binaryMessenger, CHANNEL).invokeMethod( "set colors: " + a + b + c , null)
+
+        BluetoothAdapter.getDefaultAdapter().setName("a228b" + a + b + c)
         val data = AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .addServiceUuid(pUuid)

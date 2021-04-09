@@ -28,7 +28,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:transparent_image/transparent_image.dart'
+    show kTransparentImage;
 
 class NestedTabBar extends StatefulWidget {
   var show = false;
@@ -670,21 +672,44 @@ class NestedTabBarState extends State<NestedTabBar>
                     ),
                     Expanded(
                       flex: 5,
-                      child: Slider(
-                        min: 0,
-                        max: 10,
-                        divisions: 10,
-                        value: _weightValue,
-                        label: weightOptions[_weightValue.round()],
-                        onChanged: (value) {
-                          setState(
-                            () {
-                              _weightValue = value;
-                            },
-                          );
-                        },
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Colors.lightBlue,
+                          inactiveTrackColor: Colors.grey,
+                          // trackShape: RoundedRectSliderTrackShape(),
+                          trackHeight: 4.0,
+                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+                          thumbColor: Colors.lightBlue,
+                          overlayColor: Colors.blue,
+                          overlayShape: RoundSliderOverlayShape(overlayRadius: 28.0),
+                          tickMarkShape: RoundSliderTickMarkShape(),
+                          activeTickMarkColor: Colors.white,
+                          inactiveTickMarkColor: Colors.white,
+                          valueIndicatorShape: RectangularSliderValueIndicatorShape(),//PaddleSliderValueIndicatorShape(),
+                          valueIndicatorColor: Colors.red,
+                          valueIndicatorTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                          ),
+                        ),
+                        child:  Slider(
+                          min: 0,
+                          max: 10,
+                          divisions: 10,
+                          value: _weightValue,
+                          label: weightOptions[_weightValue.round()],
+
+                          onChanged: (value) {
+                            setState(
+                              () {
+                                _weightValue = value;
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                      ),
+
                     Expanded(
                       child: Column(
                         children: [
@@ -1266,6 +1291,13 @@ class PageTwoState extends State<PageTwo> {
     ];
 
     setup();
+    loadPref();
+
+  }
+
+  loadPref() async {
+    var prefs = await SharedPreferences.getInstance();
+    doctorController.text = prefs.getString('doctor') ?? '';
   }
 
   setup() {
@@ -1322,6 +1354,50 @@ class PageTwoState extends State<PageTwo> {
               onPressed: () {
                 Navigator.of(context).pop();
                 function();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  askRearrest() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Just checking'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Is this a NEW code event?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes, new patient or longer than 20 minutes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                print('reset hit');
+                Navigator.pop(context, 'true');
+              },
+            ),
+            TextButton(
+              child: Text('No, same patient rearrested'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                print('rearrest hit');
+                Navigator.pop(context, 'false');
+
+              },
+            ),
+            TextButton(
+              child: Text('Nevermind'),
+              onPressed: () {
+                Navigator.of(context).pop();
+
               },
             ),
           ],
@@ -1846,7 +1922,7 @@ class PageTwoState extends State<PageTwo> {
               trailing: IconButton(
                   icon: Icon(FlutterIcons.delete_mdi),
                   onPressed: () => {
-                        makeSure('perminantly delete this file?',
+                        makeSure('permanently delete this file?',
                             () => {deleteFile(e)})
                       }),
               title: Row(
@@ -2222,6 +2298,122 @@ class PageTwoState extends State<PageTwo> {
     saveGlobalLog();
   }
 
+  TextEditingController doctorController = TextEditingController();
+  FocusNode doctorNode = FocusNode();
+  savePreferences() async {
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setString('doctor', doctorController.text);
+  }
+  sendEmail() async {
+    final Email email = Email(
+      body:
+      'Wow this app is awesome and the team behind it must be so smart\nBUT...\n',
+      subject: 'RECOVER APP FEEDBACK',
+      recipients: ['conormvickers@gmail.com'],
+    );
+
+    await FlutterEmailSender.send(email);
+  }
+  List<Widget> settingItems() {
+    return [
+      DrawerHeader(
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(),
+            ),
+            Expanded(
+              child: Text(
+                'OPTIONS',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Expanded(child: Icon(FlutterIcons.md_options_ion))
+          ],
+        ),
+      ),
+      Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(10),
+              child: TextField(
+                controller: doctorController,
+                focusNode: doctorNode,
+                onEditingComplete: () => {
+                  doctorNode.unfocus(),
+                  globals.info[1] = doctorController.text,
+                  savePreferences(),
+                },
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).accentColor, width: 1.0),
+                    ),
+                    labelText: 'Doctor/user',
+                    labelStyle:
+                    TextStyle(color: Theme.of(context).accentColor)),
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      ElevatedButton(
+        onPressed: () => {sendEmail()},
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Feedback',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Icon(FlutterIcons.speech_sli, color: Colors.white),
+          ],
+        ),
+      ),
+      Expanded(
+        child: Container(),
+      ),
+      Expanded(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 100),
+          child: FadeInImage.memoryNetwork(
+            placeholder: kTransparentImage,
+            image:
+            'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
+            fit: BoxFit.fitWidth,
+          ),
+        ),
+      ),
+      ElevatedButton(
+        onPressed: () => launch(
+            'https://recoverinitiative.org/veterinary-professionals/'),
+        child: Container(
+          padding: EdgeInsets.all(15),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text('Become RECOVER certified',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white)),
+              ),
+              Icon(FlutterIcons.graduation_cap_ent, color: Colors.white)
+            ],
+          ),
+        ),
+      ),
+      Divider(),
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: Text(
+            "Created by Conor Vickers, MD and Alexandra Hartzell, VMD in cooperation with Recover Initiative"),
+      ),
+      Divider()
+    ];
+  }
   @override
   Widget build(BuildContext context) {
     print('build starting');
@@ -2782,63 +2974,45 @@ class PageTwoState extends State<PageTwo> {
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           key: _scaffoldKey,
+          drawer: Drawer(child: Column(children: settingItems(),),),
           appBar: AppBar(
               automaticallyImplyLeading: false,
-              leading: Container(
-                width: 100,
-                child: IconButton(
-                  icon: Row(
-                    children: [
-                      Icon(
-                        FlutterIcons.left_ant,
-                        size: 10,
-                        color: Theme.of(context).splashColor,
-                      ),
-                      Icon(
+              leading: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+
+                    child: IconButton(
+                      icon: Icon(
                         FlutterIcons.alert_decagram_mco,
                         color: Theme.of(context).splashColor,
                       ),
-                    ],
+                      onPressed: () => {
+                        askRearrest()
+                      },
+                    ),
                   ),
-                  onPressed: () => {
-                    makeSure(
-                        'start NEW code event?',
-                        () => {
-                              print('reset hit'),
-                              Navigator.pop(context, 'true'),
-                            })
-                  },
-                ),
-              ),
-              title: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                        height: 50,
-                        child: Image.asset(
-                          'assets/recover-logo-250.png',
-                          fit: BoxFit.fitHeight,
-                        )),
-                  )
-                  // Text(
-                  //   "RECOVER",
-                  //   style: TextStyle(color: Colors.lightBlue),
-                  // ),
-                  // Icon(
-                  //   FlutterIcons.ios_medical_ion,
-                  //   color: Theme.of(context).splashColor,
-                  // )
                 ],
               ),
+              title: Container(
+                  height: 50,
+                  child: Image.asset(
+                    'assets/recover-logo-250.png',
+                    fit: BoxFit.fitHeight,
+                  )),
               elevation: 1.0,
               actions: [
-                Container(
-                  width: 100,
+              Builder(
+              builder: (context) =>
+        Container(
+
                   child: Row(
-                    children: [...undoButtons(), closeButton()],
+                    children: [IconButton(icon: Icon(FlutterIcons.ios_options_ion, color: Colors.lightBlue,),
+
+                      onPressed: () =>  { Scaffold.of(context).openDrawer() },), ...undoButtons(), closeButton()],
                   ),
                 ),
-              ]),
+              )]),
           bottomNavigationBar: ConvexAppBar.badge(
             const <int, dynamic>{3: '2'},
             style: TabStyle.reactCircle,
