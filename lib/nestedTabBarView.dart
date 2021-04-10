@@ -2300,14 +2300,16 @@ class PageTwoState extends State<PageTwo>  {
   moveToBluePass() async {
     final reset = await Navigator.push(
         context, MaterialPageRoute(builder: (context) => bluepass.BluePass(startString: finalController.text ,)));
-    print('received back on main::: ' + reset);
     if (reset != null) {
+      print('received back on main::: ' + reset);
+      if (reset != null) {
 
-    parseData(reset);
-    updateSurvey(true, false);
-    updateName();
-    saveGlobalLog();
-    resetHistory();
+      parseData(reset);
+      updateSurvey(true, false);
+      updateName();
+      saveGlobalLog();
+      resetHistory();
+      }
     }
   }
 
