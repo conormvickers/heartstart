@@ -86,7 +86,7 @@ var _shockType = "No weight documented";
 var handFreeColor;
 
 class MyHomePageState extends State<MyHomePage>
-    with WidgetsBindingObserver, TickerProviderStateMixin {
+    with WidgetsBindingObserver, TickerProviderStateMixin, WidgetsBindingObserver  {
   bool handsFree = true;
   double fraction = 0;
   double minPassed = 0;
@@ -194,6 +194,7 @@ class MyHomePageState extends State<MyHomePage>
     }
   }
 
+  GlobalKey<PageTwoState> pageTwoKey = GlobalKey<PageTwoState>();
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
@@ -202,13 +203,20 @@ class MyHomePageState extends State<MyHomePage>
         print('saving log...');
         _saveLog();
         print('done');
+        if (pageTwoKey != null) {
+          if (pageTwoKey.currentState != null) {
+            pageTwoKey.currentState.saveGlobalLog();
+          }
+
+        }
+
       }
       if (state == AppLifecycleState.resumed) {}
     });
   }
 
   resetEverything([bool resetlog = true]) {
-    nestedKey.currentState.resetEverything();
+
     handsFree = true;
     fraction = 0;
     minPassed = 0;
@@ -223,6 +231,7 @@ class MyHomePageState extends State<MyHomePage>
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
     if (resetlog) {
+      nestedKey.currentState.resetEverything();
       globals.log = formattedDate + "\tCode Started";
       globals.codeStart = now;
       globals.info = [
@@ -392,8 +401,11 @@ class MyHomePageState extends State<MyHomePage>
     askForPulse = false;
     nested.show = false;
 
+
     final reset = await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PageTwo()));
+        context, MaterialPageRoute(builder: (context) => PageTwo(
+      key: pageTwoKey,
+    )));
     print('returned ' + reset.toString());
     if (reset == 'true') {
       print('returned reset');

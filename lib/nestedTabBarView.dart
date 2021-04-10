@@ -1106,6 +1106,7 @@ class EntryItem extends StatelessWidget {
 }
 
 class PageTwo extends StatefulWidget {
+  PageTwo({Key key}) : super(key: key);
   @override
   PageTwoState createState() => PageTwoState();
 }
@@ -1230,7 +1231,7 @@ List<String> partNames = [
   'Outcome:'
 ];
 
-class PageTwoState extends State<PageTwo> {
+class PageTwoState extends State<PageTwo>  {
   List<Widget> timelineTiles = List<Widget>();
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
@@ -1265,6 +1266,14 @@ class PageTwoState extends State<PageTwo> {
   ].map((e) => InfoBit(e, '')).toList();
 
   List<String> codeNameRef;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      print('saving file...');
+      saveGlobalLog();
+    }
+  }
 
   @override
   void initState() {
@@ -1802,7 +1811,7 @@ class PageTwoState extends State<PageTwo> {
   }
 
   resetHistory() {
-    previousLogs = List<String>();
+    previousLogs = [];
     currentHistoryIndex = 0;
   }
 
@@ -2292,10 +2301,14 @@ class PageTwoState extends State<PageTwo> {
     final reset = await Navigator.push(
         context, MaterialPageRoute(builder: (context) => bluepass.BluePass(startString: finalController.text ,)));
     print('received back on main::: ' + reset);
+    if (reset != null) {
+
     parseData(reset);
     updateSurvey(true, false);
     updateName();
     saveGlobalLog();
+    resetHistory();
+    }
   }
 
   TextEditingController doctorController = TextEditingController();
