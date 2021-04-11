@@ -28,6 +28,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:transparent_image/transparent_image.dart'
     show kTransparentImage;
@@ -1111,6 +1112,7 @@ class PageTwo extends StatefulWidget {
   PageTwoState createState() => PageTwoState();
 }
 
+StateSetter stateSetter;
 final Disease = <String>{
   'Medical cardiac or non-cardiac',
   'Surgical elective or emergency',
@@ -1750,7 +1752,7 @@ class PageTwoState extends State<PageTwo>  {
     }
     if (previousLogs.length > 0) {
       if (previousLogs[0] != full) {
-        print('ADDING' + full);
+
         previousLogs.insert(0, full);
       } else {
         print('not added, the same');
@@ -1758,7 +1760,7 @@ class PageTwoState extends State<PageTwo>  {
     } else {
       previousLogs.add(full);
     }
-    print(currentHistoryIndex.toString() + previousLogs.length.toString());
+
   }
 
   saveGlobalLog() {
@@ -1792,7 +1794,7 @@ class PageTwoState extends State<PageTwo>  {
     File tobesaved = File(appDocPath + '/' + currentDocPath + '.txt');
 
     string = getPercentDone().toString() + ']' + string;
-    print(' saving  ' + string);
+    // print(' saving  ' + string);
     await tobesaved.writeAsString(string);
     print('sucess');
     updateDirectory();
@@ -2057,6 +2059,7 @@ class PageTwoState extends State<PageTwo>  {
     if (addHistory) {
       updateHistory();
     }
+
   }
 
   parseData(String full) {
@@ -2227,7 +2230,7 @@ class PageTwoState extends State<PageTwo>  {
       if (done) {
         p++;
       } else {
-        print('not ' + value.first.value);
+
       }
     });
     infoBits.asMap().forEach((key, value) {
@@ -2248,54 +2251,7 @@ class PageTwoState extends State<PageTwo>  {
   String dob;
   String breed;
   double weightKG;
-  List<Widget> getInfoBitTiles() {
-    List<Widget> r = List<Widget>();
-    infoBits.asMap().forEach((key, value) {
-      r.add(GestureDetector(
-        onTap: () async => {
-          print(value.value),
-          value.value = await showInfoButton(value.stageName, value.value),
-          setState(() => {
-                print(value.value),
-                updateSurvey(true),
-              })
-        },
-        child: Container(
-          padding: EdgeInsets.all(10),
-          child: Container(
-            padding: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(15)),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(value.stageName + ": "),
-                          Text(value.value)
-                        ],
-                      ),
-                    ),
-                    Container(
-                        width: 25,
-                        padding: EdgeInsets.all(5),
-                        child: FittedBox(
-                            child: Icon(
-                          FlutterIcons.edit_ant,
-                        )))
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ));
-    });
-    return r;
-  }
+
 
   moveToBluePass() async {
     final reset = await Navigator.push(
@@ -2429,565 +2385,33 @@ class PageTwoState extends State<PageTwo>  {
       Divider()
     ];
   }
+
+  List<Widget> getInfoBits;
+  List<Widget> diseaseL;
+  List<Widget> locationL;
+  List<Widget> previousCPAL;
+  List<Widget> previousMeasuresL;
+  List<Widget> ROSCL;
+  List<Widget> ROSCdurationL;
+  List<Widget> comorbidConditionsL;
+  List<Widget> suspectedCauseL;
+  List<Widget> generalAnesthesiaL;
+  List<Widget> mechanicalVentilationL;
+  List<Widget> euthanasiaL;
+  List<Widget> rearrestL;
+  List<Widget> outcomeL;
+  Widget roscOpener;
+  Widget anesthesiaOpener;
+  Widget euthanasiaOpener;
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
-
-    final diseaseL = Disease.map(
-      (e) => GestureDetector(
-        onTap: () => {
-          setState(() => {
-                e.checked = !e.checked,
-                updateSurvey(true),
-              }),
-        },
-        child: Chip(
-          backgroundColor: Colors.white,
-          key: Key(e.value),
-          label: Text(e.value),
-          avatar: Checkbox(
-            value: e.checked ?? false,
-          ),
-        ),
-      ),
-    ).toList();
-    final locationL = Location.map(
-      (e) => GestureDetector(
-        onTap: () => {
-          setState(() => {
-                for (_ListItem l in Location)
-                  {
-                    l.checked = false,
-                  },
-                e.checked = !e.checked,
-                updateSurvey(true),
-              }),
-        },
-        child: Chip(
-          backgroundColor: Colors.white,
-          key: Key(e.value),
-          label: Text(e.value),
-          avatar: Checkbox(
-            value: e.checked ?? false,
-          ),
-        ),
-      ),
-    ).toList();
-    final previousCPAL = PreviousCPA.map(
-      (e) => GestureDetector(
-        onTap: () => {
-          setState(() => {
-                for (_ListItem l in PreviousCPA)
-                  {
-                    l.checked = false,
-                  },
-                e.checked = !e.checked,
-                updateSurvey(true),
-              }),
-        },
-        child: Chip(
-          backgroundColor: Colors.white,
-          key: Key(e.value),
-          label: Text(e.value),
-          avatar: Checkbox(
-            value: e.checked ?? false,
-          ),
-        ),
-      ),
-    ).toList();
-    final previousMeasuresL = PreviousMeasures.map(
-      (e) => GestureDetector(
-        onTap: () => {
-          setState(() => {
-                e.checked = !e.checked,
-                updateSurvey(true),
-              }),
-        },
-        child: Chip(
-          backgroundColor: Colors.white,
-          key: Key(e.value),
-          label: Text(e.value),
-          avatar: Checkbox(
-            value: e.checked ?? false,
-          ),
-        ),
-      ),
-    ).toList();
-    final ROSCL = ROSC
-        .map(
-          (e) => Container(
-            padding: EdgeInsets.all(5),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-              child: CheckboxListTile(
-                key: Key(e.value),
-                value: e.checked ?? false,
-                onChanged: (bool newValue) {
-                  setState(() => e.checked = newValue);
-                  updateSurvey(true);
-                },
-                title: Text(e.value),
-              ),
-            ),
-          ),
-        )
-        .toList();
-    final ROSCdurationL = ROSCDuration.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => {
-                    for (_ListItem a in ROSCDuration)
-                      {
-                        a.checked = false,
-                      },
-                    e.checked = newValue
-                  });
-              updateSurvey(true);
-            },
-            title: Text(e.value),
-          ),
-        ),
-      ),
-    ).toList();
-    final comorbidConditionsL = ComorbidConditions.map(
-      (e) => GestureDetector(
-        onTap: () => {
-          setState(() => {
-                e.checked = !e.checked,
-                updateSurvey(true),
-              }),
-        },
-        child: Chip(
-          backgroundColor: Colors.white,
-          key: Key(e.value),
-          label: Text(e.value),
-          avatar: Checkbox(
-            value: e.checked ?? false,
-          ),
-        ),
-      ),
-    ).toList();
-    final suspectedCauseL = SuspectedCause.map(
-      (e) => GestureDetector(
-        onTap: () => {
-          setState(() => {
-                e.checked = !e.checked,
-                updateSurvey(true),
-              }),
-        },
-        child: Chip(
-          backgroundColor: Colors.white,
-          key: Key(e.value),
-          label: Text(e.value),
-          avatar: Checkbox(
-            value: e.checked ?? false,
-          ),
-        ),
-      ),
-    ).toList();
-    final generalAnesthesiaL = GeneralAnesthesia.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => e.checked = newValue);
-              updateSurvey(true);
-            },
-            title: Text(e.value),
-          ),
-        ),
-      ),
-    ).toList();
-    final mechanicalVentilationL = MechanicalVentilation.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => e.checked = newValue);
-              updateSurvey(true);
-            },
-            title: Text(e.value),
-          ),
-        ),
-      ),
-    ).toList();
-    final euthanasiaL = Euthanasia.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              setState(() => {e.checked = newValue});
-              updateSurvey(true);
-            },
-            title: Text(e.value),
-          ),
-        ),
-      ),
-    ).toList();
-    final rearrestL = Rearrest.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              print('starting...');
-              setState(() => {
-                    for (_ListItem b in Rearrest)
-                      {
-                        b.checked = false,
-                      },
-                    for (_ListItem a in Euthanasia)
-                      {
-                        a.checked = false,
-                      },
-                    e.checked = newValue
-                  });
-              updateSurvey(true);
-            },
-            title: Text(e.value),
-          ),
-        ),
-      ),
-    ).toList();
-    final outcomeL = Outcome.map(
-      (e) => Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: CheckboxListTile(
-            key: Key(e.value),
-            value: e.checked ?? false,
-            onChanged: (bool newValue) {
-              print('starting...');
-              setState(() => {
-                    for (_ListItem b in Outcome)
-                      {
-                        b.checked = false,
-                      },
-                    e.checked = newValue
-                  });
-              updateSurvey(true);
-            },
-            title: Text(e.value),
-          ),
-        ),
-      ),
-    ).toList();
-    Widget roscOpener = Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: ExpansionTile(
-            key: GlobalKey(),
-            title: Text("Was ROSC acheived?"),
-            initiallyExpanded: ROSC.first.checked,
-            trailing: Checkbox(
-              value: ROSC.first.checked,
-              onChanged: (bool newValue) => {
-                setState(() => {
-                      ROSC.first.checked = newValue,
-                      if (newValue == true) {setState(() => {})}
-                    })
-              },
-            ),
-            children: [...ROSCL, ...ROSCdurationL],
-          ),
-        ));
-    Widget anesthesiaOpener = Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: ExpansionTile(
-            key: GlobalKey(),
-            title: Text("General Anesthesia at time of CPA?"),
-            initiallyExpanded: GeneralAnesthesia.first.checked,
-            trailing: Checkbox(
-              value: GeneralAnesthesia.first.checked,
-              onChanged: (bool newValue) => {
-                setState(() => {
-                      GeneralAnesthesia.first.checked = newValue,
-                      if (newValue == true) {setState(() => {})}
-                    })
-              },
-            ),
-            children: [...generalAnesthesiaL],
-          ),
-        ));
-    Widget euthanasiaOpener = Container(
-        padding: EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: ExpansionTile(
-            key: GlobalKey(),
-            title: Text("Euthanasia"),
-            initiallyExpanded: Euthanasia.first.checked,
-            trailing: Checkbox(
-              value: Euthanasia.first.checked,
-              onChanged: (bool newValue) => {
-                setState(() => {
-                      for (_ListItem b in Rearrest)
-                        {
-                          b.checked = false,
-                        },
-                      Euthanasia.first.checked = newValue,
-                    })
-              },
-            ),
-            children: [
-              euthanasiaL.first,
-              Text('decission based on:'),
-              ...euthanasiaL.sublist(1, euthanasiaL.length)
-            ],
-          ),
-        ));
-
-    DraggableScrollableSheet buildDragScrollSheet() {
-      return DraggableScrollableSheet(
-          initialChildSize: 0.15,
-          minChildSize: 0.15,
-          maxChildSize: 0.95,
-          builder: (BuildContext context, ScrollController scrollController) {
-            return Container(
-                decoration: BoxDecoration(
-                    color: Colors.lightBlue,
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(15),
-                        topLeft: Radius.circular(15))),
-                child: Scrollbar(
-                  child: ListView(
-                    physics: ClampingScrollPhysics(),
-                    controller: scrollController,
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        height: 100,
-                        decoration: BoxDecoration(),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Expanded(
-                                    child: FittedBox(
-                                      fit: BoxFit.fitHeight,
-                                      child: Icon(
-                                        FlutterIcons
-                                            .arrow_up_circle_outline_mco,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: FittedBox(
-                                      fit: BoxFit.fitHeight,
-                                      child: Text(
-                                        'Additional Info',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: FittedBox(
-                                      child: Icon(
-                                        FlutterIcons
-                                            .arrow_up_circle_outline_mco,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                      Container(
-                        child: Column(children: getInfoBitTiles()),
-                      ),
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text(
-                            'Disease Category at admission (all that apply)',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      Wrap(
-                        children: diseaseL,
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                      ),
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Location of CPA (select one)',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      Wrap(
-                        children: locationL,
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                      ),
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Comorbid conditions',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      Wrap(
-                        children: comorbidConditionsL,
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                      ),
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Suspected cause of CPA',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      Wrap(
-                        children: suspectedCauseL,
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                      ),
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Previous CPA',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      Wrap(
-                        children: previousCPAL,
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                      ),
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('CPR measures ALREADY in place',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      Wrap(
-                        children: previousMeasuresL,
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                      ),
-                      Divider(),
-                      anesthesiaOpener,
-                      Divider(),
-                      ...mechanicalVentilationL,
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('ROSC',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      roscOpener,
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Mode of Death after ROSC >20 min',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      euthanasiaOpener,
-                      ...rearrestL,
-                      Divider(),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Text('Outcome',
-                            textAlign: TextAlign.center,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20)),
-                      ),
-                      ...outcomeL,
-                    ],
-                  ),
-                ));
-          });
-    }
-
     return DefaultTabController(
       length: 3,
       initialIndex: initTabIndex,
       child: Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           key: _scaffoldKey,
           drawer: Drawer(child: Column(children: settingItems(),),),
           appBar: AppBar(
@@ -3063,30 +2487,44 @@ class PageTwoState extends State<PageTwo>  {
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.all(15),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => launch(
-                                      'https://recoverinitiative.org/veterinary-professionals/'),
-                                  child: Container(
-                                    padding: EdgeInsets.all(15),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text('Become certified',
-                                            textAlign: TextAlign.center,
-                                            style:
-                                                TextStyle(color: Colors.white)),
-                                        Icon(FlutterIcons.graduation_cap_ent,
-                                            color: Colors.white)
-                                      ],
-                                    ),
+                            decoration: BoxDecoration(
+
+                    ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => launch(
+                                    'https://recoverinitiative.org/veterinary-professionals/'),
+                                child: Container(
+                                  constraints: BoxConstraints(maxHeight: 100),
+
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: FadeInImage.memoryNetwork(
+                                          placeholder: kTransparentImage,
+                                          image:
+                                          'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
+                                          fit: BoxFit.fitWidth,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 10),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text('Become\ncertified',
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                TextStyle(color: Colors.lightBlue)),
+                                            Row(children: [
+                                              Icon(FlutterIcons.left_ant, color: Colors.lightBlue ,),
+                                              Icon(FlutterIcons.graduation_cap_ent, color: Colors.lightBlue)
+                                            ],)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -3104,7 +2542,7 @@ class PageTwoState extends State<PageTwo>  {
                                     color: Colors.lightBlue,
                                   ),
                                   child: Icon(
-                                    FlutterIcons.folder_upload_mco,
+                                    FlutterIcons.folder_search_outline_mco,
                                     color: Colors.white,
                                     size: 40,
                                   )
@@ -3118,34 +2556,601 @@ class PageTwoState extends State<PageTwo>  {
               ),
               Stack(
                 children: [
-                  Builder(
-                    builder: (BuildContext context) => Column(
-                      children: <Widget>[
-                        LinearPercentIndicator(
-                          animateFromLastPercent: true,
-                          animation: true,
-                          animationDuration: 2,
-                          percent: getPercentDone(),
-                        ),
-                        Expanded(
-                          flex: 5,
-                          child: Container(
-                            color: Colors.white,
-                            child: ReorderableListView(
-                              onReorder: onReorder,
-                              children: timelineTiles,
-                              scrollController: timelineController,
-                            ),
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Builder(
+                          builder: (BuildContext context) => Column(
+                            children: <Widget>[
+                              LinearPercentIndicator(
+                                animateFromLastPercent: true,
+                                animation: true,
+                                animationDuration: 2,
+                                percent: getPercentDone(),
+                              ),
+                              Expanded(
+                                flex: 5,
+                                child: Container(
+                                  color: Colors.white,
+                                  child: ReorderableListView(
+                                    onReorder: onReorder,
+                                    children: timelineTiles,
+                                    scrollController: timelineController,
+                                  ),
+                                ),
+                              ),
+
+                            ],
                           ),
                         ),
-                        Container(
-                          height: 100,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
+                      ),
+
+                    ],
                   ),
-                  buildDragScrollSheet(),
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.bottomRight,
+                          child: Row(
+                            children: [
+                              Expanded(
+
+                                child: Container(
+                                  padding: EdgeInsets.all(35),
+                                  alignment: Alignment.bottomRight,
+                                  child: FloatingActionButton(
+                                      onPressed: () async => {
+                                    showMaterialModalBottomSheet(
+                                      context: context,
+                                      closeProgressThreshold: 0.8,
+                                      builder: (context) => StatefulBuilder(
+                                          builder: (BuildContext context, StateSetter setModState /*You can rename this!*/) {
+
+                                            print('-----------------------------------===============');
+                                            getInfoBits = infoBits.map( (value) =>
+                                              GestureDetector(
+                                                onTap: () async => {
+                                                  print(value.value),
+                                                  value.value = await showInfoButton(value.stageName, value.value),
+                                                  setModState(() => {
+                                                    print(value.value),
+                                                    updateSurvey(true),
+                                                  })
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(5),
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white, borderRadius: BorderRadius.circular(15)),
+                                                    child: Column(
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Expanded(
+                                                              child: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  Text(value.stageName + ": "),
+                                                                  Text(value.value)
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            Container(
+                                                                width: 25,
+                                                                padding: EdgeInsets.all(5),
+                                                                child: FittedBox(
+                                                                    child: Icon(
+                                                                      FlutterIcons.edit_ant,
+                                                                    )))
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              )).toList();
+
+                                            diseaseL = Disease.map(
+                                                  (e) => GestureDetector(
+                                                onTap: () => {
+                                                  setModState(() => {
+                                                    e.checked = !e.checked,
+                                                    updateSurvey(true),
+                                                  }),
+                                                },
+                                                child: Chip(
+                                                  backgroundColor: Colors.white,
+                                                  key: Key(e.value),
+                                                  label: Text(e.value),
+                                                  avatar: Checkbox(
+                                                    value: e.checked ?? false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            locationL = Location.map(
+                                                  (e) => GestureDetector(
+                                                onTap: () => {
+                                                  setModState(() => {
+                                                    for (_ListItem l in Location)
+                                                      {
+                                                        l.checked = false,
+                                                      },
+                                                    e.checked = !e.checked,
+                                                    updateSurvey(true),
+                                                  }),
+                                                },
+                                                child: Chip(
+                                                  backgroundColor: Colors.white,
+                                                  key: Key(e.value),
+                                                  label: Text(e.value),
+                                                  avatar: Checkbox(
+                                                    value: e.checked ?? false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            previousCPAL = PreviousCPA.map(
+                                                  (e) => GestureDetector(
+                                                onTap: () => {
+                                                  setModState(() => {
+                                                    for (_ListItem l in PreviousCPA)
+                                                      {
+                                                        l.checked = false,
+                                                      },
+                                                    e.checked = !e.checked,
+                                                    updateSurvey(true),
+                                                  }),
+                                                },
+                                                child: Chip(
+                                                  backgroundColor: Colors.white,
+                                                  key: Key(e.value),
+                                                  label: Text(e.value),
+                                                  avatar: Checkbox(
+                                                    value: e.checked ?? false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            previousMeasuresL = PreviousMeasures.map(
+                                                  (e) => GestureDetector(
+                                                onTap: () => {
+                                                  setModState(() => {
+                                                    e.checked = !e.checked,
+                                                    updateSurvey(true),
+                                                  }),
+                                                },
+                                                child: Chip(
+                                                  backgroundColor: Colors.white,
+                                                  key: Key(e.value),
+                                                  label: Text(e.value),
+                                                  avatar: Checkbox(
+                                                    value: e.checked ?? false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            ROSCL = ROSC
+                                                .map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      setModState(() => e.checked = newValue);
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                                .toList();
+                                            ROSCdurationL = ROSCDuration.map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      setModState(() => {
+                                                        for (_ListItem a in ROSCDuration)
+                                                          {
+                                                            a.checked = false,
+                                                          },
+                                                        e.checked = newValue
+                                                      });
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            comorbidConditionsL = ComorbidConditions.map(
+                                                  (e) => GestureDetector(
+                                                onTap: () => {
+                                                  setModState(() => {
+                                                    e.checked = !e.checked,
+                                                    updateSurvey(true),
+                                                  }),
+                                                },
+                                                child: Chip(
+                                                  backgroundColor: Colors.white,
+                                                  key: Key(e.value),
+                                                  label: Text(e.value),
+                                                  avatar: Checkbox(
+                                                    value: e.checked ?? false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            suspectedCauseL = SuspectedCause.map(
+                                                  (e) => GestureDetector(
+                                                onTap: () => {
+                                                  setModState(() => {
+                                                    e.checked = !e.checked,
+                                                    updateSurvey(true),
+                                                  }),
+                                                },
+                                                child: Chip(
+                                                  backgroundColor: Colors.white,
+                                                  key: Key(e.value),
+                                                  label: Text(e.value),
+                                                  avatar: Checkbox(
+                                                    value: e.checked ?? false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            generalAnesthesiaL = GeneralAnesthesia.map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      setModState(() => e.checked = newValue);
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            mechanicalVentilationL = MechanicalVentilation.map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      setModState(() => e.checked = newValue);
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            euthanasiaL = Euthanasia.map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      setModState(() => {e.checked = newValue});
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            rearrestL = Rearrest.map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      print('starting...');
+                                                      setModState(() => {
+                                                        for (_ListItem b in Rearrest)
+                                                          {
+                                                            b.checked = false,
+                                                          },
+                                                        for (_ListItem a in Euthanasia)
+                                                          {
+                                                            a.checked = false,
+                                                          },
+                                                        e.checked = newValue
+                                                      });
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            outcomeL = Outcome.map(
+                                                  (e) => Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: CheckboxListTile(
+                                                    key: Key(e.value),
+                                                    value: e.checked ?? false,
+                                                    onChanged: (bool newValue) {
+                                                      print('starting...');
+                                                      setModState(() => {
+                                                        for (_ListItem b in Outcome)
+                                                          {
+                                                            b.checked = false,
+                                                          },
+                                                        e.checked = newValue
+                                                      });
+                                                      updateSurvey(true);
+                                                    },
+                                                    title: Text(e.value),
+                                                  ),
+                                                ),
+                                              ),
+                                            ).toList();
+                                            roscOpener = Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: ExpansionTile(
+                                                    key: GlobalKey(),
+                                                    title: Text("Was ROSC acheived?"),
+                                                    initiallyExpanded: ROSC.first.checked,
+                                                    trailing: Checkbox(
+                                                      value: ROSC.first.checked,
+                                                      onChanged: (bool newValue) => {
+                                                        setModState(() => {
+                                                          ROSC.first.checked = newValue,
+                                                          if (newValue == true) {setModState(() => {})}
+                                                        })
+                                                      },
+                                                    ),
+                                                    children: [...ROSCL, ...ROSCdurationL],
+                                                  ),
+                                                ));
+                                            anesthesiaOpener = Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: ExpansionTile(
+                                                    key: GlobalKey(),
+                                                    title: Text("General Anesthesia at time of CPA?"),
+                                                    initiallyExpanded: GeneralAnesthesia.first.checked,
+                                                    trailing: Checkbox(
+                                                      value: GeneralAnesthesia.first.checked,
+                                                      onChanged: (bool newValue) => {
+                                                        setModState(() => {
+                                                          GeneralAnesthesia.first.checked = newValue,
+                                                          if (newValue == true) {setModState(() => {})}
+                                                        })
+                                                      },
+                                                    ),
+                                                    children: [...generalAnesthesiaL],
+                                                  ),
+                                                ));
+                                            euthanasiaOpener = Container(
+                                                padding: EdgeInsets.all(5),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                  ),
+                                                  child: ExpansionTile(
+                                                    key: GlobalKey(),
+                                                    title: Text("Euthanasia"),
+                                                    initiallyExpanded: Euthanasia.first.checked,
+                                                    trailing: Checkbox(
+                                                      value: Euthanasia.first.checked,
+                                                      onChanged: (bool newValue) => {
+                                                        setModState(() => {
+                                                          for (_ListItem b in Rearrest)
+                                                            {
+                                                              b.checked = false,
+                                                            },
+                                                          Euthanasia.first.checked = newValue,
+                                                        })
+                                                      },
+                                                    ),
+                                                    children: [
+                                                      euthanasiaL.first,
+                                                      Text('decission based on:'),
+                                                      ...euthanasiaL.sublist(1, euthanasiaL.length)
+                                                    ],
+                                                  ),
+                                                ));
+                                            return Container(
+                                              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.lightBlue,
+                                              ),
+                                              child: SingleChildScrollView(
+                                                controller: ModalScrollController.of(context),
+                                                child: Column(
+
+                                                  children: [
+
+                                                    Container(
+                                                      child: Column(children: getInfoBits),
+                                                    ),
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text(
+                                                          'Disease Category at admission (all that apply)',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    Wrap(
+                                                      children: diseaseL,
+                                                      spacing: 8.0,
+                                                      runSpacing: 4.0,
+                                                    ),
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('Location of CPA (select one)',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    Wrap(
+                                                      children: locationL,
+                                                      spacing: 8.0,
+                                                      runSpacing: 4.0,
+                                                    ),
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('Comorbid conditions',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    Wrap(
+                                                      children: comorbidConditionsL,
+                                                      spacing: 8.0,
+                                                      runSpacing: 4.0,
+                                                    ),
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('Suspected cause of CPA',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    Wrap(
+                                                      children: suspectedCauseL,
+                                                      spacing: 8.0,
+                                                      runSpacing: 4.0,
+                                                    ),
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('Previous CPA',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    Wrap(
+                                                      children: previousCPAL,
+                                                      spacing: 8.0,
+                                                      runSpacing: 4.0,
+                                                    ),
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('CPR measures ALREADY in place',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    Wrap(
+                                                      children: previousMeasuresL,
+                                                      spacing: 8.0,
+                                                      runSpacing: 4.0,
+                                                    ),
+                                                    Divider(),
+                                                    anesthesiaOpener,
+                                                    Divider(),
+                                                    ...mechanicalVentilationL,
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('ROSC',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    roscOpener,
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('Mode of Death after ROSC >20 min',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    euthanasiaOpener,
+                                                    ...rearrestL,
+                                                    Divider(),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Text('Outcome',
+                                                          textAlign: TextAlign.center,
+                                                          style:
+                                                          TextStyle(color: Colors.white, fontSize: 20)),
+                                                    ),
+                                                    ...outcomeL,
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                      ),
+                                    ),
+                                  }, child: Icon(FlutterIcons.briefcase_edit_mco, color: Colors.white)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
               Column(

@@ -58,6 +58,7 @@ dependencies:
   flutter_blue: ^0.7.3
   fluttertoast: ^7.1.8
   flutter_email_sender: ^5.0.0
+  modal_bottom_sheet: ^2.0.0
 
 
 
