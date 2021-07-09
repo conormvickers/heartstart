@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutterheart/chesttypes_icons.dart';
 import 'package:flutterheart/main.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -13,19 +14,14 @@ import 'main.dart' as rootFile;
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:badges/badges.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -1234,7 +1230,7 @@ List<String> partNames = [
 ];
 
 class PageTwoState extends State<PageTwo>  {
-  List<Widget> timelineTiles = List<Widget>();
+  List<Widget> timelineTiles = [];
   List<String> eventSplit = globals.log.split('\n');
   int timelineEditing = null;
   TextEditingController timelineEditingController = TextEditingController();
@@ -1771,13 +1767,9 @@ class PageTwoState extends State<PageTwo>  {
   }
 
   saveFile(String string) async {
-    // if (_scaffoldKey.currentContext != null) {
-    //   _scaffoldKey.currentState.showSnackBar(SnackBar(
-    //
-    //     content: Text('saving...\n'),
-    //     duration: Duration(seconds: 1),
-    //   ));
-    // }
+    if (kIsWeb ) {
+      return;
+    }
     Fluttertoast.showToast(
         msg: "saving...",
         toastLength: Toast.LENGTH_SHORT,
@@ -2407,6 +2399,652 @@ class PageTwoState extends State<PageTwo>  {
   @override
   Widget build(BuildContext context) {
     print('build starting');
+    if (kIsWeb) {print('on web-----');
+
+      return Scaffold(
+            resizeToAvoidBottomInset: true,
+            key: _scaffoldKey,
+            drawer: Drawer(child: Column(children: settingItems(),),),
+            appBar: AppBar(
+                automaticallyImplyLeading: false,
+                leading: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+
+                      child: IconButton(
+                        icon: Icon(
+                          FlutterIcons.alert_decagram_mco,
+                          color: Theme.of(context).splashColor,
+                        ),
+                        onPressed: () => {
+                          askRearrest()
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                title: Container(
+                    height: 50,
+                    child: Image.asset(
+                      'assets/recover-logo-250.png',
+                      fit: BoxFit.fitHeight,
+                    )),
+                elevation: 1.0,
+                actions: [
+                  Builder(
+                    builder: (context) =>
+                        Container(
+
+                          child: Row(
+                            children: [IconButton(icon: Icon(FlutterIcons.ios_options_ion, color: Colors.lightBlue,),
+
+                              onPressed: () =>  { Scaffold.of(context).openDrawer() },), ...undoButtons(), closeButton()],
+                          ),
+                        ),
+                  )]),
+            body: Stack(
+                  children: [
+                    Column(
+                      children: [
+                        Expanded(
+                          child: Builder(
+                            builder: (BuildContext context) => Column(
+                              children: <Widget>[
+                                LinearPercentIndicator(
+                                  animateFromLastPercent: true,
+                                  animation: true,
+                                  animationDuration: 2,
+                                  percent: getPercentDone(),
+                                ),
+                                Expanded(
+                                  flex: 5,
+                                  child: Container(
+                                    color: Colors.white,
+                                    child: ReorderableListView(
+                                      onReorder: onReorder,
+                                      children: timelineTiles,
+                                      scrollController: timelineController,
+                                    ),
+                                  ),
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            alignment: Alignment.bottomRight,
+                            child: Row(
+                              children: [
+                                Expanded(
+
+                                  child: Container(
+                                    padding: EdgeInsets.all(35),
+                                    alignment: Alignment.bottomRight,
+                                    child: FloatingActionButton(
+                                        onPressed: () async => {
+                                          showMaterialModalBottomSheet(
+                                            context: context,
+                                            closeProgressThreshold: 0.8,
+                                            builder: (context) => StatefulBuilder(
+                                                builder: (BuildContext context, StateSetter setModState /*You can rename this!*/) {
+
+                                                  print('-----------------------------------===============');
+                                                  getInfoBits = infoBits.map( (value) =>
+                                                      GestureDetector(
+                                                        onTap: () async => {
+                                                          print(value.value),
+                                                          value.value = await showInfoButton(value.stageName, value.value),
+                                                          setModState(() => {
+                                                            print(value.value),
+                                                            updateSurvey(true),
+                                                          })
+                                                        },
+                                                        child: Container(
+                                                          padding: EdgeInsets.all(10),
+                                                          child: Container(
+                                                            padding: EdgeInsets.all(5),
+                                                            decoration: BoxDecoration(
+                                                                color: Colors.white, borderRadius: BorderRadius.circular(15)),
+                                                            child: Column(
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child: Row(
+                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Text(value.stageName + ": "),
+                                                                          Text(value.value)
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                        width: 25,
+                                                                        padding: EdgeInsets.all(5),
+                                                                        child: FittedBox(
+                                                                            child: Icon(
+                                                                              FlutterIcons.edit_ant,
+                                                                            )))
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )).toList();
+
+                                                  diseaseL = Disease.map(
+                                                        (e) => GestureDetector(
+                                                      onTap: () => {
+                                                        setModState(() => {
+                                                          e.checked = !e.checked,
+                                                          updateSurvey(true),
+                                                        }),
+                                                      },
+                                                      child: Chip(
+                                                        backgroundColor: Colors.white,
+                                                        key: Key(e.value),
+                                                        label: Text(e.value),
+                                                        avatar: Checkbox(
+                                                          value: e.checked ?? false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  locationL = Location.map(
+                                                        (e) => GestureDetector(
+                                                      onTap: () => {
+                                                        setModState(() => {
+                                                          for (_ListItem l in Location)
+                                                            {
+                                                              l.checked = false,
+                                                            },
+                                                          e.checked = !e.checked,
+                                                          updateSurvey(true),
+                                                        }),
+                                                      },
+                                                      child: Chip(
+                                                        backgroundColor: Colors.white,
+                                                        key: Key(e.value),
+                                                        label: Text(e.value),
+                                                        avatar: Checkbox(
+                                                          value: e.checked ?? false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  previousCPAL = PreviousCPA.map(
+                                                        (e) => GestureDetector(
+                                                      onTap: () => {
+                                                        setModState(() => {
+                                                          for (_ListItem l in PreviousCPA)
+                                                            {
+                                                              l.checked = false,
+                                                            },
+                                                          e.checked = !e.checked,
+                                                          updateSurvey(true),
+                                                        }),
+                                                      },
+                                                      child: Chip(
+                                                        backgroundColor: Colors.white,
+                                                        key: Key(e.value),
+                                                        label: Text(e.value),
+                                                        avatar: Checkbox(
+                                                          value: e.checked ?? false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  previousMeasuresL = PreviousMeasures.map(
+                                                        (e) => GestureDetector(
+                                                      onTap: () => {
+                                                        setModState(() => {
+                                                          e.checked = !e.checked,
+                                                          updateSurvey(true),
+                                                        }),
+                                                      },
+                                                      child: Chip(
+                                                        backgroundColor: Colors.white,
+                                                        key: Key(e.value),
+                                                        label: Text(e.value),
+                                                        avatar: Checkbox(
+                                                          value: e.checked ?? false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  ROSCL = ROSC
+                                                      .map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            setModState(() => e.checked = newValue);
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                      .toList();
+                                                  ROSCdurationL = ROSCDuration.map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            setModState(() => {
+                                                              for (_ListItem a in ROSCDuration)
+                                                                {
+                                                                  a.checked = false,
+                                                                },
+                                                              e.checked = newValue
+                                                            });
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  comorbidConditionsL = ComorbidConditions.map(
+                                                        (e) => GestureDetector(
+                                                      onTap: () => {
+                                                        setModState(() => {
+                                                          e.checked = !e.checked,
+                                                          updateSurvey(true),
+                                                        }),
+                                                      },
+                                                      child: Chip(
+                                                        backgroundColor: Colors.white,
+                                                        key: Key(e.value),
+                                                        label: Text(e.value),
+                                                        avatar: Checkbox(
+                                                          value: e.checked ?? false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  suspectedCauseL = SuspectedCause.map(
+                                                        (e) => GestureDetector(
+                                                      onTap: () => {
+                                                        setModState(() => {
+                                                          e.checked = !e.checked,
+                                                          updateSurvey(true),
+                                                        }),
+                                                      },
+                                                      child: Chip(
+                                                        backgroundColor: Colors.white,
+                                                        key: Key(e.value),
+                                                        label: Text(e.value),
+                                                        avatar: Checkbox(
+                                                          value: e.checked ?? false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  generalAnesthesiaL = GeneralAnesthesia.map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            setModState(() => e.checked = newValue);
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  mechanicalVentilationL = MechanicalVentilation.map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            setModState(() => e.checked = newValue);
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  euthanasiaL = Euthanasia.map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            setModState(() => {e.checked = newValue});
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  rearrestL = Rearrest.map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            print('starting...');
+                                                            setModState(() => {
+                                                              for (_ListItem b in Rearrest)
+                                                                {
+                                                                  b.checked = false,
+                                                                },
+                                                              for (_ListItem a in Euthanasia)
+                                                                {
+                                                                  a.checked = false,
+                                                                },
+                                                              e.checked = newValue
+                                                            });
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  outcomeL = Outcome.map(
+                                                        (e) => Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: CheckboxListTile(
+                                                          key: Key(e.value),
+                                                          value: e.checked ?? false,
+                                                          onChanged: (bool newValue) {
+                                                            print('starting...');
+                                                            setModState(() => {
+                                                              for (_ListItem b in Outcome)
+                                                                {
+                                                                  b.checked = false,
+                                                                },
+                                                              e.checked = newValue
+                                                            });
+                                                            updateSurvey(true);
+                                                          },
+                                                          title: Text(e.value),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).toList();
+                                                  roscOpener = Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: ExpansionTile(
+                                                          key: GlobalKey(),
+                                                          title: Text("Was ROSC acheived?"),
+                                                          initiallyExpanded: ROSC.first.checked,
+                                                          trailing: Checkbox(
+                                                            value: ROSC.first.checked,
+                                                            onChanged: (bool newValue) => {
+                                                              setModState(() => {
+                                                                ROSC.first.checked = newValue,
+                                                                if (newValue == true) {setModState(() => {})}
+                                                              })
+                                                            },
+                                                          ),
+                                                          children: [...ROSCL, ...ROSCdurationL],
+                                                        ),
+                                                      ));
+                                                  anesthesiaOpener = Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: ExpansionTile(
+                                                          key: GlobalKey(),
+                                                          title: Text("General Anesthesia at time of CPA?"),
+                                                          initiallyExpanded: GeneralAnesthesia.first.checked,
+                                                          trailing: Checkbox(
+                                                            value: GeneralAnesthesia.first.checked,
+                                                            onChanged: (bool newValue) => {
+                                                              setModState(() => {
+                                                                GeneralAnesthesia.first.checked = newValue,
+                                                                if (newValue == true) {setModState(() => {})}
+                                                              })
+                                                            },
+                                                          ),
+                                                          children: [...generalAnesthesiaL],
+                                                        ),
+                                                      ));
+                                                  euthanasiaOpener = Container(
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                        ),
+                                                        child: ExpansionTile(
+                                                          key: GlobalKey(),
+                                                          title: Text("Euthanasia"),
+                                                          initiallyExpanded: Euthanasia.first.checked,
+                                                          trailing: Checkbox(
+                                                            value: Euthanasia.first.checked,
+                                                            onChanged: (bool newValue) => {
+                                                              setModState(() => {
+                                                                for (_ListItem b in Rearrest)
+                                                                  {
+                                                                    b.checked = false,
+                                                                  },
+                                                                Euthanasia.first.checked = newValue,
+                                                              })
+                                                            },
+                                                          ),
+                                                          children: [
+                                                            euthanasiaL.first,
+                                                            Text('decission based on:'),
+                                                            ...euthanasiaL.sublist(1, euthanasiaL.length)
+                                                          ],
+                                                        ),
+                                                      ));
+                                                  return Container(
+                                                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.lightBlue,
+                                                    ),
+                                                    child: SingleChildScrollView(
+                                                      controller: ModalScrollController.of(context),
+                                                      child: Column(
+
+                                                        children: [
+
+                                                          Container(
+                                                            child: Column(children: getInfoBits),
+                                                          ),
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text(
+                                                                'Disease Category at admission (all that apply)',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          Wrap(
+                                                            children: diseaseL,
+                                                            spacing: 8.0,
+                                                            runSpacing: 4.0,
+                                                          ),
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('Location of CPA (select one)',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          Wrap(
+                                                            children: locationL,
+                                                            spacing: 8.0,
+                                                            runSpacing: 4.0,
+                                                          ),
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('Comorbid conditions',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          Wrap(
+                                                            children: comorbidConditionsL,
+                                                            spacing: 8.0,
+                                                            runSpacing: 4.0,
+                                                          ),
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('Suspected cause of CPA',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          Wrap(
+                                                            children: suspectedCauseL,
+                                                            spacing: 8.0,
+                                                            runSpacing: 4.0,
+                                                          ),
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('Previous CPA',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          Wrap(
+                                                            children: previousCPAL,
+                                                            spacing: 8.0,
+                                                            runSpacing: 4.0,
+                                                          ),
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('CPR measures ALREADY in place',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          Wrap(
+                                                            children: previousMeasuresL,
+                                                            spacing: 8.0,
+                                                            runSpacing: 4.0,
+                                                          ),
+                                                          Divider(),
+                                                          anesthesiaOpener,
+                                                          Divider(),
+                                                          ...mechanicalVentilationL,
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('ROSC',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          roscOpener,
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('Mode of Death after ROSC >20 min',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          euthanasiaOpener,
+                                                          ...rearrestL,
+                                                          Divider(),
+                                                          Container(
+                                                            padding: EdgeInsets.all(8),
+                                                            child: Text('Outcome',
+                                                                textAlign: TextAlign.center,
+                                                                style:
+                                                                TextStyle(color: Colors.white, fontSize: 20)),
+                                                          ),
+                                                          ...outcomeL,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                            ),
+                                          ),
+                                        }, child: Icon(FlutterIcons.briefcase_edit_mco, color: Colors.white)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+
+      );
+    }
     return DefaultTabController(
       length: 3,
       initialIndex: initTabIndex,

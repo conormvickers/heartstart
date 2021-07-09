@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -176,11 +177,13 @@ class MyHomePageState extends State<MyHomePage>
     autoStartCascade();
     animCont = AnimationController(vsync: this);
 
-    Future<void>.delayed(
-        Duration(seconds: 10),
-            () => {
-          Wakelock.enable(),
-        });
+    if (!kIsWeb) {
+      Future<void>.delayed(
+          Duration(seconds: 10),
+              () => {
+            Wakelock.enable(),
+          });
+    }
   }
 
 
