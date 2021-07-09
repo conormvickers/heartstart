@@ -71,13 +71,14 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-var askForPulse = false;
-var warningDismissed = false;
-int timelineEditing;
 TextEditingController timelineEditingController = TextEditingController();
 GlobalKey<NestedTabBarState> nestedKey = GlobalKey<NestedTabBarState>();
 Scaffold currentScaffold;
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
+var askForPulse = false;
+var warningDismissed = false;
+int timelineEditing;
 var nested = NestedTabBar(
   key: nestedKey,
 );
