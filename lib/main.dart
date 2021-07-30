@@ -23,6 +23,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:transparent_image/transparent_image.dart'
     show kTransparentImage;
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 void main() {
   runApp(MyApp());
@@ -56,7 +57,6 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.montserratTextTheme(
           Theme.of(context).textTheme,
         ),
-
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
+
   @override
   MyHomePageState createState() => MyHomePageState();
 }
@@ -85,7 +86,10 @@ var _shockType = "No weight documented";
 var handFreeColor;
 
 class MyHomePageState extends State<MyHomePage>
-    with WidgetsBindingObserver, TickerProviderStateMixin, WidgetsBindingObserver  {
+    with
+        WidgetsBindingObserver,
+        TickerProviderStateMixin,
+        WidgetsBindingObserver {
   bool handsFree = true;
   double fraction = 0;
   double minPassed = 0;
@@ -103,6 +107,7 @@ class MyHomePageState extends State<MyHomePage>
   TextEditingController doctorController = TextEditingController();
   FocusNode doctorNode = FocusNode();
   int autoStart = 5;
+
   String _printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
@@ -124,6 +129,7 @@ class MyHomePageState extends State<MyHomePage>
     'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
     'EXTERNAL: 360 J mono, 150 J bi\nINTERNAL: 50 J mono, 15 J bi',
   ];
+
   IconData checkChestType() {
     if (chestIcon != null) {
       return chestIcon;
@@ -150,21 +156,28 @@ class MyHomePageState extends State<MyHomePage>
   TextInputType eventKeyboard =
       TextInputType.numberWithOptions(signed: true, decimal: true);
 
-
   @override
   void initState() {
-
     WidgetsBinding.instance.addObserver(this);
     super.initState();
+    _kOptions = <String>[
+      ...medNames,
+      ...otherOptions
+
+    ];
+
+    _animationController =
+        AnimationController(duration: Duration(milliseconds: 300), vsync: this);
+    _animation = IntTween(begin: 100, end: 10).animate(_animationController);
+    _animation.addListener(() => setState(() {}));
 
     nested = NestedTabBar(
       parent: this,
       key: nestedKey,
     );
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
-    globals.log = formattedDate + "\tCode Started";
-    globals.codeStart = now;
+
+    globals.log = getTime() + " Code Started";
+
 
     minPassed = 0;
     secPassed = 0;
@@ -180,12 +193,11 @@ class MyHomePageState extends State<MyHomePage>
     if (!kIsWeb) {
       Future<void>.delayed(
           Duration(seconds: 10),
-              () => {
-            Wakelock.enable(),
-          });
+          () => {
+                Wakelock.enable(),
+              });
     }
   }
-
 
   String getFormatedTime() {
     DateTime a = DateTime.now();
@@ -209,6 +221,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   GlobalKey<PageTwoState> pageTwoKey = GlobalKey<PageTwoState>();
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
@@ -221,16 +234,13 @@ class MyHomePageState extends State<MyHomePage>
           if (pageTwoKey.currentState != null) {
             pageTwoKey.currentState.saveGlobalLog();
           }
-
         }
-
       }
       if (state == AppLifecycleState.resumed) {}
     });
   }
 
   resetEverything([bool resetlog = true]) {
-
     handsFree = true;
     fraction = 0;
     minPassed = 0;
@@ -241,12 +251,11 @@ class MyHomePageState extends State<MyHomePage>
     player.setVolume(1);
     playerB.setVolume(1);
 
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
+
     if (resetlog) {
       nestedKey.currentState.resetEverything();
-      globals.log = formattedDate + "\tCode Started";
-      globals.codeStart = now;
+      globals.log = getTime() + " Code Started";
+
       globals.info = [
         '',
         '',
@@ -414,16 +423,17 @@ class MyHomePageState extends State<MyHomePage>
     askForPulse = false;
     nested.show = false;
 
-
     final reset = await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => PageTwo(
-      key: pageTwoKey,
-    )));
+        context,
+        MaterialPageRoute(
+            builder: (context) => PageTwo(
+                  key: pageTwoKey,
+                )));
     print('returned ' + reset.toString());
     if (reset == 'true') {
       print('returned reset');
       resetEverything();
-    }else{
+    } else {
       print('rearest or continue');
       addToLog('Patient Rearrested');
       resetEverything(false);
@@ -554,7 +564,6 @@ class MyHomePageState extends State<MyHomePage>
       },
     );
   }
-
 
   autoStartCascade() async {
     if (autoStart > 0) {
@@ -769,8 +778,8 @@ class MyHomePageState extends State<MyHomePage>
         ),
       ),
       ElevatedButton(
-        onPressed: () => launch(
-            'https://recoverinitiative.org/veterinary-professionals/'),
+        onPressed: () =>
+            launch('https://recoverinitiative.org/veterinary-professionals/'),
         child: Container(
           padding: EdgeInsets.all(15),
           child: Row(
@@ -803,313 +812,275 @@ class MyHomePageState extends State<MyHomePage>
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15))),
+                topLeft: Radius.circular(15), topRight: Radius.circular(15))),
         child: ListView(
           children: [
             Column(
-                  children: <Widget>[
-                    ListTile(
-                      title: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).accentColor,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        height: 100,
-                        child: AutoSizeText(
-                          'GOT A PULSE',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        alignment: Alignment.center,
+              children: <Widget>[
+                ListTile(
+                  title: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).accentColor,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    height: 100,
+                    child: AutoSizeText(
+                      'GOT A PULSE',
+                      style: TextStyle(
+                        fontSize: 40,
+                        color: Colors.white,
                       ),
-                      onTap: () => {_selectedPulse('pulse')},
+                      textAlign: TextAlign.center,
                     ),
-                    ListTile(
-                      title: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius:
-                            BorderRadius.circular(8.0),
-                          ),
-                          height: 100,
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                flex: 5,
-                                child: Column(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 4,
-                                      child: Column(
-                                        children: [
-                                          Expanded(
-                                            child: Container(),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              decoration:
-                                              BoxDecoration(
-                                                border: Border(
-                                                    top: BorderSide(
-                                                        width: 2,
-                                                        color: Colors
-                                                            .white)),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.fitWidth,
-                                        child: Container(
-                                          width: 1000,
-                                          alignment:
-                                          Alignment.center,
-                                          child: AutoSizeText(
-                                            'Asystole - no shock',
-                                            style: TextStyle(
-                                                fontSize: 40,
-                                                color:
-                                                Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )),
-                      onTap: () => {_selectedPulse('asystole')},
-                    ),
-                    ListTile(
-                      title: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius:
-                            BorderRadius.circular(8.0),
-                          ),
-                          height: 100,
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                flex: 5,
-                                child: Column(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 4,
-                                      child: Container(
-                                        width: 1000,
-                                        child: ShaderMask(
-                                          child: Image.asset(
-                                            ('assets/pea.png'),
-                                            fit: BoxFit.fill,
-                                          ),
-                                          shaderCallback:
-                                              (Rect bounds) {
-                                            return LinearGradient(
-                                              colors: [
-                                                Colors.white,
-                                                Colors.white
-                                              ],
-                                              stops: [0.0, 0.0],
-                                            ).createShader(bounds);
-                                          },
-                                          blendMode:
-                                          BlendMode.srcATop,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: FittedBox(
-                                        fit: BoxFit.fitWidth,
-                                        child: Container(
-                                          width: 1000,
-                                          alignment:
-                                          Alignment.center,
-                                          child: AutoSizeText(
-                                            'PEA - no shock',
-                                            style: TextStyle(
-                                                fontSize: 40,
-                                                color:
-                                                Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )),
-                      onTap: () => {_selectedPulse('pea')},
-                    ),
-                    ListTile(
-                      title: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius:
-                            BorderRadius.circular(8.0),
-                          ),
-                          height: 100,
-                          child: Row(
-                            children: <Widget>[
-                              Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: Icon(
-                                      FontAwesome.bolt,
-                                      size: 50,
-                                      color: Theme.of(context)
-                                          .splashColor,
-                                    ),
-                                  )),
-                              Expanded(
-                                flex: 5,
-                                child: Column(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 4,
-                                      child: Container(
-                                        width: 1000,
-                                        child: ShaderMask(
-                                          child: Image.asset(
-                                            ('assets/vfib.png'),
-                                            fit: BoxFit.fill,
-                                          ),
-                                          shaderCallback:
-                                              (Rect bounds) {
-                                            return LinearGradient(
-                                              colors: [
-                                                Colors.white,
-                                                Colors.white
-                                              ],
-                                              stops: [0.0, 0.0],
-                                            ).createShader(bounds);
-                                          },
-                                          blendMode:
-                                          BlendMode.srcATop,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: AutoSizeText(
-                                        'Ventricular Fibrillation',
-                                        style: TextStyle(
-                                            fontSize: 40,
-                                            color: Colors.white),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: Icon(
-                                      FontAwesome.bolt,
-                                      size: 50,
-                                      color: Theme.of(context)
-                                          .splashColor,
-                                    ),
-                                  )),
-                            ],
-                          )),
-                      onTap: () => {_selectedPulse('vfib')},
-                    ),
-                    ListTile(
-                      title: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius:
-                            BorderRadius.circular(8.0),
-                          ),
-                          height: 100,
-                          child: Row(
-                            children: <Widget>[
-                              Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: Icon(
-                                      FontAwesome.bolt,
-                                      size: 50,
-                                      color: Theme.of(context)
-                                          .splashColor,
-                                    ),
-                                  )),
-                              Expanded(
-                                flex: 5,
-                                child: Column(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 4,
-                                      child: Container(
-                                        width: 1000,
-                                        child: ShaderMask(
-                                          child: Image.asset(
-                                            ('assets/vtach.png'),
-                                            fit: BoxFit.fill,
-                                          ),
-                                          shaderCallback:
-                                              (Rect bounds) {
-                                            return LinearGradient(
-                                              colors: [
-                                                Colors.white,
-                                                Colors.white
-                                              ],
-                                              stops: [0.0, 0.0],
-                                            ).createShader(bounds);
-                                          },
-                                          blendMode:
-                                          BlendMode.srcATop,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: AutoSizeText(
-                                        'Pulseless Ventricular Tachycardia',
-                                        style: TextStyle(
-                                            fontSize: 40,
-                                            color: Colors.white),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Flexible(
-                                  flex: 1,
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: Icon(
-                                      FontAwesome.bolt,
-                                      size: 50,
-                                      color: Theme.of(context)
-                                          .splashColor,
-                                    ),
-                                  )),
-                            ],
-                          )),
-                      onTap: () => {_selectedPulse('vtach')},
-                    ),
-                  ],
+                    alignment: Alignment.center,
+                  ),
+                  onTap: () => {_selectedPulse('pulse')},
                 ),
+                ListTile(
+                  title: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      height: 100,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 4,
+                                  child: Column(
+                                    children: [
+                                      Expanded(
+                                        child: Container(),
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                                top: BorderSide(
+                                                    width: 2,
+                                                    color: Colors.white)),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: FittedBox(
+                                    fit: BoxFit.fitWidth,
+                                    child: Container(
+                                      width: 1000,
+                                      alignment: Alignment.center,
+                                      child: AutoSizeText(
+                                        'Asystole - no shock',
+                                        style: TextStyle(
+                                            fontSize: 40, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )),
+                  onTap: () => {_selectedPulse('asystole')},
+                ),
+                ListTile(
+                  title: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      height: 100,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 4,
+                                  child: Container(
+                                    width: 1000,
+                                    child: ShaderMask(
+                                      child: Image.asset(
+                                        ('assets/pea.png'),
+                                        fit: BoxFit.fill,
+                                      ),
+                                      shaderCallback: (Rect bounds) {
+                                        return LinearGradient(
+                                          colors: [Colors.white, Colors.white],
+                                          stops: [0.0, 0.0],
+                                        ).createShader(bounds);
+                                      },
+                                      blendMode: BlendMode.srcATop,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: FittedBox(
+                                    fit: BoxFit.fitWidth,
+                                    child: Container(
+                                      width: 1000,
+                                      alignment: Alignment.center,
+                                      child: AutoSizeText(
+                                        'PEA - no shock',
+                                        style: TextStyle(
+                                            fontSize: 40, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )),
+                  onTap: () => {_selectedPulse('pea')},
+                ),
+                ListTile(
+                  title: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      height: 100,
+                      child: Row(
+                        children: <Widget>[
+                          Flexible(
+                              flex: 1,
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  FontAwesome.bolt,
+                                  size: 50,
+                                  color: Theme.of(context).splashColor,
+                                ),
+                              )),
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 4,
+                                  child: Container(
+                                    width: 1000,
+                                    child: ShaderMask(
+                                      child: Image.asset(
+                                        ('assets/vfib.png'),
+                                        fit: BoxFit.fill,
+                                      ),
+                                      shaderCallback: (Rect bounds) {
+                                        return LinearGradient(
+                                          colors: [Colors.white, Colors.white],
+                                          stops: [0.0, 0.0],
+                                        ).createShader(bounds);
+                                      },
+                                      blendMode: BlendMode.srcATop,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: AutoSizeText(
+                                    'Ventricular Fibrillation',
+                                    style: TextStyle(
+                                        fontSize: 40, color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Flexible(
+                              flex: 1,
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  FontAwesome.bolt,
+                                  size: 50,
+                                  color: Theme.of(context).splashColor,
+                                ),
+                              )),
+                        ],
+                      )),
+                  onTap: () => {_selectedPulse('vfib')},
+                ),
+                ListTile(
+                  title: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      height: 100,
+                      child: Row(
+                        children: <Widget>[
+                          Flexible(
+                              flex: 1,
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  FontAwesome.bolt,
+                                  size: 50,
+                                  color: Theme.of(context).splashColor,
+                                ),
+                              )),
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 4,
+                                  child: Container(
+                                    width: 1000,
+                                    child: ShaderMask(
+                                      child: Image.asset(
+                                        ('assets/vtach.png'),
+                                        fit: BoxFit.fill,
+                                      ),
+                                      shaderCallback: (Rect bounds) {
+                                        return LinearGradient(
+                                          colors: [Colors.white, Colors.white],
+                                          stops: [0.0, 0.0],
+                                        ).createShader(bounds);
+                                      },
+                                      blendMode: BlendMode.srcATop,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: AutoSizeText(
+                                    'Pulseless Ventricular Tachycardia',
+                                    style: TextStyle(
+                                        fontSize: 40, color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Flexible(
+                              flex: 1,
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  FontAwesome.bolt,
+                                  size: 50,
+                                  color: Theme.of(context).splashColor,
+                                ),
+                              )),
+                        ],
+                      )),
+                  onTap: () => {_selectedPulse('vtach')},
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1157,11 +1128,12 @@ class MyHomePageState extends State<MyHomePage>
               ],
             ),
           ),
-          onPressed:() => setState(() {
+          onPressed: () => setState(() {
             print('yes pcheck');
             presentPulseCheckOutcomes();
           }),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
       ),
     );
@@ -1249,199 +1221,199 @@ class MyHomePageState extends State<MyHomePage>
             flex: 2,
             child: Row(
               children: <Widget>[
-            Expanded(
-            child: Padding(
-                padding: EdgeInsets.all(5),
-              child: RawMaterialButton(
-                fillColor: Theme.of(context).splashColor,
-                splashColor: Colors.white,
-                child: Padding(
-                  padding: EdgeInsets.all(5.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Icon(
-                            FontAwesome.bolt,
-                            size: 400,
-                            color: Colors.white,
+                Expanded(
+                    child: Padding(
+                        padding: EdgeInsets.all(5),
+                        child: RawMaterialButton(
+                          fillColor: Theme.of(context).splashColor,
+                          splashColor: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  child: FittedBox(
+                                    fit: BoxFit.fitWidth,
+                                    child: Icon(
+                                      FontAwesome.bolt,
+                                      size: 400,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: AutoSizeText(
+                                    _shockType,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 60),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: AutoSizeText(
-                          _shockType,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          style: TextStyle(color: Colors.white, fontSize: 60),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                onPressed: () => setState(() {
-                  String formattedDate = getFormatedTime();
-                  String combined =
-                      "\n" + formattedDate + "\tShock Delivered";
-                  String full = combined.toString() + "\t";
-                  globals.log = globals.log + full;
-                  print('Shock Delivered');
-                  askForPulse = false;
-                  nested.show = false;
-                  showShock = false;
-                  fractionPulse = 0;
-                  progressPulseCheck = true;
-                  player.setVolume(1);
-                  playerB.setVolume(1);
-                  _speechThis('Continue Compressions');
-                }),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-              )))],
+                          onPressed: () => setState(() {
+                            String formattedDate = getFormatedTime();
+                            String combined =
+                                "\n" + formattedDate + "\tShock Delivered";
+                            String full = combined.toString() + "\t";
+                            globals.log = globals.log + full;
+                            print('Shock Delivered');
+                            askForPulse = false;
+                            nested.show = false;
+                            showShock = false;
+                            fractionPulse = 0;
+                            progressPulseCheck = true;
+                            player.setVolume(1);
+                            playerB.setVolume(1);
+                            _speechThis('Continue Compressions');
+                          }),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                        )))
+              ],
             ),
           ),
         ],
       ),
     );
-
   }
 
   Future<String> popupEditor(String info, String current) async {
-      TextEditingController temp = TextEditingController();
-      temp.text = current;
-      temp.selection = TextSelection(baseOffset: 0, extentOffset: temp.text.length);
+    TextEditingController temp = TextEditingController();
+    temp.text = current;
+    temp.selection =
+        TextSelection(baseOffset: 0, extentOffset: temp.text.length);
 
-      String r;
+    String r;
 
-      var response = await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(info),
-              content: TextField(
-                controller: temp,
-                autofocus: true,
-                onEditingComplete: () => {
-                  Navigator.pop(context, temp.text),
-                },
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('done'),
-                  onPressed: () => {Navigator.pop(context, temp.text)},
-                )
-              ],
-            );}) ;
-      print('response: ' + response.toString());
-      if (response is String) {
-        print('response is a string');
-        r = response;
-      }
-      return r;
+    var response = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(info),
+            content: TextField(
+              controller: temp,
+              autofocus: true,
+              onEditingComplete: () => {
+                Navigator.pop(context, temp.text),
+              },
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('done'),
+                onPressed: () => {Navigator.pop(context, temp.text)},
+              )
+            ],
+          );
+        });
+    print('response: ' + response.toString());
+    if (response is String) {
+      print('response is a string');
+      r = response;
+    }
+    return r;
   }
 
   updateDrawer() {
-      print('updating drawer');
-      List<String> eventSplit = globals.log.split('\n');
-      timelineTiles = [];
-      for (int i = 0; i < eventSplit.length; i++) {
-        if (eventSplit[i] != '') {
-          bool first = false;
-          bool last = false;
-          bool dot = true;
-          IconData icon = Icons.arrow_downward;
-          double iconSize = 20;
-          double height = 50;
-          String rest = eventSplit[i];
+    print('updating drawer');
+    List<String> eventSplit = globals.log.split('\n');
+    timelineTiles = [];
+    for (int i = 0; i < eventSplit.length; i++) {
+      if (eventSplit[i] != '') {
+        bool first = false;
+        bool last = false;
+        bool dot = true;
+        IconData icon = Icons.arrow_downward;
+        double iconSize = 20;
+        double height = 50;
+        String rest = eventSplit[i];
 
-          if (i == 0) {
-            first = true;
+        if (i == 0) {
+          first = true;
+        }
+        if (i == eventSplit.length - 1) {
+          last = true;
+        }
+        for (String string in ['Pulse', 'Shock', 'Code']) {
+          if (eventSplit[i].contains(string)) {
+            icon = Icons.access_alarm;
+            iconSize = 40;
+            height = 120;
           }
-          if (i == eventSplit.length - 1) {
-            last = true;
+        }
+        for (String string in [
+          'Epinephrine Low',
+          'Epinephrine High',
+          'Vasopressin',
+          'Atropine',
+          'Amiodarone',
+          'Lidocaine',
+          'Naloxone',
+          'Flumazenil',
+          'Atipamezole'
+        ]) {
+          if (eventSplit[i].contains(string)) {
+            icon = Icons.medical_services;
           }
-          for (String string in ['Pulse', 'Shock', 'Code']) {
-            if (eventSplit[i].contains(string)) {
-              icon = Icons.access_alarm;
-              iconSize = 40;
-              height = 120;
-            }
+        }
+        for (String string in [
+          'IV Access',
+          'Monitor',
+          'Oxygen',
+          'Intubation',
+          'Capnography',
+        ]) {
+          if (eventSplit[i].contains(string)) {
+            icon = Icons.check;
           }
-          for (String string in [
-            'Epinephrine Low',
-            'Epinephrine High',
-            'Vasopressin',
-            'Atropine',
-            'Amiodarone',
-            'Lidocaine',
-            'Naloxone',
-            'Flumazenil',
-            'Atipamezole'
-          ]) {
-            if (eventSplit[i].contains(string)) {
-              icon = Icons.medical_services;
-            }
-          }
-          for (String string in [
-            'IV Access',
-            'Monitor',
-            'Oxygen',
-            'Intubation',
-            'Capnography',
-          ]) {
-            if (eventSplit[i].contains(string)) {
-              icon = Icons.check;
-            }
-          }
+        }
 
-
-          TimelineTile add = TimelineTile(
-            alignment: TimelineAlign.manual,
-            lineXY: 0.1,
-            startChild: Container(
-              height: height,
-            ),
-            endChild: Container(
-              color: Colors.white,
-              height: height,
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () async {
-
-                    print('tapped' + i.toString());
-                    String returned = await popupEditor("Edit event", rest);
-                    if (returned != null) {
-                      eventSplit[i] = returned;
-                      globals.log = eventSplit.join('\n');
-                      updateDrawer();
-                      setState(() { });
-                    }
-
-                },
-                child: Row(
-                  children: [
-                    Expanded(child: Text(rest) ),
-                  ],
-                ),
+        TimelineTile add = TimelineTile(
+          alignment: TimelineAlign.manual,
+          lineXY: 0.1,
+          startChild: Container(
+            height: height,
+          ),
+          endChild: Container(
+            color: Colors.white,
+            height: height,
+            alignment: Alignment.center,
+            child: GestureDetector(
+              onTap: () async {
+                print('tapped' + i.toString());
+                String returned = await popupEditor("Edit event", rest);
+                if (returned != null) {
+                  eventSplit[i] = returned;
+                  globals.log = eventSplit.join('\n');
+                  updateDrawer();
+                  setState(() {});
+                }
+              },
+              child: Row(
+                children: [
+                  Expanded(child: Text(rest)),
+                ],
               ),
             ),
-            isFirst: first,
-            isLast: last,
-            hasIndicator: dot,
-            indicatorStyle: IndicatorStyle(
-                width: iconSize,
-                color: Theme.of(context).splashColor,
-                padding: EdgeInsets.all(8),
-                iconStyle: IconStyle(
-                  iconData: icon,
-                  color: Colors.white,
-                )),
-          );
-          timelineTiles.add(add);
-        }
+          ),
+          isFirst: first,
+          isLast: last,
+          hasIndicator: dot,
+          indicatorStyle: IndicatorStyle(
+              width: iconSize,
+              color: Theme.of(context).splashColor,
+              padding: EdgeInsets.all(8),
+              iconStyle: IconStyle(
+                iconData: icon,
+                color: Colors.white,
+              )),
+        );
+        timelineTiles.add(add);
       }
+    }
   }
 
   Widget timerView() {
@@ -1453,11 +1425,11 @@ class MyHomePageState extends State<MyHomePage>
           child: IconButton(
               icon: Icon(FlutterIcons.hand_ent, color: Colors.lightBlue),
               onPressed: () => {
-                print('hand free'),
-                setState(() {
-                  handsFree = true;
-                }),
-              }),
+                    print('hand free'),
+                    setState(() {
+                      handsFree = true;
+                    }),
+                  }),
         ),
         Tooltip(
           preferBelow: false,
@@ -1465,18 +1437,18 @@ class MyHomePageState extends State<MyHomePage>
           child: IconButton(
               icon: Icon(FlutterIcons.note_add_mdi, color: Colors.lightBlue),
               onPressed: () => {
-                print('enter other data'),
-                setState(() {
-                  addEventString = 'Miscellaneous Event';
-                  addEventStringlog = '';
-                  eventKeyboard = TextInputType.text;
-                  enterCapno = true;
-                  // Future.delayed(Duration(seconds: 10), () {
-                  print('requesting focus');
-                  capnoNode.requestFocus();
-                  // });
-                }),
-              }),
+                    print('enter other data'),
+                    setState(() {
+                      addEventString = 'Miscellaneous Event';
+                      addEventStringlog = '';
+                      eventKeyboard = TextInputType.text;
+                      enterCapno = true;
+                      // Future.delayed(Duration(seconds: 10), () {
+                      print('requesting focus');
+                      capnoNode.requestFocus();
+                      // });
+                    }),
+                  }),
         ),
         Tooltip(
           preferBelow: false,
@@ -1488,12 +1460,12 @@ class MyHomePageState extends State<MyHomePage>
 
               child: FittedBox(
                   child: Text(
-                    'CO\u2082',
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )), //Icon(Chesttypes.co2_1, color: Colors.lightBlue),
+                'CO\u2082',
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+              )), //Icon(Chesttypes.co2_1, color: Colors.lightBlue),
             ),
             onPressed: () => {
               print('enter etco2 data'),
@@ -1513,8 +1485,9 @@ class MyHomePageState extends State<MyHomePage>
         ),
       ]);
     }
-    return
-    Expanded(
+
+    return Expanded(
+      flex: 100,
       child: Stack(
         children: [
           Center(
@@ -1542,47 +1515,47 @@ class MyHomePageState extends State<MyHomePage>
                           child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                Container(
-                                  height: 30,
+                            Container(
+                              height: 30,
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: FittedBox(
+                                fit: BoxFit.fitHeight,
+                                child: Container(
+                                  width: 1000,
+                                  child: Icon(
+                                    centerIcon,
+                                    color: barColor,
+                                  ),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: FittedBox(
-                                    fit: BoxFit.fitHeight,
-                                    child: Container(
-                                      width: 1000,
-                                      child: Icon(
-                                        centerIcon,
-                                        color: barColor,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: FittedBox(
+                                child: Column(
+                                  children: [
+                                    Text('pulse check in'),
+                                    Text(
+                                      '-' + pulseCheckCountdown,
+                                      textAlign: TextAlign.center,
+                                      key: GlobalObjectKey('timerCircle'),
+                                      style: new TextStyle(
+                                        fontSize: 40.0,
                                       ),
                                     ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: FittedBox(
-                                    child: Column(
-                                      children: [
-                                        Text('pulse check in'),
-                                        Text(
-                                          '-' + pulseCheckCountdown,
-                                          textAlign: TextAlign.center,
-                                          key: GlobalObjectKey('timerCircle'),
-                                          style: new TextStyle(
-                                            fontSize: 40.0,
-                                          ),
-                                        ),
-                                        Text(
-                                          'time elapsed ' + currentTime(),
-                                        ),
-                                      ],
+                                    Text(
+                                      'time elapsed ' + currentTime(),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                                Expanded(
-                                  child: Container(),
-                                )
-                              ])),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(),
+                            )
+                          ])),
                       backgroundColor: Colors.grey,
                       progressColor: barColor,
                     ),
@@ -1605,7 +1578,11 @@ class MyHomePageState extends State<MyHomePage>
                 onPressed: () => {toggleVoice()},
               ),
               Row(
-                children: [Expanded(child: Container(),)],
+                children: [
+                  Expanded(
+                    child: Container(),
+                  )
+                ],
               )
             ],
           ),
@@ -1623,7 +1600,8 @@ class MyHomePageState extends State<MyHomePage>
                   message: "Stop Code",
                   preferBelow: false,
                   child: IconButton(
-                    icon: Icon(FlutterIcons.cancel_mco, color: Colors.lightBlue),
+                    icon:
+                        Icon(FlutterIcons.cancel_mco, color: Colors.lightBlue),
                     onPressed: () => {_ensureStopCode()},
                   ),
                 ),
@@ -1631,8 +1609,8 @@ class MyHomePageState extends State<MyHomePage>
                   message: "Change Weight",
                   preferBelow: false,
                   child: IconButton(
-                    icon:
-                    Icon(FlutterIcons.dog_side_mco, color: Colors.lightBlue),
+                    icon: Icon(FlutterIcons.dog_side_mco,
+                        color: Colors.lightBlue),
                     onPressed: () => {
                       print('change weight'),
                       setState(() {
@@ -1641,7 +1619,8 @@ class MyHomePageState extends State<MyHomePage>
                         globals.chest = null;
                         print('reset weight ' + globals.weightKG.toString());
                         nestedKey.currentState.setState(() {
-                          nestedKey.currentState.nestedTabController.animateTo(1);
+                          nestedKey.currentState.nestedTabController
+                              .animateTo(1);
                         });
                       }),
                     },
@@ -1657,7 +1636,7 @@ class MyHomePageState extends State<MyHomePage>
                     ),
                     onPressed: () => {
                       setState(
-                            () {
+                        () {
                           askForPulse = true;
                         },
                       ),
@@ -1671,10 +1650,12 @@ class MyHomePageState extends State<MyHomePage>
             right: 0,
             top: 25,
             child: GestureDetector(
-              onTap: () => {
-                updateDrawer(),
-                setState((){}),
-                _scaffoldKey.currentState.openEndDrawer(),
+              onTap: ()  {
+                  if (_animationController.value == 0.0) {
+                    _animationController.forward();
+                  } else {
+                    _animationController.reverse();
+                  }
               },
               child: Container(
                 width: 50,
@@ -1697,349 +1678,211 @@ class MyHomePageState extends State<MyHomePage>
       ),
     );
   }
-  Widget toolView() {
 
-    var cP = Container(
-      color: Colors.black54,
-      child: Column(
-        children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: Container(
-              padding: EdgeInsets.all(15),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.all(5),
-                          child: Container(
-                            alignment: Alignment.center,
-                            child: AutoSizeText(
-                              'Check Pulse Now?',
-                              maxLines: 1,
-                              style: TextStyle(
-                                fontSize: 50,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ]),
-              ),
-            ),
-          ),
-          Flexible(
-            flex: 2,
-            child: Row(
-              children: <Widget>[
-                deferPulseButton(),
-                openPulseButton(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-    if (showShock) {
-      cP = deliverShockButton();
-    }
-    var pulseStack = <Widget>[
-      nested,
-      cP,
-    ];
-    var lowStack = <Widget>[nested];
+  AnimationController _animationController;
+  Animation _animation;
+  final medNames = <String>['Epinephrine Low ',
+    'Epinephrine High ',
+    'Vasopressin ',
+    'Atropine ',
+    'Amiodarone ',
+    'Lidocaine ',
+    'Naloxone ',
+    'Flumazenil ',
+    'Atipamezole ',];
 
-    var temp = lowStack;
-    if (nested.show != null) {
-      if (nested.show) {
-        askForPulse = true;
+  final otherOptions = <String>['CO2',
+  'Carbon Dioxide',
+  'Pulse Check',
+  'Shock Delivered'];
+
+  List<String> _kOptions = [];
+  final epilow = <String>['0.03', '0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5'];
+  final epihigh = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  final vaso = <String>['0.1', '0.2', '0.4', '0.6', '0.8', '1', '1.2', '1.4', '1.6', '1.8', '2'];
+  final atro = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  final amio = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  final lido = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  final nalo = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  final flum = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  final atip = <String>['0.03', '0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5'];
+
+  List<Widget> logTiles() {
+    List<Widget> toReturn = [];
+    List<String> retSplit = globals.log.split('\n');
+    List<Widget> minAgo = [];
+
+
+    retSplit.asMap().forEach((key, value) {
+      try {
+        final parsedTime = DateTime.parse(value.substring(0, value.indexOf(' ')));
+        final now = DateTime.now();
+        String min = now.difference(parsedTime).inMinutes.toStringAsFixed(0);
+        minAgo.add(Text(min + ' min ago'));
+      }catch(error){
+
+        minAgo.add(Container());
       }
-    }
-    if (askForPulse) {
-      handFreeColor = Theme.of(context).accentColor;
-      temp = pulseStack;
-      handsFreeWidget = Column(
-        children: [
-          Expanded(
-            child: FittedBox(
-              child: Text(
-                'New Cycle',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 200,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: FittedBox(
-              child: Icon(
-                Icons.touch_app_sharp,
-                color: Colors.white,
-                size: 200,
-              ),
-            ),
-          ),
-          Text('tap', style: TextStyle(color: Colors.white)),
-        ],
-      );
-    } else {
-      handFreeColor = Colors.white;//Theme.of(context).splashColor;
-      handsFreeWidget = Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(
-            child: Container(
-              child: AutoSizeText(
-                'HANDS FREE MODE',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 300,
-                  //color: Colors.white,
-                ),
-              ),
-              alignment: Alignment.center,
-            ),
-          ),
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                FittedBox(
-                  alignment: Alignment.center,
-                  child: Icon(
-                    FlutterIcons.hand_ent,
-                    size: 500,
-                    color: Colors.grey,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(),
-                    ),
-                    Container(
-                        height: 70,
-                        width: 70,
-                        decoration: BoxDecoration(
-                            color: Colors.lightBlue,
-                            borderRadius: BorderRadius.circular(15)),
-                        child: Stack(
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                    child: Center(
-                                      child: Stack(
-                                        children: [
-                                          Column(
-                                            children: [
-                                              Expanded(
-                                                child: Container(),
-                                              ),
-                                              Expanded(
-                                                child: FittedBox(
-                                                  child: Icon(
-                                                      FlutterIcons.clock_faw5,
-                                                      color: Colors.white),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Container(),
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            children: [
-                                              Expanded(
-                                                child: Container(),
-                                              ),
-                                              Expanded(
-                                                flex: 4,
-                                                child: FittedBox(
-                                                  child: Icon(
-                                                      FlutterIcons.undo_alt_faw5s,
-                                                      color: Colors.white),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Container(),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                              ],
-                            ),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => setState(() => {
-                                  addToLog(
-                                      'Timer reset in Hands-Free Mode'),
-                                  fractionPulse = 0,
-                                  updateCircle(),
-                                }), // handle your onTap here
-                                child: Container(),
-                              ),
-                            ),
-                          ],
-                        )),
-                    Container(
-                      width: 10,
-                    )
-                  ],
-                )
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-    if (handsFree) {
-      temp.add(Container(
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Column(
+
+      toReturn.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              flex: 2,
-              child: GestureDetector(
-                onTap: () => setState(() {
-                  if (askForPulse) {
-                    print('new cycle hands free');
-                    askForPulse = false;
-                    nested.show = false;
-                    progressPulseCheck = true;
-                    player.setVolume(1);
-                    playerB.setVolume(1);
-                    _speechThis('Restart Compressions');
-                  }
-                }),
-                child: Container(
-                  padding: EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: handFreeColor,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  alignment: Alignment.center,
-                  child: handsFreeWidget,
-                ),
-              ),
-            ),
-            Expanded(
-                flex: 1,
-                child: Container(
-                  child: Container(
-
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 2,
-                        ),
-                        color: Theme.of(context).splashColor,
-                        borderRadius: BorderRadius.all(Radius.circular(15))),
-                    child: TextButton(
-
-                      onPressed: () => {
-                        setState(() => {
-                          handsFree = false,
-                        })
-                      },
-
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: FittedBox(
-                              fit: BoxFit.fitHeight,
-                              child: Text(
-                                'Exit Hands Free',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 300,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                              child: FittedBox(
-                                child: Icon(
-                                  FlutterIcons.notes_medical_faw5s,
-                                  size: 300,
-                                  color: Colors.white,
-                                ),
-                              ))
-                        ],
-                      ),
-                    ),
-                  ),
-                ))
+            Text( cutDisplay(value) ),
+            minAgo[key]
           ],
-        ),
-      ));
-    }
+        )
+      );
+    });
+
+
+    return toReturn;
+  }
+  String cutDisplay(String value) {
+    String a = value.substring(value.indexOf('T') + 1, value.indexOf('.') - 3) ;
+    String b = value.substring(value.indexOf(' '));
+    return a + ' ' + b;
+  }
+  Widget toolView(BuildContext context) {
+
 
     return Expanded(
-      flex: 1,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Stack(
-          children: temp,
-        ),
+      flex: _animation.value,
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                  child: Stack(
+                children: [
+                  SingleChildScrollView(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children:
+                        logTiles()
+
+                    ),
+                  )),
+                ],
+              )),
+            ],
+          ),
+          Center(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(),
+                ),
+                ElevatedButton(
+                    child: Text('add'),
+                    onPressed: () {
+                      TextEditingController controller = TextEditingController();
+                      FocusNode focusHere = FocusNode();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Row(
+                              children: [
+                                Text("Setting String"),
+                                ElevatedButton(
+                                  child: Icon(Icons.add),
+                                  onPressed: () {
+                                    Navigator.pop(context, controller.text);
+                                  },
+                                )
+                              ],
+                            ),
+                            content:
+                            TypeAheadField(
+                              textFieldConfiguration: TextFieldConfiguration(
+                                  autofocus: true,
+                                  focusNode: focusHere,
+                                  controller: controller,
+                                  decoration: InputDecoration(
+                                      border: OutlineInputBorder()
+                                  )
+                              ),
+                              suggestionsCallback: (pattern) async {
+                                if (controller.text.toLowerCase().contains('epinephrine low')) {
+                                  return epilow.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('epinephrine high')) {
+                                  return epihigh.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('vasopressin')) {
+                                  return vaso.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('atropine')) {
+                                  return atro.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('amiodarone')) {
+                                  return amio.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('lidocaine')) {
+                                  return lido.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('naloxone')) {
+                                  return nalo.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('flumazenil')) {
+                                  return flum.map((e) => e + ' ml').toList();
+                                }else if (controller.text.toLowerCase().contains('atipamezole')) {
+                                  return atip.map((e) => e + ' ml').toList();
+                                }
+
+
+                                return _kOptions.where((element) =>  element.toLowerCase().contains(pattern) );
+                              },
+                              itemBuilder: (context, suggestion) {
+                                return ListTile(
+                                  leading: medNames.contains(suggestion) ? Icon(Icons.medical_services) : Icon(Icons.warning),
+                                  title: Text(suggestion),
+                                  );
+                              },
+                              transitionBuilder: (context, suggestionsBox, controller) {
+                                return suggestionsBox;
+                              },
+                              keepSuggestionsOnSuggestionSelected: true,
+
+                              onSuggestionSelected: (suggestion) {
+                                String old = '';
+                                _kOptions.forEach((element) {
+                                  if (controller.text.toLowerCase().contains(element.toLowerCase())) {
+                                    old = controller.text;
+                                  }
+                                });
+                                controller.text = old + suggestion;
+                                print(suggestion);
+                                focusHere.requestFocus();
+                                controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+                              },
+                            ),
+
+
+                          );
+                        },
+                      ).then((val) {
+                        setState(() {
+                          globals.log = globals.log + '\n' + getTime() + ' ' + val;
+                        });
+                      });
+                    }),
+              ],
+            ),
+          ),
+
+        ],
       ),
     );
+
   }
-  @override
-  Widget build(BuildContext context) {
+  String getTime() {
+    String d = DateTime.now().toIso8601String();
+    return d;//.substring(d.indexOf('T') + 1, d.lastIndexOf(':') );
+  }
 
-    if (globals.reset) {
-      print("reseting now");
-      DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd_kk-mm').format(now);
-      globals.log = formattedDate + "\tCode Started\t00:00";
-      minPassed = 0;
-      secPassed = 0;
-      dispSec = 0;
-      fraction = 0;
-      fractionPulse = 0;
-      askForPulse = false;
-      globals.reset = false;
-      progressPulseCheck = true;
-      player.setVolume(1);
-      playerB.setVolume(1);
+  Widget warning() {
+    if (warningDismissed || kIsWeb) {
+      return Container();
     }
-
-
-
-    Widget full;
-    if (MediaQuery.of(context).size.width > MediaQuery.of(context).size.height ) {
-      full = Row(children: <Widget>[
-        timerView(),
-        Divider(),
-        toolView(),
-      ]);
-    }else{
-      full = Column(children: <Widget>[
-        timerView(),
-        Divider(),
-        toolView(),
-      ]);
-    }
-
-    var warning = Column(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Expanded(
@@ -2147,101 +1990,38 @@ class MyHomePageState extends State<MyHomePage>
         ),
       ],
     );
+  }
 
-    Widget units() {
-      if (addEventString.contains('CO2')) {
-        return Column(
-          children: [
-            Container(
-              height: 20,
-            ),
-            Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  '   mmHg',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
-        );
-      }
-
-      return Container();
+  Widget mainScreen(BuildContext context) {
+    if (MediaQuery.of(context).size.width >
+        MediaQuery.of(context).size.height) {
+      return Row(children: <Widget>[
+        timerView(),
+        toolView(context),
+      ]);
     }
+    return Column(children: <Widget>[
+      timerView(),
+      toolView(context),
+    ]);
+  }
 
-    Widget enterCapnographyData() {
-      if (enterCapno) {
-        return GestureDetector(
-          onTap: () => {
-            setState(() => {
-                  enterCapno = false,
-                })
-          },
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(30),
-                  color: Colors.black38,
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: 100,
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            textAlign: TextAlign.right,
-                            focusNode: capnoNode,
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context).accentColor,
-                                      width: 1.0),
-                                ),
-                                labelText: addEventString,
-                                labelStyle: TextStyle(
-                                    color: Theme.of(context).accentColor)),
-                            controller: capnoController,
-                            keyboardType: eventKeyboard,
-                            onEditingComplete: () => {
-                              addCapnoToLog(),
-                              setState(() => {
-                                    enterCapno = false,
-                                  }),
-                            },
-                          ),
-                        ),
-                        units()
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  color: Colors.black38,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
+  @override
+  Widget build(BuildContext context) {
+    if (globals.reset) {
+      print("reseting now");
 
-      return Container();
-    }
-
-    var fullStack = <Widget>[full, enterCapnographyData()];
-    if (!warningDismissed) {
-      fullStack = <Widget>[full, warning];
+      globals.log = getTime() + " Code Started";
+      minPassed = 0;
+      secPassed = 0;
+      dispSec = 0;
+      fraction = 0;
+      fractionPulse = 0;
+      askForPulse = false;
+      globals.reset = false;
+      progressPulseCheck = true;
+      player.setVolume(1);
+      playerB.setVolume(1);
     }
 
     Scaffold s = Scaffold(
@@ -2326,10 +2106,9 @@ class MyHomePageState extends State<MyHomePage>
         ),
       ),
       body: Stack(
-        children: fullStack,
+        children: [mainScreen(context), warning()],
       ),
     );
     return s;
   }
 }
-
