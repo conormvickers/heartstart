@@ -160,11 +160,7 @@ class MyHomePageState extends State<MyHomePage>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     super.initState();
-    _kOptions = <String>[
-      ...medNames,
-      ...otherOptions
-
-    ];
+    _kOptions = <String>[...medNames, ...otherOptions];
 
     _animationController =
         AnimationController(duration: Duration(milliseconds: 300), vsync: this);
@@ -177,7 +173,6 @@ class MyHomePageState extends State<MyHomePage>
     );
 
     globals.log = getTime() + " Code Started";
-
 
     minPassed = 0;
     secPassed = 0;
@@ -250,7 +245,6 @@ class MyHomePageState extends State<MyHomePage>
     enterCapno = false;
     player.setVolume(1);
     playerB.setVolume(1);
-
 
     if (resetlog) {
       nestedKey.currentState.resetEverything();
@@ -605,6 +599,9 @@ class MyHomePageState extends State<MyHomePage>
     await player.setLoopMode(LoopMode.one);
     await playerB.setLoopMode(LoopMode.one);
 
+    if (kIsWeb) {
+      return;
+    }
     var duration = await player.setAsset('assets/longmp.mp3');
     player.play();
 
@@ -1650,12 +1647,12 @@ class MyHomePageState extends State<MyHomePage>
             right: 0,
             top: 25,
             child: GestureDetector(
-              onTap: ()  {
-                  if (_animationController.value == 0.0) {
-                    _animationController.forward();
-                  } else {
-                    _animationController.reverse();
-                  }
+              onTap: () {
+                if (_animationController.value == 0.0) {
+                  _animationController.forward();
+                } else {
+                  _animationController.reverse();
+                }
               },
               child: Container(
                 width: 50,
@@ -1681,7 +1678,8 @@ class MyHomePageState extends State<MyHomePage>
 
   AnimationController _animationController;
   Animation _animation;
-  final medNames = <String>['Epinephrine Low ',
+  final medNames = <String>[
+    'Epinephrine Low ',
     'Epinephrine High ',
     'Vasopressin ',
     'Atropine ',
@@ -1689,63 +1687,167 @@ class MyHomePageState extends State<MyHomePage>
     'Lidocaine ',
     'Naloxone ',
     'Flumazenil ',
-    'Atipamezole ',];
+    'Atipamezole ',
+  ];
 
-  final otherOptions = <String>['CO2',
-  'Carbon Dioxide',
-  'Pulse Check',
-  'Shock Delivered'];
+  final otherOptions = <String>[
+    'CO2',
+    'Carbon Dioxide',
+    'Pulse Check',
+    'Shock Delivered'
+  ];
 
   List<String> _kOptions = [];
-  final epilow = <String>['0.03', '0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5'];
-  final epihigh = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
-  final vaso = <String>['0.1', '0.2', '0.4', '0.6', '0.8', '1', '1.2', '1.4', '1.6', '1.8', '2'];
-  final atro = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
-  final amio = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
-  final lido = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
-  final nalo = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
-  final flum = <String>['0.25', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
-  final atip = <String>['0.03', '0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5'];
+  final epilow = <String>[
+    '0.03',
+    '0.05',
+    '0.1',
+    '0.15',
+    '0.2',
+    '0.25',
+    '0.3',
+    '0.35',
+    '0.4',
+    '0.45',
+    '0.5'
+  ];
+  final epihigh = <String>[
+    '0.25',
+    '0.5',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '3.5',
+    '4',
+    '4.5',
+    '5'
+  ];
+  final vaso = <String>[
+    '0.1',
+    '0.2',
+    '0.4',
+    '0.6',
+    '0.8',
+    '1',
+    '1.2',
+    '1.4',
+    '1.6',
+    '1.8',
+    '2'
+  ];
+  final atro = <String>[
+    '0.25',
+    '0.5',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '3.5',
+    '4',
+    '4.5',
+    '5'
+  ];
+  final amio = <String>[
+    '0.25',
+    '0.5',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '3.5',
+    '4',
+    '4.5',
+    '5'
+  ];
+  final lido = <String>[
+    '0.25',
+    '0.5',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '3.5',
+    '4',
+    '4.5',
+    '5'
+  ];
+  final nalo = <String>[
+    '0.25',
+    '0.5',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '3.5',
+    '4',
+    '4.5',
+    '5'
+  ];
+  final flum = <String>[
+    '0.25',
+    '0.5',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '3.5',
+    '4',
+    '4.5',
+    '5'
+  ];
+  final atip = <String>[
+    '0.03',
+    '0.05',
+    '0.1',
+    '0.15',
+    '0.2',
+    '0.25',
+    '0.3',
+    '0.35',
+    '0.4',
+    '0.45',
+    '0.5'
+  ];
 
   List<Widget> logTiles() {
     List<Widget> toReturn = [];
     List<String> retSplit = globals.log.split('\n');
     List<Widget> minAgo = [];
 
-
     retSplit.asMap().forEach((key, value) {
       try {
-        final parsedTime = DateTime.parse(value.substring(0, value.indexOf(' ')));
+        final parsedTime =
+            DateTime.parse(value.substring(0, value.indexOf(' ')));
         final now = DateTime.now();
         String min = now.difference(parsedTime).inMinutes.toStringAsFixed(0);
         minAgo.add(Text(min + ' min ago'));
-      }catch(error){
-
+      } catch (error) {
         minAgo.add(Container());
       }
 
-      toReturn.add(
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text( cutDisplay(value) ),
-            minAgo[key]
-          ],
-        )
-      );
+      toReturn.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text(cutDisplay(value)), minAgo[key]],
+      ));
     });
-
 
     return toReturn;
   }
+
   String cutDisplay(String value) {
-    String a = value.substring(value.indexOf('T') + 1, value.indexOf('.') - 3) ;
+    String a = value.substring(value.indexOf('T') + 1, value.indexOf('.') - 3);
     String b = value.substring(value.indexOf(' '));
     return a + ' ' + b;
   }
+
   Widget toolView(BuildContext context) {
-
-
     return Expanded(
       flex: _animation.value,
       child: Stack(
@@ -1760,11 +1862,7 @@ class MyHomePageState extends State<MyHomePage>
                   SingleChildScrollView(
                       child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children:
-                        logTiles()
-
-                    ),
+                    child: Column(children: logTiles()),
                   )),
                 ],
               )),
@@ -1779,103 +1877,173 @@ class MyHomePageState extends State<MyHomePage>
                 ElevatedButton(
                     child: Text('add'),
                     onPressed: () {
-                      TextEditingController controller = TextEditingController();
+                      TextEditingController controller =
+                          TextEditingController();
                       FocusNode focusHere = FocusNode();
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Row(
+                          return Dialog(
+                            // insetPadding: EdgeInsets.all(10),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("Setting String"),
-                                ElevatedButton(
-                                  child: Icon(Icons.add),
-                                  onPressed: () {
-                                    Navigator.pop(context, controller.text);
-                                  },
-                                )
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                        icon: Icon(Icons.mediation),
+                                        onPressed: null),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      constraints: BoxConstraints(
+                                          maxWidth: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              2),
+                                      child: TypeAheadField(
+                                        textFieldConfiguration:
+                                            TextFieldConfiguration(
+                                                autofocus: true,
+                                                focusNode: focusHere,
+                                                controller: controller,
+                                                decoration: InputDecoration(
+                                                    border:
+                                                        OutlineInputBorder())),
+                                        suggestionsCallback: (pattern) async {
+                                          if (controller.text
+                                              .toLowerCase()
+                                              .contains('epinephrine low')) {
+                                            return epilow
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('epinephrine high')) {
+                                            return epihigh
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('vasopressin')) {
+                                            return vaso
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('atropine')) {
+                                            return atro
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('amiodarone')) {
+                                            return amio
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('lidocaine')) {
+                                            return lido
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('naloxone')) {
+                                            return nalo
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('flumazenil')) {
+                                            return flum
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          } else if (controller.text
+                                              .toLowerCase()
+                                              .contains('atipamezole')) {
+                                            return atip
+                                                .map((e) => e + ' ml')
+                                                .toList();
+                                          }
+
+                                          return _kOptions.where((element) =>
+                                              element.toLowerCase().contains(
+                                                  pattern.toLowerCase()));
+                                        },
+                                        itemBuilder: (context, suggestion) {
+                                          return ListTile(
+                                            leading: medNames
+                                                    .contains(suggestion)
+                                                ? Icon(Icons.medical_services)
+                                                : Icon(Icons.warning),
+                                            title: Text(suggestion),
+                                          );
+                                        },
+                                        transitionBuilder: (context,
+                                            suggestionsBox, controller) {
+                                          return suggestionsBox;
+                                        },
+                                        keepSuggestionsOnSuggestionSelected:
+                                            true,
+                                        onSuggestionSelected: (suggestion) {
+                                          String old = '';
+                                          _kOptions.forEach((element) {
+                                            if (controller.text
+                                                .toLowerCase()
+                                                .contains(
+                                                    element.toLowerCase())) {
+                                              old = controller.text;
+                                            }
+                                          });
+                                          controller.text = old + suggestion;
+                                          print(suggestion);
+                                          focusHere.requestFocus();
+                                          controller.selection =
+                                              TextSelection.fromPosition(
+                                                  TextPosition(
+                                                      offset: controller
+                                                          .text.length));
+                                        },
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      child: Icon(Icons.add),
+                                      onPressed: () {
+                                        Navigator.pop(context, controller.text);
+                                      },
+                                    )
+                                  ],
+                                ),
                               ],
                             ),
-                            content:
-                            TypeAheadField(
-                              textFieldConfiguration: TextFieldConfiguration(
-                                  autofocus: true,
-                                  focusNode: focusHere,
-                                  controller: controller,
-                                  decoration: InputDecoration(
-                                      border: OutlineInputBorder()
-                                  )
-                              ),
-                              suggestionsCallback: (pattern) async {
-                                if (controller.text.toLowerCase().contains('epinephrine low')) {
-                                  return epilow.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('epinephrine high')) {
-                                  return epihigh.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('vasopressin')) {
-                                  return vaso.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('atropine')) {
-                                  return atro.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('amiodarone')) {
-                                  return amio.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('lidocaine')) {
-                                  return lido.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('naloxone')) {
-                                  return nalo.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('flumazenil')) {
-                                  return flum.map((e) => e + ' ml').toList();
-                                }else if (controller.text.toLowerCase().contains('atipamezole')) {
-                                  return atip.map((e) => e + ' ml').toList();
-                                }
-
-
-                                return _kOptions.where((element) =>  element.toLowerCase().contains(pattern) );
-                              },
-                              itemBuilder: (context, suggestion) {
-                                return ListTile(
-                                  leading: medNames.contains(suggestion) ? Icon(Icons.medical_services) : Icon(Icons.warning),
-                                  title: Text(suggestion),
-                                  );
-                              },
-                              transitionBuilder: (context, suggestionsBox, controller) {
-                                return suggestionsBox;
-                              },
-                              keepSuggestionsOnSuggestionSelected: true,
-
-                              onSuggestionSelected: (suggestion) {
-                                String old = '';
-                                _kOptions.forEach((element) {
-                                  if (controller.text.toLowerCase().contains(element.toLowerCase())) {
-                                    old = controller.text;
-                                  }
-                                });
-                                controller.text = old + suggestion;
-                                print(suggestion);
-                                focusHere.requestFocus();
-                                controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-                              },
-                            ),
-
-
                           );
                         },
                       ).then((val) {
                         setState(() {
-                          globals.log = globals.log + '\n' + getTime() + ' ' + val;
+                          if (val == null) {
+                            return;
+                          }
+                          globals.log =
+                              globals.log + '\n' + getTime() + ' ' + val;
                         });
                       });
                     }),
               ],
             ),
           ),
-
         ],
       ),
     );
-
   }
+
   String getTime() {
     String d = DateTime.now().toIso8601String();
-    return d;//.substring(d.indexOf('T') + 1, d.lastIndexOf(':') );
+    return d; //.substring(d.indexOf('T') + 1, d.lastIndexOf(':') );
   }
 
   Widget warning() {

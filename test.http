@@ -1,2 +1,2 @@
-GET https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=https://laminarmedical.web.app&client_id=9c6c905c-aeaa-455f-862b-31823042bb2d
+GET https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=https://laminarmedical.web.app&client_id=2352b7cf-24ce-437e-9bce-e7fc2d68c85e
 
