@@ -1902,52 +1902,63 @@ class MyHomePageState extends State<MyHomePage>
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          IconButton(
-                                              tooltip: 'Medications',
-                                              icon: Container(
-                                                width: 50,
-                                                height: 50,
-                                                child: FittedBox(
-                                                  child: Icon(
-                                                    FlutterIcons.pill_mco,
+                                          Expanded(
+                                            child: Column(
+                                              children: [
+                                                Expanded(
+                                                  child: FittedBox(
+                                                    child: IconButton(
+                                                        tooltip: 'Medications',
+                                                        icon: Icon(
+                                                          FlutterIcons.pill_mco,
 
+                                                        ),
+                                                        onPressed: () {
+                                                          pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                        }),
                                                   ),
                                                 ),
-                                              ),
-                                              onPressed: () {
-                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-                                              }),
-                                          IconButton(
-                                              tooltip: 'Pulse Check',
-                                              icon: Container(
-                                                width: 50,
-                                                height: 50,
-                                                child: FittedBox(
-                                                  child: Icon(
-                                                    FlutterIcons.pulse_mco,
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: IconButton(
+                                                tooltip: 'Pulse Check',
+                                                icon: Container(
+                                                  width: 50,
+                                                  height: 50,
+                                                  child: FittedBox(
+                                                    child: Icon(
+                                                      FlutterIcons.pulse_mco,
 
 
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              onPressed: () {
-                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-                                              }),
-                                          IconButton(
-                                              tooltip: 'Patient Info',
-                                              icon: Container(
-                                                width: 50,
-                                                height: 50,
-                                                child: FittedBox(
-                                                  child: Icon(
-                                                    FlutterIcons.dog_faw5s,
-                                                    size: 40,
+                                                onPressed: () {
+                                                  pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                }),
+                                          ),
+                                          Expanded(
+                                            child: IconButton(
+                                                tooltip: 'Pulse Check',
+                                                icon: Container(
+                                                  width: 50,
+                                                  height: 50,
+                                                  child: FittedBox(
+                                                    child: Icon(
+                                                      FlutterIcons.pulse_mco,
+
+
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              onPressed: () {
-                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-                                              }),
+                                                onPressed: () {
+                                                  pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                }),
+                                          )
+
+
                                         ],
                                       ),
                                       Stack(
