@@ -246,6 +246,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   resetEverything([bool resetlog = true]) {
+    return;
     handsFree = true;
     fraction = 0;
     minPassed = 0;
@@ -256,26 +257,26 @@ class MyHomePageState extends State<MyHomePage>
     player.setVolume(1);
     playerB.setVolume(1);
 
-    if (resetlog) {
-      nestedKey.currentState.resetEverything();
-      globals.log = getTime() + " Code Started";
-
-      globals.info = [
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-      ];
-      globals.chest = null;
-      globals.weightKG = null;
-    }
+    // if (resetlog) {
+    //   nestedKey.currentState.resetEverything();
+    //   globals.log = getTime() + " Code Started";
+    //
+    //   globals.info = [
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //     '',
+    //   ];
+    //   globals.chest = null;
+    //   globals.weightKG = null;
+    // }
     loadPreferences();
 
     centerIcon = FlutterIcons.heart_ant;
@@ -1093,6 +1094,284 @@ class MyHomePageState extends State<MyHomePage>
       ),
     );
   }
+  Widget pulseOptions() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+      child: ListView(
+        children: [
+          Column(
+            children: <Widget>[
+              ListTile(
+                title: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).accentColor,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  height: 100,
+                  child: AutoSizeText(
+                    'GOT A PULSE',
+                    style: TextStyle(
+                      fontSize: 40,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  alignment: Alignment.center,
+                ),
+                onTap: () => {_selectedPulse('pulse')},
+              ),
+              ListTile(
+                title: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    height: 100,
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: Container(),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                              top: BorderSide(
+                                                  width: 2,
+                                                  color: Colors.white)),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: Container(
+                                    width: 1000,
+                                    alignment: Alignment.center,
+                                    child: AutoSizeText(
+                                      'Asystole - no shock',
+                                      style: TextStyle(
+                                          fontSize: 40, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+                onTap: () => {_selectedPulse('asystole')},
+              ),
+              ListTile(
+                title: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    height: 100,
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: Container(
+                                  width: 1000,
+                                  child: ShaderMask(
+                                    child: Image.asset(
+                                      ('assets/pea.png'),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    shaderCallback: (Rect bounds) {
+                                      return LinearGradient(
+                                        colors: [Colors.white, Colors.white],
+                                        stops: [0.0, 0.0],
+                                      ).createShader(bounds);
+                                    },
+                                    blendMode: BlendMode.srcATop,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: Container(
+                                    width: 1000,
+                                    alignment: Alignment.center,
+                                    child: AutoSizeText(
+                                      'PEA - no shock',
+                                      style: TextStyle(
+                                          fontSize: 40, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+                onTap: () => {_selectedPulse('pea')},
+              ),
+              ListTile(
+                title: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    height: 100,
+                    child: Row(
+                      children: <Widget>[
+                        Flexible(
+                            flex: 1,
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                FontAwesome.bolt,
+                                size: 50,
+                                color: Theme.of(context).splashColor,
+                              ),
+                            )),
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: Container(
+                                  width: 1000,
+                                  child: ShaderMask(
+                                    child: Image.asset(
+                                      ('assets/vfib.png'),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    shaderCallback: (Rect bounds) {
+                                      return LinearGradient(
+                                        colors: [Colors.white, Colors.white],
+                                        stops: [0.0, 0.0],
+                                      ).createShader(bounds);
+                                    },
+                                    blendMode: BlendMode.srcATop,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: AutoSizeText(
+                                  'Ventricular Fibrillation',
+                                  style: TextStyle(
+                                      fontSize: 40, color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                            flex: 1,
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                FontAwesome.bolt,
+                                size: 50,
+                                color: Theme.of(context).splashColor,
+                              ),
+                            )),
+                      ],
+                    )),
+                onTap: () => {_selectedPulse('vfib')},
+              ),
+              ListTile(
+                title: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    height: 100,
+                    child: Row(
+                      children: <Widget>[
+                        Flexible(
+                            flex: 1,
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                FontAwesome.bolt,
+                                size: 50,
+                                color: Theme.of(context).splashColor,
+                              ),
+                            )),
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: Container(
+                                  width: 1000,
+                                  child: ShaderMask(
+                                    child: Image.asset(
+                                      ('assets/vtach.png'),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    shaderCallback: (Rect bounds) {
+                                      return LinearGradient(
+                                        colors: [Colors.white, Colors.white],
+                                        stops: [0.0, 0.0],
+                                      ).createShader(bounds);
+                                    },
+                                    blendMode: BlendMode.srcATop,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: AutoSizeText(
+                                  'Pulseless Ventricular Tachycardia',
+                                  style: TextStyle(
+                                      fontSize: 40, color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                            flex: 1,
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                FontAwesome.bolt,
+                                size: 50,
+                                color: Theme.of(context).splashColor,
+                              ),
+                            )),
+                      ],
+                    )),
+                onTap: () => {_selectedPulse('vtach')},
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget openPulseButton() {
     return Expanded(
@@ -1854,6 +2133,8 @@ class MyHomePageState extends State<MyHomePage>
 
         ],
       );
+    }else if (selected == 'pulse') {
+      return pulseOptions();
     }
     return Container();
   }

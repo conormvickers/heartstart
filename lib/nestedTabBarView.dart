@@ -2400,7 +2400,6 @@ class PageTwoState extends State<PageTwo>  {
   Widget build(BuildContext context) {
     print('build starting');
     if (kIsWeb) {print('on web-----');
-
       return Scaffold(
             resizeToAvoidBottomInset: true,
             key: _scaffoldKey,
