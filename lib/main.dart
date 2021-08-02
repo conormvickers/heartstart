@@ -170,7 +170,17 @@ class MyHomePageState extends State<MyHomePage>
     WidgetsBinding.instance.addObserver(this);
     super.initState();
     _kOptions = <String>[...medNames, ...otherOptions];
-    medDoses = [epilow, epihigh, vaso, atro, amio, lido, nalo, flum, atip,];
+    medDoses = [
+      epilow,
+      epihigh,
+      vaso,
+      atro,
+      amio,
+      lido,
+      nalo,
+      flum,
+      atip,
+    ];
 
     _animationController =
         AnimationController(duration: Duration(milliseconds: 300), vsync: this);
@@ -917,18 +927,9 @@ class MyHomePageState extends State<MyHomePage>
                                   flex: 4,
                                   child: Container(
                                     width: 1000,
-                                    child: ShaderMask(
-                                      child: Image.asset(
-                                        ('assets/pea.png'),
-                                        fit: BoxFit.fill,
-                                      ),
-                                      shaderCallback: (Rect bounds) {
-                                        return LinearGradient(
-                                          colors: [Colors.white, Colors.white],
-                                          stops: [0.0, 0.0],
-                                        ).createShader(bounds);
-                                      },
-                                      blendMode: BlendMode.srcATop,
+                                    child: Image.asset(
+                                      ('assets/pea.png'),
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                 ),
@@ -981,18 +982,9 @@ class MyHomePageState extends State<MyHomePage>
                                   flex: 4,
                                   child: Container(
                                     width: 1000,
-                                    child: ShaderMask(
-                                      child: Image.asset(
-                                        ('assets/vfib.png'),
-                                        fit: BoxFit.fill,
-                                      ),
-                                      shaderCallback: (Rect bounds) {
-                                        return LinearGradient(
-                                          colors: [Colors.white, Colors.white],
-                                          stops: [0.0, 0.0],
-                                        ).createShader(bounds);
-                                      },
-                                      blendMode: BlendMode.srcATop,
+                                    child: Image.asset(
+                                      ('assets/vfib.png'),
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                 ),
@@ -1048,18 +1040,9 @@ class MyHomePageState extends State<MyHomePage>
                                   flex: 4,
                                   child: Container(
                                     width: 1000,
-                                    child: ShaderMask(
-                                      child: Image.asset(
-                                        ('assets/vtach.png'),
-                                        fit: BoxFit.fill,
-                                      ),
-                                      shaderCallback: (Rect bounds) {
-                                        return LinearGradient(
-                                          colors: [Colors.white, Colors.white],
-                                          stops: [0.0, 0.0],
-                                        ).createShader(bounds);
-                                      },
-                                      blendMode: BlendMode.srcATop,
+                                    child: Image.asset(
+                                      ('assets/vtach.png'),
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                 ),
@@ -1094,7 +1077,8 @@ class MyHomePageState extends State<MyHomePage>
       ),
     );
   }
-  Widget pulseOptions() {
+
+  Widget pulseOptions(TextEditingController controller) {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white,
@@ -1121,7 +1105,9 @@ class MyHomePageState extends State<MyHomePage>
                   ),
                   alignment: Alignment.center,
                 ),
-                onTap: () => {_selectedPulse('pulse')},
+                onTap: () {
+                  controller.text = 'Got Pulse';
+                },
               ),
               ListTile(
                 title: Container(
@@ -1176,7 +1162,9 @@ class MyHomePageState extends State<MyHomePage>
                         ),
                       ],
                     )),
-                onTap: () => {_selectedPulse('asystole')},
+                onTap: () {
+                  controller.text = 'Asystole';
+                },
               ),
               ListTile(
                 title: Container(
@@ -1196,18 +1184,9 @@ class MyHomePageState extends State<MyHomePage>
                                 flex: 4,
                                 child: Container(
                                   width: 1000,
-                                  child: ShaderMask(
-                                    child: Image.asset(
-                                      ('assets/pea.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                    shaderCallback: (Rect bounds) {
-                                      return LinearGradient(
-                                        colors: [Colors.white, Colors.white],
-                                        stops: [0.0, 0.0],
-                                      ).createShader(bounds);
-                                    },
-                                    blendMode: BlendMode.srcATop,
+                                  child: Image.asset(
+                                    (kIsWeb ? 'pea.png' : 'assets/pea.png'),
+                                    fit: BoxFit.fill,
                                   ),
                                 ),
                               ),
@@ -1217,7 +1196,7 @@ class MyHomePageState extends State<MyHomePage>
                                   child: Container(
                                     width: 1000,
                                     alignment: Alignment.center,
-                                    child: AutoSizeText(
+                                    child: Text(
                                       'PEA - no shock',
                                       style: TextStyle(
                                           fontSize: 40, color: Colors.white),
@@ -1230,7 +1209,9 @@ class MyHomePageState extends State<MyHomePage>
                         ),
                       ],
                     )),
-                onTap: () => {_selectedPulse('pea')},
+                onTap: () {
+                  controller.text = 'PEA';
+                },
               ),
               ListTile(
                 title: Container(
@@ -1260,18 +1241,9 @@ class MyHomePageState extends State<MyHomePage>
                                 flex: 4,
                                 child: Container(
                                   width: 1000,
-                                  child: ShaderMask(
-                                    child: Image.asset(
-                                      ('assets/vfib.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                    shaderCallback: (Rect bounds) {
-                                      return LinearGradient(
-                                        colors: [Colors.white, Colors.white],
-                                        stops: [0.0, 0.0],
-                                      ).createShader(bounds);
-                                    },
-                                    blendMode: BlendMode.srcATop,
+                                  child: Image.asset(
+                                    (kIsWeb ? 'vfib.png' : 'assets/vfib.png'),
+                                    fit: BoxFit.fill,
                                   ),
                                 ),
                               ),
@@ -1297,7 +1269,7 @@ class MyHomePageState extends State<MyHomePage>
                             )),
                       ],
                     )),
-                onTap: () => {_selectedPulse('vfib')},
+                onTap: () => {controller.text = 'V Fib'},
               ),
               ListTile(
                 title: Container(
@@ -1327,18 +1299,9 @@ class MyHomePageState extends State<MyHomePage>
                                 flex: 4,
                                 child: Container(
                                   width: 1000,
-                                  child: ShaderMask(
-                                    child: Image.asset(
-                                      ('assets/vtach.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                    shaderCallback: (Rect bounds) {
-                                      return LinearGradient(
-                                        colors: [Colors.white, Colors.white],
-                                        stops: [0.0, 0.0],
-                                      ).createShader(bounds);
-                                    },
-                                    blendMode: BlendMode.srcATop,
+                                  child: Image.asset(
+                                    (kIsWeb ? 'vtach.png' : 'assets/vtach.png'),
+                                    fit: BoxFit.fill,
                                   ),
                                 ),
                               ),
@@ -1364,7 +1327,9 @@ class MyHomePageState extends State<MyHomePage>
                             )),
                       ],
                     )),
-                onTap: () => {_selectedPulse('vtach')},
+                onTap: () {
+                  controller.text = 'Pulseless V Tach';
+                },
               ),
             ],
           ),
@@ -1703,7 +1668,6 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   Widget timerView() {
-
     return Expanded(
       flex: 100,
       child: Stack(
@@ -1804,7 +1768,6 @@ class MyHomePageState extends State<MyHomePage>
               )
             ],
           ),
-
           Positioned(
             right: 0,
             bottom: 40,
@@ -1819,7 +1782,6 @@ class MyHomePageState extends State<MyHomePage>
                     onPressed: () => {_ensureStopCode()},
                   ),
                 ),
-
                 Tooltip(
                   message: "Check Pulse",
                   preferBelow: false,
@@ -2068,73 +2030,100 @@ class MyHomePageState extends State<MyHomePage>
       return Stack(
         children: [
           SingleChildScrollView(
-            child: Row(
-              children: [
-                Column(children: [
-                  Container(height: 40,),
-                  ...medNames.map((e) => Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1)
-                  ),
+              child: Row(
+            children: [
+              Column(
+                children: [
+                  Container(
                     height: 40,
-                    width: 150,
-                    child: Center(child: Text(e)))).toList(),
+                  ),
+                  ...medNames
+                      .map((e) => Container(
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey, width: 1)),
+                          height: 40,
+                          width: 150,
+                          child: Center(child: Text(e))))
+                      .toList(),
                 ],
-                ),
-                Expanded(
-                  child: Container(
-                    child: SingleChildScrollView(
-                      controller: _letters,
-                      scrollDirection: Axis.horizontal,
-                      child: Column(children:
-                      [ Container(height: 40,),
-                      ...medDoses.map((e) => Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey, width: 1)
+              ),
+              Expanded(
+                child: Container(
+                  child: SingleChildScrollView(
+                    controller: _letters,
+                    scrollDirection: Axis.horizontal,
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 40,
                         ),
-                        child: Row(
-                          children: e.map((f) => Container(
-                            height: 40,
-                              width: 60,
-                              child: Center(child: TextButton(
-                                  onPressed: () {
-                                    controller.text = _kOptions[medDoses.indexOf(e)] + ' ' + f + 'mL';
-
-                                  },
-                                  child: Text(f))))).toList(),),
-                      ), ).toList(),],),
+                        ...medDoses
+                            .map(
+                              (e) => Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.grey, width: 1)),
+                                child: Row(
+                                  children: e
+                                      .map((f) => Container(
+                                          height: 40,
+                                          width: 60,
+                                          child: Center(
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    controller.text = _kOptions[
+                                                            medDoses
+                                                                .indexOf(e)] +
+                                                        ' ' +
+                                                        f +
+                                                        'mL';
+                                                  },
+                                                  child: Text(f)))))
+                                      .toList(),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            )
-          ),
+              ),
+            ],
+          )),
           Row(
             children: [
-              Container(width: 150, height: 40, color: Colors.white,),
+              Container(
+                width: 150,
+                height: 40,
+                color: Colors.white,
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   controller: _numbers,
                   child: Row(
-                    children: weightOptions.map((e) => Container(
-                        width: 60,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.lightBlue
-                        ),
-                        child: Center(child: Text(e, style: TextStyle(color: Colors.white),) ))).toList(),
+                    children: weightOptions
+                        .map((e) => Container(
+                            width: 60,
+                            height: 40,
+                            decoration: BoxDecoration(color: Colors.lightBlue),
+                            child: Center(
+                                child: Text(
+                              e,
+                              style: TextStyle(color: Colors.white),
+                            ))))
+                        .toList(),
                   ),
                 ),
               ),
             ],
           )
-
         ],
       );
-    }else if (selected == 'pulse') {
-      return pulseOptions();
+    } else if (selected == 'pulse') {
+      return pulseOptions(controller);
     }
     return Container();
   }
@@ -2173,8 +2162,10 @@ class MyHomePageState extends State<MyHomePage>
                     child: ElevatedButton(
                         child: Container(
                             padding: EdgeInsets.all(20),
-                            child: Icon(FlutterIcons.pen_plus_mco, color: Colors.white
-                              ,)),
+                            child: Icon(
+                              FlutterIcons.pen_plus_mco,
+                              color: Colors.white,
+                            )),
                         onPressed: () {
                           TextEditingController controller =
                               TextEditingController();
@@ -2192,7 +2183,8 @@ class MyHomePageState extends State<MyHomePage>
                                       Container(
                                         height: 200,
                                         child: PageView(
-                                          physics: NeverScrollableScrollPhysics(),
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
                                           controller: pageController,
                                           children: [
                                             Row(
@@ -2217,8 +2209,7 @@ class MyHomePageState extends State<MyHomePage>
                                                                   selected =
                                                                       'medications';
                                                                 });
-                                                                pageController.animateToPage(
-                                                                    1,
+                                                                pageController.animateToPage(1,
                                                                     duration: Duration(
                                                                         milliseconds:
                                                                             300),
@@ -2247,8 +2238,7 @@ class MyHomePageState extends State<MyHomePage>
                                                                   selected =
                                                                       'pulse';
                                                                 });
-                                                                pageController.animateToPage(
-                                                                    1,
+                                                                pageController.animateToPage(1,
                                                                     duration: Duration(
                                                                         milliseconds:
                                                                             300),
@@ -2274,10 +2264,10 @@ class MyHomePageState extends State<MyHomePage>
                                                               ),
                                                               onPressed: () {
                                                                 build(() {
-                                                                  selected = 'info';
+                                                                  selected =
+                                                                      'info';
                                                                 });
-                                                                pageController.animateToPage(
-                                                                    1,
+                                                                pageController.animateToPage(1,
                                                                     duration: Duration(
                                                                         milliseconds:
                                                                             300),
@@ -2295,14 +2285,16 @@ class MyHomePageState extends State<MyHomePage>
                                               children: [
                                                 helperOptions(controller),
                                                 IconButton(
-                                                    icon:
-                                                        Icon(FlutterIcons.back_ant),
+                                                    icon: Icon(
+                                                        FlutterIcons.back_ant),
                                                     onPressed: () {
-                                                      pageController.animateToPage(
-                                                          0,
-                                                          duration: Duration(
-                                                              milliseconds: 300),
-                                                          curve: Curves.easeOut);
+                                                      pageController
+                                                          .animateToPage(0,
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      300),
+                                                              curve: Curves
+                                                                  .easeOut);
                                                     }),
                                               ],
                                             ),
@@ -2318,10 +2310,11 @@ class MyHomePageState extends State<MyHomePage>
                                           children: [
                                             Container(
                                               constraints: BoxConstraints(
-                                                  maxWidth: MediaQuery.of(context)
-                                                          .size
-                                                          .width /
-                                                      2),
+                                                  maxWidth:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width /
+                                                          2),
                                               child: TypeAheadField(
                                                 textFieldConfiguration:
                                                     TextFieldConfiguration(
@@ -2329,8 +2322,10 @@ class MyHomePageState extends State<MyHomePage>
                                                   focusNode: focusHere,
                                                   controller: controller,
                                                   decoration: InputDecoration(
-                                                    focusColor: Colors.lightBlue,
-                                                    hoverColor: Colors.lightBlue,
+                                                    focusColor:
+                                                        Colors.lightBlue,
+                                                    hoverColor:
+                                                        Colors.lightBlue,
                                                     focusedBorder:
                                                         OutlineInputBorder(
                                                             borderSide: BorderSide(
@@ -2344,7 +2339,8 @@ class MyHomePageState extends State<MyHomePage>
                                                     hintText: 'Start typing...',
                                                     labelText: 'Record',
                                                     labelStyle: TextStyle(
-                                                        color: Colors.lightBlue),
+                                                        color:
+                                                            Colors.lightBlue),
                                                   ),
                                                 ),
                                                 suggestionsCallback:
@@ -2365,7 +2361,8 @@ class MyHomePageState extends State<MyHomePage>
                                                         .toList();
                                                   } else if (controller.text
                                                       .toLowerCase()
-                                                      .contains('vasopressin')) {
+                                                      .contains(
+                                                          'vasopressin')) {
                                                     return vaso
                                                         .map((e) => e + ' ml')
                                                         .toList();
@@ -2401,7 +2398,8 @@ class MyHomePageState extends State<MyHomePage>
                                                         .toList();
                                                   } else if (controller.text
                                                       .toLowerCase()
-                                                      .contains('atipamezole')) {
+                                                      .contains(
+                                                          'atipamezole')) {
                                                     return atip
                                                         .map((e) => e + ' ml')
                                                         .toList();
@@ -2413,23 +2411,26 @@ class MyHomePageState extends State<MyHomePage>
                                                           .contains(pattern
                                                               .toLowerCase()));
                                                 },
-                                                itemBuilder: (context, suggestion) {
+                                                itemBuilder:
+                                                    (context, suggestion) {
                                                   return ListTile(
-                                                    leading: medNames
-                                                            .contains(suggestion)
-                                                        ? Icon(
-                                                            Icons.medical_services)
+                                                    leading: medNames.contains(
+                                                            suggestion)
+                                                        ? Icon(Icons
+                                                            .medical_services)
                                                         : Icon(Icons.warning),
                                                     title: Text(suggestion),
                                                   );
                                                 },
                                                 transitionBuilder: (context,
-                                                    suggestionsBox, controller) {
+                                                    suggestionsBox,
+                                                    controller) {
                                                   return suggestionsBox;
                                                 },
                                                 keepSuggestionsOnSuggestionSelected:
                                                     true,
-                                                onSuggestionSelected: (suggestion) {
+                                                onSuggestionSelected:
+                                                    (suggestion) {
                                                   String old = '';
                                                   _kOptions.forEach((element) {
                                                     if (controller.text
@@ -2447,18 +2448,20 @@ class MyHomePageState extends State<MyHomePage>
                                                       TextSelection.fromPosition(
                                                           TextPosition(
                                                               offset: controller
-                                                                  .text.length));
+                                                                  .text
+                                                                  .length));
                                                 },
                                               ),
                                             ),
                                             Tooltip(
                                               message: 'Record',
                                               child: ElevatedButton(
-
                                                 child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Icon(FlutterIcons.pen_plus_mco, color: Colors.white
-                                      ),
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Icon(
+                                                      FlutterIcons.pen_plus_mco,
+                                                      color: Colors.white),
                                                 ),
                                                 onPressed: () {
                                                   Navigator.pop(
@@ -2698,7 +2701,9 @@ class MyHomePageState extends State<MyHomePage>
               child: Container(
                   height: 50,
                   child: Image.asset(
-                    'assets/recover-logo-250.png',
+                    kIsWeb
+                        ? 'recover-logo-250.png'
+                        : 'assets/recover-logo-250.png',
                     fit: BoxFit.fitHeight,
                   )),
             )
