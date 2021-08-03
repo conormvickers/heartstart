@@ -1769,39 +1769,34 @@ class MyHomePageState extends State<MyHomePage>
               )
             ],
           ),
-          Positioned(
-            right: 0,
-            bottom: 40,
-            child: Column(
-              children: [
-                Tooltip(
-                  message: "Stop Code",
-                  preferBelow: false,
-                  child: IconButton(
-                    icon:
-                        Icon(FlutterIcons.cancel_mco, color: Colors.lightBlue),
-                    onPressed: () => {_ensureStopCode()},
-                  ),
-                ),
-                Tooltip(
-                  message: "Check Pulse",
-                  preferBelow: false,
-                  child: IconButton(
-                    icon: Icon(
-                      FlutterIcons.pulse_mco,
-                      color: Colors.lightBlue,
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: Container(
+
                     ),
-                    onPressed: () => {
-                      setState(
-                        () {
-                          askForPulse = true;
-                        },
-                      ),
-                    },
                   ),
-                ),
-              ],
-            ),
+                  Expanded(
+
+                    child: FittedBox(
+                      child: Tooltip(
+                        message: "Stop Code",
+                        preferBelow: false,
+                        child: IconButton(
+                          icon:
+                              Icon(FlutterIcons.alert_octagon_fea, color: Colors.red),
+                          onPressed: () => {_ensureStopCode()},
+                        ),
+                      ),
+                    ),
+                  ),
+
+                ],
+              ),
+            ],
           ),
           sizeButton(vertical)
         ],
@@ -2106,7 +2101,7 @@ class MyHomePageState extends State<MyHomePage>
     return Expanded(
       flex: _animation.value,
       child: Container(
-        decoration: BoxDecoration(color: Colors.lightBlueAccent.withAlpha(20)),
+        decoration: BoxDecoration(color: Colors.lightBlueAccent.withAlpha(70)),
         child: Stack(
           children: [
             Column(
@@ -2604,9 +2599,9 @@ class MyHomePageState extends State<MyHomePage>
 
   Widget sizeButton(bool vertical) {
     return Positioned(
-      right: vertical ? 25 : 0,
+      left: vertical ? 25 : 0,
       top: vertical ? null : 25,
-      left: null,
+      right: null,
       bottom: vertical ? 0 : null,
       child: Transform.rotate(
         angle: !vertical ? 0 : math.pi / 2,
@@ -2625,12 +2620,15 @@ class MyHomePageState extends State<MyHomePage>
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(15),
                   bottomLeft: Radius.circular(15)),
-              color: Colors.lightBlueAccent,
+              color: Colors.lightBlueAccent.withAlpha(200),
             ),
             alignment: Alignment.center,
-            child: Icon(
-              FlutterIcons.arrows_compress_fou,
-              color: Colors.white,
+            child: Transform.rotate(
+              angle: !vertical ? 0 : - math.pi / 2,
+              child: Icon(
+                FlutterIcons.notes_medical_faw5s,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
