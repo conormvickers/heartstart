@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -26,6 +27,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'dart:math' as math;
+import 'package:customgauge/customgauge.dart';
 
 void main() {
   runApp(MyApp());
@@ -1668,6 +1670,206 @@ class MyHomePageState extends State<MyHomePage>
     }
   }
 
+  breathingBar() {
+    return Container(
+      padding: EdgeInsets.all(15),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Column(
+              children: [
+                Expanded(
+                  child: FAProgressBar(
+                    direction: Axis.vertical,
+                    progressColor: Theme.of(context).accentColor,
+                    verticalDirection: VerticalDirection.up,
+                    currentValue: breathingValue,
+                    animatedDuration: Duration(milliseconds: 1000),
+                    borderRadius: 0,
+                  ),
+                ),
+                Expanded(
+                  child: FAProgressBar(
+                    direction: Axis.vertical,
+                    progressColor: Theme.of(context).accentColor,
+                    verticalDirection: VerticalDirection.down,
+                    currentValue: breathingValue,
+                    animatedDuration: Duration(milliseconds: 1000),
+                    borderRadius: 0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child:
+                Container(alignment: Alignment.center, child: Text('Breaths')),
+          )
+        ],
+      ),
+    );
+  }
+
+  double speed = 0;
+  int breathingValue = 0;
+  var tapTimes = <DateTime>[];
+  var tapDifs = <int>[];
+  var perc1 = 0.0;
+  var perc2 = 0.0;
+  var perc3 = 0.0;
+  var anim1 = true;
+  var anim2 = true;
+  var anim3 = true;
+  Timer tapResetTimer;
+  // Widget gauge = Container();
+  Widget gauge() {
+    return Container(
+      margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16),
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Flexible(
+              flex: 2,
+              child: new LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: CustomGauge(
+                          gaugeSize: constraints.maxHeight,
+                          //MediaQuery.of(context).size.width * 2 / 5 ,
+                          maxValue: 170,
+                          minValue: 50,
+                          showMarkers: false,
+                          valueWidget: Container(),
+                          segments: [
+                            GaugeSegment(
+                                'Low', 50, Theme.of(context).splashColor),
+                            GaugeSegment('Medium', 20, Colors.white),
+                            GaugeSegment(
+                                'High', 50, Theme.of(context).splashColor),
+                          ],
+                          currentValue: speed,
+                          displayWidget: Text(tapLabel,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                              )),
+                        ),
+                      ),
+                    ),
+                    Expanded(child: breathingBar()),
+                  ],
+                );
+              }),
+            ),
+            Flexible(
+              flex: 1,
+              child: ElevatedButton(
+                child: Text('compressions'),
+                onPressed: _handleTap,
+              ),
+            ),
+          ],
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          color: Colors.black12,
+        ),
+      ),
+    );
+  }
+
+  _handleTap() {
+    print('tap');
+    tapTimes.add(DateTime.now());
+    if (tapTimes.length > 4) {
+      tapTimes.removeAt(0);
+    }
+
+    if (tapTimes.length >= 2) {
+      DateTime a;
+      tapDifs = [];
+
+      tapTimes.forEach((element) => {
+            if (tapTimes.indexOf(element) < tapTimes.length - 1)
+              {
+                a = tapTimes[tapTimes.indexOf(element) + 1],
+                tapDifs.add(a.difference(element).inMilliseconds),
+              }
+          });
+
+      print(tapDifs);
+      double ave = (tapDifs.reduce((value, element) => value + element) /
+          tapDifs.length);
+      print(ave);
+      setState(() {
+        tapLabel = (60000 / ave).toStringAsFixed(0) + " /min";
+      });
+      speed = 60000 / ave;
+      print(speed);
+      if (speed < 100) {
+        perc1 = (speed - 60) / 40;
+        if (perc1 < 0) {
+          perc1 = 0;
+        }
+        perc2 = 0;
+        perc3 = 0;
+        anim1 = true;
+        anim2 = true;
+        anim3 = true;
+      } else if (speed > 120) {
+        perc3 = (speed - 120) / 40;
+        if (perc3 > 1) {
+          perc3 = 1;
+        }
+        perc2 = 1;
+        perc1 = 1;
+        anim1 = false;
+        anim2 = false;
+        anim3 = true;
+      } else {
+        perc2 = (speed - 100) / 20;
+
+        perc1 = 1;
+        perc3 = 0;
+        anim1 = false;
+        anim2 = true;
+        anim3 = false;
+      }
+    }
+    if (tapResetTimer != null) {
+      tapResetTimer.cancel();
+    }
+
+    tapResetTimer = new Timer(
+        Duration(seconds: 3),
+        () => {
+              print('resetting tap timer'),
+              _resetTapper(),
+            });
+  }
+
+  _resetTapper() {
+    anim1 = false;
+    anim2 = false;
+    anim3 = false;
+    tapTimes = [];
+    setState(() {
+      tapLabel = '';
+      speed = 0;
+    });
+    perc1 = 0.0;
+    perc2 = 0.0;
+    perc3 = 0.0;
+  }
+
   Widget timerView(bool vertical) {
     return Expanded(
       flex: 100,
@@ -1769,31 +1971,43 @@ class MyHomePageState extends State<MyHomePage>
               )
             ],
           ),
+          Positioned(
+            bottom: 0,
+            right: vertical ? 0 : null,
+            left: vertical ? null : 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: Icon(FlutterIcons.gauge_ent),
+                  color: Colors.red,
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
           Column(
             children: [
               Row(
                 children: [
                   Expanded(
                     flex: 4,
-                    child: Container(
-
-                    ),
+                    child: Container(),
                   ),
                   Expanded(
-
                     child: FittedBox(
                       child: Tooltip(
                         message: "Stop Code",
                         preferBelow: false,
                         child: IconButton(
-                          icon:
-                              Icon(FlutterIcons.alert_octagon_fea, color: Colors.red),
+                          icon: Icon(FlutterIcons.alert_octagon_fea,
+                              color: Colors.red),
                           onPressed: () => {_ensureStopCode()},
                         ),
                       ),
                     ),
                   ),
-
                 ],
               ),
             ],
@@ -2599,10 +2813,10 @@ class MyHomePageState extends State<MyHomePage>
 
   Widget sizeButton(bool vertical) {
     return Positioned(
-      left: vertical ? 25 : 0,
-      top: vertical ? null : 25,
-      right: null,
-      bottom: vertical ? 0 : null,
+      left: vertical ? 25 : null,
+      top: null,
+      right: vertical ? null : 0,
+      bottom: vertical ? 0 : 25,
       child: Transform.rotate(
         angle: !vertical ? 0 : math.pi / 2,
         child: GestureDetector(
@@ -2624,7 +2838,7 @@ class MyHomePageState extends State<MyHomePage>
             ),
             alignment: Alignment.center,
             child: Transform.rotate(
-              angle: !vertical ? 0 : - math.pi / 2,
+              angle: !vertical ? 0 : -math.pi / 2,
               child: Icon(
                 FlutterIcons.notes_medical_faw5s,
                 color: Colors.white,
@@ -2639,9 +2853,12 @@ class MyHomePageState extends State<MyHomePage>
   Widget mainScreen(BuildContext context) {
     if (MediaQuery.of(context).size.width >
         MediaQuery.of(context).size.height) {
-      return Row(children: <Widget>[
-        timerView(false),
-        toolView(context),
+      return Stack(children: [
+        Row(children: <Widget>[
+          timerView(false),
+          toolView(context),
+        ]),
+        gauge()
       ]);
     }
     return Column(children: <Widget>[
