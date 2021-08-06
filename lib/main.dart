@@ -178,20 +178,6 @@ class MyHomePageState extends State<MyHomePage>
               setState(() {
                 resetBreathingTimer();
 
-                if (int.parse(globals.publicCodeTime.substring(0, 2)) >= 2) {
-                  if (!twominbadge) {
-                    twominbadge = true;
-                    needBadge = true;
-                    print('badge needed');
-                  }
-                }
-                if (int.parse(globals.publicCodeTime.substring(0, 2)) >= 10) {
-                  if (!tenminbadge) {
-                    tenminbadge = true;
-                    needBadge = true;
-                    print('10 min badge needed');
-                  }
-                }
               })
             });
 
@@ -212,7 +198,7 @@ class MyHomePageState extends State<MyHomePage>
 
     _animationController =
         AnimationController(duration: Duration(milliseconds: 300), vsync: this);
-    _animation = IntTween(begin: 100, end: 10).animate(_animationController);
+    _animation = IntTween(begin: 5, end: 100).animate(_animationController);
     _animation.addListener(() => setState(() {}));
 
     _timerAnimCont =
@@ -220,8 +206,9 @@ class MyHomePageState extends State<MyHomePage>
     timerCurve =
         CurvedAnimation(parent: _timerAnimCont, curve: Curves.easeOutExpo);
     timerCurve.addListener(() => setState(() {}));
+    _timerAnimCont.value = 1;
 
-    _timerAnimCont.forward();
+
     nested = NestedTabBar(
       parent: this,
       key: nestedKey,
@@ -570,26 +557,34 @@ class MyHomePageState extends State<MyHomePage>
             ),
           ),
           actions: <Widget>[
-            TextButton(
-              child: Text('Yes, got pulse'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                stopAndGoToNextPage('pulse found');
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    child: Text('No resume code', style: TextStyle(color: Colors.grey)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                        shape: MaterialStateProperty.all<
+                            RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                            ))),
+                    child: Text('Yes'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      stopAndGoToNextPage('');
+                    },
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              child: Text('Yes, stop resuscitation'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                stopAndGoToNextPage('resuscitation efforts withdrawn');
-              },
-            ),
-            TextButton(
-              child: Text('No resume code'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+
           ],
         );
       },
@@ -766,7 +761,7 @@ class MyHomePageState extends State<MyHomePage>
           ),
         ],
       ),
-      ElevatedButton(
+      kIsWeb ? Container() : ElevatedButton(
         onPressed: () => {
           globals.ignoreCurrentLog = true,
           stopAndGoToNextPage(),
@@ -800,7 +795,7 @@ class MyHomePageState extends State<MyHomePage>
       Expanded(
         child: Container(),
       ),
-      Expanded(
+      kIsWeb ? Container() : Expanded(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: 100),
           child: FadeInImage.memoryNetwork(
@@ -1992,10 +1987,15 @@ class MyHomePageState extends State<MyHomePage>
                       animateFromLastPercent: true,
                       circularStrokeCap: CircularStrokeCap.round,
                       footer: FittedBox(
-                        child: Text(
-                          inst,
-                          key: GlobalObjectKey('inst'),
-                          maxLines: 1,
+                        child: Column(
+                          children: [
+                            Text(
+                              inst,
+                              key: GlobalObjectKey('inst'),
+                              maxLines: 1,
+                            ),
+                            Container(height: 40,)
+                          ],
                         ),
                       ),
                       center: Center(
@@ -2055,11 +2055,13 @@ class MyHomePageState extends State<MyHomePage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
+                tooltip: 'Toggle Metronome',
                 icon: soundIcon,
                 color: soundColor,
                 onPressed: () => {toggleSound()},
               ),
               IconButton(
+                tooltip: 'Toggle Voice',
                 icon: voiceIcon,
                 color: voiceColor,
                 onPressed: () => {toggleVoice()},
@@ -2083,7 +2085,8 @@ class MyHomePageState extends State<MyHomePage>
                 children: [
                   Expanded(
                     child: FittedBox(
-                      child: IconButton(
+                      child: IconButton( tooltip: 'Speed Check',
+
                         icon: Icon(FlutterIcons.gauge_ent),
                         color: Colors.red,
                         onPressed: () {
@@ -2292,19 +2295,32 @@ class MyHomePageState extends State<MyHomePage>
     List<Widget> minAgo = [];
 
     retSplit.asMap().forEach((key, value) {
+      Color col = Colors.transparent;
+      Color textCol = Colors.grey;
+      medNames.forEach((element) {
+        if (value.contains(element)) {
+          col = Colors.red;
+          textCol = Colors.white;
+        }
+      });
+
       try {
         final parsedTime =
             DateTime.parse(value.substring(0, value.indexOf(' ')));
         final now = DateTime.now();
         String min = now.difference(parsedTime).inMinutes.toStringAsFixed(0);
-        minAgo.add(Text(min + ' min ago'));
+        minAgo.add(Text(min + ' min ago', style: TextStyle(color: textCol),));
       } catch (error) {
         minAgo.add(Container());
       }
 
-      toReturn.add(Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(cutDisplay(value)), minAgo[key]],
+      toReturn.add(Container(
+        padding: EdgeInsets.all(4),
+        color: col,
+        child: Row(
+mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [FittedBox(child: Text(cutDisplay(value) , style: TextStyle(color: textCol),)),  FittedBox(child: minAgo[key])],
+        ),
       ));
     });
 
@@ -2430,7 +2446,7 @@ class MyHomePageState extends State<MyHomePage>
       flex: _animation.value,
       child: Container(
         decoration: BoxDecoration(color: Colors.lightBlueAccent.withAlpha(70)),
-        child: _animation.value < 20
+        child: _animation.value < 50
             ? Container()
             : Stack(
                 children: [
@@ -2620,6 +2636,7 @@ class MyHomePageState extends State<MyHomePage>
                                                                       .all(8),
                                                               child:
                                                                   TypeAheadField(
+                                                                    hideOnEmpty: true,
                                                                 textFieldConfiguration:
                                                                     TextFieldConfiguration(
                                                                   autofocus:
@@ -2656,103 +2673,29 @@ class MyHomePageState extends State<MyHomePage>
                                                                 ),
                                                                 suggestionsCallback:
                                                                     (pattern) async {
-                                                                  if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'epinephrine low')) {
-                                                                    return epilow
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'epinephrine high')) {
-                                                                    return epihigh
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'vasopressin')) {
-                                                                    return vaso
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'atropine')) {
-                                                                    return atro
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'amiodarone')) {
-                                                                    return amio
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'lidocaine')) {
-                                                                    return lido
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'naloxone')) {
-                                                                    return nalo
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'flumazenil')) {
-                                                                    return flum
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  } else if (controller
-                                                                      .text
-                                                                      .toLowerCase()
-                                                                      .contains(
-                                                                          'atipamezole')) {
-                                                                    return atip
-                                                                        .map((e) =>
-                                                                            e +
-                                                                            ' ml')
-                                                                        .toList();
-                                                                  }
+                                                                      List<String> ret = [];
+                                                                      medNames.asMap().forEach((num, medName) {
 
+                                                                        if (pattern.toLowerCase().contains(medName.toLowerCase()) && pattern.length < medName.length + 4 ) {
+                                                                          print(pattern.toLowerCase() + medName.toLowerCase() );
+                                                                          print(medDoses[num]);
+
+                                                                          ret =  medDoses[num].map((e) =>
+                                                                          e +
+                                                                              ' ml')
+                                                                              .toList();
+                                                                        }
+                                                                      });
+
+                                                                      if (ret.length > 0) {
+                                                                        return ret;
+                                                                      }
                                                                   return _kOptions.where((element) => element
                                                                       .toLowerCase()
                                                                       .contains(
                                                                           pattern
-                                                                              .toLowerCase()));
+                                                                              .toLowerCase()) && element.length != pattern.length
+                                                                  );
                                                                 },
                                                                 itemBuilder:
                                                                     (context,
@@ -3049,15 +2992,7 @@ class MyHomePageState extends State<MyHomePage>
       bottom: vertical ? 0 : 25,
       child: Transform.rotate(
         angle: !vertical ? 0 : math.pi / 2,
-        child: GestureDetector(
-          onTap: () {
-            if (_animationController.value == 0.0) {
-              _animationController.forward();
-            } else {
-              _animationController.reverse();
-            }
-          },
-          child: Container(
+        child:  Container(
             width: 50,
             height: 50,
             decoration: BoxDecoration(
@@ -3069,14 +3004,22 @@ class MyHomePageState extends State<MyHomePage>
             alignment: Alignment.center,
             child: Transform.rotate(
               angle: !vertical ? 0 : -math.pi / 2,
-              child: Icon(
-                FlutterIcons.notes_medical_faw5s,
-                color: Colors.white,
+              child: IconButton(
+                onPressed: () {
+                  if (_animationController.value == 0.0) {
+                    _animationController.forward();
+                  } else {
+                    _animationController.reverse();
+                  }
+                },
+                icon: Icon(
+                  FlutterIcons.notes_medical_faw5s,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ),
-      ),
     );
   }
 

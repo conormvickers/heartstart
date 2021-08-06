@@ -1375,37 +1375,85 @@ class PageTwoState extends State<PageTwo> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Just checking'),
+          title: Text('Re-Arrest'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Is this a NEW code event?'),
+                Text('Did the SAME PATIENT arrest again?'),
               ],
             ),
           ),
           actions: <Widget>[
-            TextButton(
-              child: Text('Yes, new patient or longer than 20 minutes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                print('reset hit');
-                Navigator.pop(context, 'true');
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    child: Text('Nevermind', style: TextStyle(color: Colors.grey)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ButtonStyle(
+
+
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18.0),
+                                      ))),
+                              child: Text('YES', style: TextStyle(color: Colors.white)),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                print('reset hit');
+                                Navigator.pop(context, 'false');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ButtonStyle(
+
+
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18.0),
+                                      ))),
+                              child: Column(
+                                children: [
+                                  Text('NO', style: TextStyle(color: Colors.white)),
+                                  Text('new patient', style: TextStyle(color: Colors.white, fontSize: 10))
+                                ],
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                print('rearrest hit');
+                                Navigator.pop(context, 'true');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              child: Text('No, same patient rearrested'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                print('rearrest hit');
-                Navigator.pop(context, 'false');
-              },
-            ),
-            TextButton(
-              child: Text('Nevermind'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+
+
           ],
         );
       },
@@ -2351,7 +2399,7 @@ class PageTwoState extends State<PageTwo> {
       Expanded(
         child: Container(),
       ),
-      Expanded(
+      kIsWeb ? Container() : Expanded(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: 100),
           child: FadeInImage.memoryNetwork(
@@ -2422,18 +2470,38 @@ class PageTwoState extends State<PageTwo> {
         ),
         appBar: AppBar(
             automaticallyImplyLeading: false,
-            leading: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+
+            flexibleSpace: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(width: 8),
                 Container(
-                  child: IconButton(
-                    icon: Icon(
-                      FlutterIcons.alert_decagram_mco,
-                      color: Theme.of(context).splashColor,
+                  child: ElevatedButton(
+
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.red),
+
+                        shape: MaterialStateProperty.all<
+                            RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                            ))),
+                    child: Row(
+                      children: [
+                        Icon(FlutterIcons.chevron_left_ent, color: Colors.white,),
+                        Text('RE-ARREST', style: TextStyle(color: Colors.white)),
+                      ],
                     ),
                     onPressed: () => {askRearrest()},
                   ),
                 ),
+          ],
+        ),
               ],
             ),
             title: Container(
