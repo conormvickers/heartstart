@@ -250,9 +250,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   String getFormatedTime() {
-    DateTime a = DateTime.now();
-    String formattedDate = intl.DateFormat('kk:mm').format(a);
-    return formattedDate;
+    return DateTime.now().toIso8601String();
   }
 
   addCapnoToLog() {
@@ -292,37 +290,18 @@ class MyHomePageState extends State<MyHomePage>
 
   resetEverything([bool resetlog = true]) {
     return;
-    handsFree = true;
     fraction = 0;
     minPassed = 0;
     secPassed = 0;
     fractionPulse = 0;
     dispSec = 0;
-    enterCapno = false;
-    player.setVolume(1);
-    playerB.setVolume(1);
 
-    // if (resetlog) {
-    //   nestedKey.currentState.resetEverything();
-    //   globals.log = getTime() + " Code Started";
-    //
-    //   globals.info = [
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //     '',
-    //   ];
-    //   globals.chest = null;
-    //   globals.weightKG = null;
-    // }
-    loadPreferences();
+    if (!kIsWeb) {
+      player.setVolume(1);
+      playerB.setVolume(1);
+
+      loadPreferences();
+    }
 
     centerIcon = FlutterIcons.heart_ant;
     inst = "Continue Compressions";
@@ -467,11 +446,13 @@ class MyHomePageState extends State<MyHomePage>
     globals.log = globals.log + combined;
     print('added log');
 
-    player.setVolume(0);
-    playerB.setVolume(0);
-    progressPulseCheck = false;
-    askForPulse = false;
-    nested.show = false;
+    if (!kIsWeb) {
+      player.setVolume(0);
+      playerB.setVolume(0);
+      progressPulseCheck = false;
+      askForPulse = false;
+      nested.show = false;
+    }
 
     final reset = await Navigator.push(
         context,
@@ -1735,8 +1716,9 @@ class MyHomePageState extends State<MyHomePage>
             ),
           ),
           Expanded(
-            child:
-                FittedBox(child: Container(alignment: Alignment.center, child: Text('Breaths'))),
+            child: FittedBox(
+                child: Container(
+                    alignment: Alignment.center, child: Text('Breaths'))),
           )
         ],
       ),
@@ -2479,14 +2461,12 @@ class MyHomePageState extends State<MyHomePage>
                           child: Tooltip(
                             message: 'Record',
                             child: ElevatedButton(
-                               style:  ButtonStyle(
-                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                style: ButtonStyle(
+                                    shape: MaterialStateProperty.all<
+                                            RoundedRectangleBorder>(
                                         RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(18.0),
-
-                                        )
-                                    )
-                                ),
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ))),
                                 child: Container(
                                     padding: EdgeInsets.all(20),
                                     child: Icon(
@@ -2501,381 +2481,419 @@ class MyHomePageState extends State<MyHomePage>
                                     context: context,
                                     builder: (BuildContext context) {
                                       return Dialog(
-
                                         child: StatefulBuilder(builder:
                                             (context, StateSetter build) {
-                                          return Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                height: 200,
-                                                child: PageView(
-                                                  physics:
-                                                      NeverScrollableScrollPhysics(),
-                                                  controller: pageController,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        Expanded(
-                                                          child: Column(
-                                                            children: [
-                                                              Expanded(
-                                                                child:
-                                                                    FittedBox(
-                                                                  child: IconButton(
-                                                                      tooltip: 'Medications',
-                                                                      icon: Icon(
-                                                                        FlutterIcons
-                                                                            .pill_mco,color: Colors.grey,
+                                          return Container(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                MediaQuery.of(context)
+                                                            .size
+                                                            .height <
+                                                        500
+                                                    ? Container()
+                                                    : Container(
+                                                        height: 200,
+                                                        child: PageView(
+                                                          physics:
+                                                              NeverScrollableScrollPhysics(),
+                                                          controller:
+                                                              pageController,
+                                                          children: [
+                                                            Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceEvenly,
+                                                              children: [
+                                                                Expanded(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                            FittedBox(
+                                                                          child: IconButton(
+                                                                              tooltip: 'Medications',
+                                                                              icon: Icon(
+                                                                                FlutterIcons.pill_mco,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                build(() {
+                                                                                  selected = 'medications';
+                                                                                });
+                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                              }),
+                                                                        ),
                                                                       ),
-                                                                      onPressed: () {
-                                                                        build(
-                                                                            () {
-                                                                          selected =
-                                                                              'medications';
-                                                                        });
-                                                                        pageController.animateToPage(
-                                                                            1,
-                                                                            duration:
-                                                                                Duration(milliseconds: 300),
-                                                                            curve: Curves.easeOut);
-                                                                      }),
+                                                                    ],
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          child: Column(
-                                                            children: [
-                                                              Expanded(
-                                                                child:
-                                                                    FittedBox(
-                                                                  child: IconButton(
-                                                                      tooltip: 'Pulse Check',
-                                                                      icon: Icon(
-                                                                        FlutterIcons
-                                                                            .pulse_mco,color: Colors.grey,
+                                                                Expanded(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                            FittedBox(
+                                                                          child: IconButton(
+                                                                              tooltip: 'Pulse Check',
+                                                                              icon: Icon(
+                                                                                FlutterIcons.pulse_mco,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                build(() {
+                                                                                  selected = 'pulse';
+                                                                                });
+                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                              }),
+                                                                        ),
                                                                       ),
-                                                                      onPressed: () {
-                                                                        build(
-                                                                            () {
-                                                                          selected =
-                                                                              'pulse';
-                                                                        });
-                                                                        pageController.animateToPage(
-                                                                            1,
-                                                                            duration:
-                                                                                Duration(milliseconds: 300),
-                                                                            curve: Curves.easeOut);
-                                                                      }),
+                                                                    ],
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          child: Column(
-                                                            children: [
-                                                              Expanded(
-                                                                child:
-                                                                    FittedBox(
-                                                                  child: IconButton(
-                                                                      tooltip: 'Patient Info',
-                                                                      icon: Icon(
-                                                                        FlutterIcons
-                                                                            .dog_faw5s,
-                                                                        color: Colors.grey,
+                                                                Expanded(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                            FittedBox(
+                                                                          child: IconButton(
+                                                                              tooltip: 'Patient Info',
+                                                                              icon: Icon(
+                                                                                FlutterIcons.dog_faw5s,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                build(() {
+                                                                                  selected = 'info';
+                                                                                });
+                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                              }),
+                                                                        ),
                                                                       ),
-                                                                      onPressed: () {
-                                                                        build(
-                                                                            () {
-                                                                          selected =
-                                                                              'info';
-                                                                        });
-                                                                        pageController.animateToPage(
-                                                                            1,
-                                                                            duration:
-                                                                                Duration(milliseconds: 300),
-                                                                            curve: Curves.easeOut);
-                                                                      }),
+                                                                    ],
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ],
-                                                          ),
+                                                              ],
+                                                            ),
+                                                            Stack(
+                                                              children: [
+                                                                helperOptions(
+                                                                    controller),
+                                                                IconButton(
+                                                                    icon: Icon(
+                                                                        FlutterIcons
+                                                                            .back_ant),
+                                                                    onPressed:
+                                                                        () {
+                                                                      pageController.animateToPage(
+                                                                          0,
+                                                                          duration: Duration(
+                                                                              milliseconds:
+                                                                                  300),
+                                                                          curve:
+                                                                              Curves.easeOut);
+                                                                    }),
+                                                              ],
+                                                            ),
+                                                          ],
                                                         ),
-                                                      ],
-                                                    ),
-                                                    Stack(
-                                                      children: [
-                                                        helperOptions(
-                                                            controller),
-                                                        IconButton(
-                                                            icon: Icon(
-                                                                FlutterIcons
-                                                                    .back_ant),
-                                                            onPressed: () {
-                                                              pageController.animateToPage(
-                                                                  0,
-                                                                  duration: Duration(
-                                                                      milliseconds:
-                                                                          300),
-                                                                  curve: Curves
-                                                                      .easeOut);
-                                                            }),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Divider(),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceEvenly,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: Container(
-                                                            padding: EdgeInsets.all(8),
-
-                                                            child: TypeAheadField(
-                                                              textFieldConfiguration:
-                                                                  TextFieldConfiguration(
-                                                                autofocus: true,
-                                                                focusNode: focusHere,
-                                                                controller:
-                                                                    controller,
-                                                                decoration:
-                                                                    InputDecoration(
-                                                                  focusColor: Colors
-                                                                      .lightBlue,
-                                                                  hoverColor: Colors
-                                                                      .lightBlue,
-                                                                  focusedBorder: OutlineInputBorder(
-                                                                      borderSide: BorderSide(
-                                                                          color: Colors
-                                                                              .lightBlue)),
-                                                                  enabledBorder: OutlineInputBorder(
-                                                                      borderSide: BorderSide(
-                                                                          color: Colors
-                                                                              .lightBlue)),
-                                                                  hintText:
-                                                                      'Start typing...',
-                                                                  labelText: 'Record',
-                                                                  labelStyle: TextStyle(
-                                                                      color: Colors
-                                                                          .lightBlue),
+                                                      ),
+                                                Divider(),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(8),
+                                                              child:
+                                                                  TypeAheadField(
+                                                                textFieldConfiguration:
+                                                                    TextFieldConfiguration(
+                                                                  autofocus:
+                                                                      true,
+                                                                  focusNode:
+                                                                      focusHere,
+                                                                  controller:
+                                                                      controller,
+                                                                  decoration:
+                                                                      InputDecoration(
+                                                                    focusColor:
+                                                                        Colors
+                                                                            .lightBlue,
+                                                                    hoverColor:
+                                                                        Colors
+                                                                            .lightBlue,
+                                                                    focusedBorder:
+                                                                        OutlineInputBorder(
+                                                                            borderSide:
+                                                                                BorderSide(color: Colors.lightBlue)),
+                                                                    enabledBorder:
+                                                                        OutlineInputBorder(
+                                                                            borderSide:
+                                                                                BorderSide(color: Colors.lightBlue)),
+                                                                    hintText:
+                                                                        'Start typing...',
+                                                                    labelText:
+                                                                        'Record',
+                                                                    labelStyle:
+                                                                        TextStyle(
+                                                                            color:
+                                                                                Colors.lightBlue),
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                              suggestionsCallback:
-                                                                  (pattern) async {
-                                                                if (controller.text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'epinephrine low')) {
-                                                                  return epilow
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'epinephrine high')) {
-                                                                  return epihigh
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'vasopressin')) {
-                                                                  return vaso
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'atropine')) {
-                                                                  return atro
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'amiodarone')) {
-                                                                  return amio
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'lidocaine')) {
-                                                                  return lido
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'naloxone')) {
-                                                                  return nalo
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'flumazenil')) {
-                                                                  return flum
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                } else if (controller
-                                                                    .text
-                                                                    .toLowerCase()
-                                                                    .contains(
-                                                                        'atipamezole')) {
-                                                                  return atip
-                                                                      .map((e) =>
-                                                                          e + ' ml')
-                                                                      .toList();
-                                                                }
-
-                                                                return _kOptions.where(
-                                                                    (element) => element
-                                                                        .toLowerCase()
-                                                                        .contains(pattern
-                                                                            .toLowerCase()));
-                                                              },
-                                                              itemBuilder: (context,
-                                                                  suggestion) {
-                                                                return ListTile(
-                                                                  leading: medNames
-                                                                          .contains(
-                                                                              suggestion)
-                                                                      ? Icon(Icons
-                                                                          .medical_services)
-                                                                      : Icon(Icons
-                                                                          .warning),
-                                                                  title: Text(
-                                                                      suggestion),
-                                                                );
-                                                              },
-                                                              transitionBuilder:
-                                                                  (context,
-                                                                      suggestionsBox,
-                                                                      controller) {
-                                                                return suggestionsBox;
-                                                              },
-                                                              keepSuggestionsOnSuggestionSelected:
-                                                                  true,
-                                                              onSuggestionSelected:
-                                                                  (suggestion) {
-                                                                String old = '';
-                                                                _kOptions.forEach(
-                                                                    (element) {
-                                                                  if (controller.text
+                                                                suggestionsCallback:
+                                                                    (pattern) async {
+                                                                  if (controller
+                                                                      .text
                                                                       .toLowerCase()
-                                                                      .contains(element
-                                                                          .toLowerCase())) {
-                                                                    old = controller
-                                                                        .text;
+                                                                      .contains(
+                                                                          'epinephrine low')) {
+                                                                    return epilow
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'epinephrine high')) {
+                                                                    return epihigh
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'vasopressin')) {
+                                                                    return vaso
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'atropine')) {
+                                                                    return atro
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'amiodarone')) {
+                                                                    return amio
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'lidocaine')) {
+                                                                    return lido
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'naloxone')) {
+                                                                    return nalo
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'flumazenil')) {
+                                                                    return flum
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
+                                                                  } else if (controller
+                                                                      .text
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          'atipamezole')) {
+                                                                    return atip
+                                                                        .map((e) =>
+                                                                            e +
+                                                                            ' ml')
+                                                                        .toList();
                                                                   }
-                                                                });
-                                                                controller.text =
-                                                                    old + suggestion;
-                                                                print(suggestion);
-                                                                focusHere
-                                                                    .requestFocus();
-                                                                controller.selection =
-                                                                    TextSelection.fromPosition(
-                                                                        TextPosition(
-                                                                            offset: controller
-                                                                                .text
-                                                                                .length));
-                                                              },
+
+                                                                  return _kOptions.where((element) => element
+                                                                      .toLowerCase()
+                                                                      .contains(
+                                                                          pattern
+                                                                              .toLowerCase()));
+                                                                },
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        suggestion) {
+                                                                  return ListTile(
+                                                                    leading: medNames.contains(
+                                                                            suggestion)
+                                                                        ? Icon(Icons
+                                                                            .medical_services)
+                                                                        : Icon(Icons
+                                                                            .warning),
+                                                                    title: Text(
+                                                                        suggestion),
+                                                                  );
+                                                                },
+                                                                transitionBuilder:
+                                                                    (context,
+                                                                        suggestionsBox,
+                                                                        controller) {
+                                                                  return suggestionsBox;
+                                                                },
+                                                                keepSuggestionsOnSuggestionSelected:
+                                                                    true,
+                                                                onSuggestionSelected:
+                                                                    (suggestion) {
+                                                                  String old =
+                                                                      '';
+                                                                  _kOptions.forEach(
+                                                                      (element) {
+                                                                    if (controller
+                                                                        .text
+                                                                        .toLowerCase()
+                                                                        .contains(
+                                                                            element.toLowerCase())) {
+                                                                      old = controller
+                                                                          .text;
+                                                                    }
+                                                                  });
+                                                                  controller
+                                                                          .text =
+                                                                      old +
+                                                                          suggestion;
+                                                                  print(
+                                                                      suggestion);
+                                                                  focusHere
+                                                                      .requestFocus();
+                                                                  controller
+                                                                          .selection =
+                                                                      TextSelection.fromPosition(TextPosition(
+                                                                          offset: controller
+                                                                              .text
+                                                                              .length));
+                                                                },
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                        IconButton(
-                                                          icon: Icon(FlutterIcons.backspace_faw5s, color: Colors.grey,),
-                                                          onPressed: () {controller.text = '';},
-                                                        )
-                                                      ],
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: TextButton(
-                                                            child: Text('cancel', style: TextStyle(color: Colors.grey),),
+                                                          IconButton(
+                                                            icon: Icon(
+                                                              FlutterIcons
+                                                                  .backspace_faw5s,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
                                                             onPressed: () {
-                                                              Navigator.of(context).pop();
+                                                              controller.text =
+                                                                  '';
                                                             },
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          child: Tooltip(
-                                                            message: 'Record',
-                                                            child: ElevatedButton(
-                                              style: ButtonStyle(
-                                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                              RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(18.0),
-
-                                              )
-                                              )
-                                              ),
-
-                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .all(8.0),
-                                                                child: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                  children: [
-                                                                    Text('RECORD', style: TextStyle(color: Colors.white),),
-
-                                                                    Icon(
-                                                                        FlutterIcons
-                                                                            .pen_plus_mco,
-                                                                        color:
-                                                                            Colors.white),
-                                                                  ],
-                                                                ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: TextButton(
+                                                              child: Text(
+                                                                'cancel',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .grey),
                                                               ),
                                                               onPressed: () {
-                                                                Navigator.pop(context,
-                                                                    controller.text);
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
                                                               },
                                                             ),
                                                           ),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  ],
+                                                          Expanded(
+                                                            child: Tooltip(
+                                                              message: 'Record',
+                                                              child:
+                                                                  ElevatedButton(
+                                                                style:
+                                                                    ButtonStyle(
+                                                                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                                            RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              18.0),
+                                                                ))),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                              .all(
+                                                                          8.0),
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceEvenly,
+                                                                    children: [
+                                                                      Text(
+                                                                        'RECORD',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.white),
+                                                                      ),
+                                                                      Icon(
+                                                                          FlutterIcons
+                                                                              .pen_plus_mco,
+                                                                          color:
+                                                                              Colors.white),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                onPressed: () {
+                                                                  Navigator.pop(
+                                                                      context,
+                                                                      controller
+                                                                          .text);
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           );
                                         }),
                                       );
