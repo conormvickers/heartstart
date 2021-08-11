@@ -177,7 +177,6 @@ class MyHomePageState extends State<MyHomePage>
         (Timer timer) => {
               setState(() {
                 resetBreathingTimer();
-
               })
             });
 
@@ -207,7 +206,6 @@ class MyHomePageState extends State<MyHomePage>
         CurvedAnimation(parent: _timerAnimCont, curve: Curves.easeOutExpo);
     timerCurve.addListener(() => setState(() {}));
     _timerAnimCont.value = 1;
-
 
     nested = NestedTabBar(
       parent: this,
@@ -549,42 +547,40 @@ class MyHomePageState extends State<MyHomePage>
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Stop Code Now?'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Are you sure you want to stop the code now?'),
-              ],
-            ),
-          ),
+          content: Text('Are you sure you want to stop the code now?'),
           actions: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    child: Text('No resume code', style: TextStyle(color: Colors.grey)),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+            Container(
+              constraints:
+                  BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      child: Text('No resume code',
+                          style: TextStyle(color: Colors.grey)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                        shape: MaterialStateProperty.all<
-                            RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                            ))),
-                    child: Text('Yes'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      stopAndGoToNextPage('');
-                    },
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                      ))),
+                      child: Text('Yes'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        stopAndGoToNextPage('');
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-
           ],
         );
       },
@@ -761,23 +757,25 @@ class MyHomePageState extends State<MyHomePage>
           ),
         ],
       ),
-      kIsWeb ? Container() : ElevatedButton(
-        onPressed: () => {
-          globals.ignoreCurrentLog = true,
-          stopAndGoToNextPage(),
-        },
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Go To Files',
-                style: TextStyle(color: Colors.white),
+      kIsWeb
+          ? Container()
+          : ElevatedButton(
+              onPressed: () => {
+                globals.ignoreCurrentLog = true,
+                stopAndGoToNextPage(),
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Go To Files',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  Icon(FlutterIcons.folder_ent, color: Colors.white),
+                ],
               ),
             ),
-            Icon(FlutterIcons.folder_ent, color: Colors.white),
-          ],
-        ),
-      ),
       ElevatedButton(
         onPressed: () => {sendEmail()},
         child: Row(
@@ -795,17 +793,19 @@ class MyHomePageState extends State<MyHomePage>
       Expanded(
         child: Container(),
       ),
-      kIsWeb ? Container() : Expanded(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 100),
-          child: FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage,
-            image:
-                'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
-            fit: BoxFit.fitWidth,
-          ),
-        ),
-      ),
+      kIsWeb
+          ? Container()
+          : Expanded(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 100),
+                child: FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image:
+                      'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            ),
       ElevatedButton(
         onPressed: () =>
             launch('https://recoverinitiative.org/veterinary-professionals/'),
@@ -1994,7 +1994,9 @@ class MyHomePageState extends State<MyHomePage>
                               key: GlobalObjectKey('inst'),
                               maxLines: 1,
                             ),
-                            Container(height: 40,)
+                            Container(
+                              height: 40,
+                            )
                           ],
                         ),
                       ),
@@ -2085,8 +2087,8 @@ class MyHomePageState extends State<MyHomePage>
                 children: [
                   Expanded(
                     child: FittedBox(
-                      child: IconButton( tooltip: 'Speed Check',
-
+                      child: IconButton(
+                        tooltip: 'Speed Check',
                         icon: Icon(FlutterIcons.gauge_ent),
                         color: Colors.red,
                         onPressed: () {
@@ -2309,7 +2311,10 @@ class MyHomePageState extends State<MyHomePage>
             DateTime.parse(value.substring(0, value.indexOf(' ')));
         final now = DateTime.now();
         String min = now.difference(parsedTime).inMinutes.toStringAsFixed(0);
-        minAgo.add(Text(min + ' min ago', style: TextStyle(color: textCol),));
+        minAgo.add(Text(
+          min + ' min ago',
+          style: TextStyle(color: textCol),
+        ));
       } catch (error) {
         minAgo.add(Container());
       }
@@ -2318,8 +2323,15 @@ class MyHomePageState extends State<MyHomePage>
         padding: EdgeInsets.all(4),
         color: col,
         child: Row(
-mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [FittedBox(child: Text(cutDisplay(value) , style: TextStyle(color: textCol),)),  FittedBox(child: minAgo[key])],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FittedBox(
+                child: Text(
+              cutDisplay(value),
+              style: TextStyle(color: textCol),
+            )),
+            FittedBox(child: minAgo[key])
+          ],
         ),
       ));
     });
@@ -2441,6 +2453,7 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
     return Container();
   }
 
+  bool showHelpers = true;
   Widget toolView(BuildContext context) {
     return Expanded(
       flex: _animation.value,
@@ -2493,20 +2506,23 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   TextEditingController controller =
                                       TextEditingController();
                                   FocusNode focusHere = FocusNode();
+
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return Dialog(
                                         child: StatefulBuilder(builder:
                                             (context, StateSetter build) {
+                                          focusHere.addListener(() {
+                                            print('focused ' +
+                                                focusHere.hasFocus.toString());
+                                            build(() {});
+                                          });
                                           return Container(
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                MediaQuery.of(context)
-                                                            .size
-                                                            .height <
-                                                        500
+                                                focusHere.hasFocus
                                                     ? Container()
                                                     : Container(
                                                         height: 200,
@@ -2636,7 +2652,8 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                       .all(8),
                                                               child:
                                                                   TypeAheadField(
-                                                                    hideOnEmpty: true,
+                                                                hideOnEmpty:
+                                                                    true,
                                                                 textFieldConfiguration:
                                                                     TextFieldConfiguration(
                                                                   autofocus:
@@ -2673,29 +2690,47 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                 ),
                                                                 suggestionsCallback:
                                                                     (pattern) async {
-                                                                      List<String> ret = [];
-                                                                      medNames.asMap().forEach((num, medName) {
+                                                                  List<String>
+                                                                      ret = [];
+                                                                  medNames
+                                                                      .asMap()
+                                                                      .forEach((num,
+                                                                          medName) {
+                                                                    if (pattern
+                                                                            .toLowerCase()
+                                                                            .contains(medName
+                                                                                .toLowerCase()) &&
+                                                                        pattern.length <
+                                                                            medName.length +
+                                                                                4) {
+                                                                      print(pattern
+                                                                              .toLowerCase() +
+                                                                          medName
+                                                                              .toLowerCase());
+                                                                      print(medDoses[
+                                                                          num]);
 
-                                                                        if (pattern.toLowerCase().contains(medName.toLowerCase()) && pattern.length < medName.length + 4 ) {
-                                                                          print(pattern.toLowerCase() + medName.toLowerCase() );
-                                                                          print(medDoses[num]);
-
-                                                                          ret =  medDoses[num].map((e) =>
-                                                                          e +
+                                                                      ret = medDoses[
+                                                                              num]
+                                                                          .map((e) =>
+                                                                              e +
                                                                               ' ml')
-                                                                              .toList();
-                                                                        }
-                                                                      });
+                                                                          .toList();
+                                                                    }
+                                                                  });
 
-                                                                      if (ret.length > 0) {
-                                                                        return ret;
-                                                                      }
-                                                                  return _kOptions.where((element) => element
-                                                                      .toLowerCase()
-                                                                      .contains(
+                                                                  if (ret.length >
+                                                                      0) {
+                                                                    return ret;
+                                                                  }
+                                                                  return _kOptions.where((element) =>
+                                                                      element
+                                                                          .toLowerCase()
+                                                                          .contains(pattern
+                                                                              .toLowerCase()) &&
+                                                                      element.length !=
                                                                           pattern
-                                                                              .toLowerCase()) && element.length != pattern.length
-                                                                  );
+                                                                              .length);
                                                                 },
                                                                 itemBuilder:
                                                                     (context,
@@ -2802,23 +2837,25 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                       const EdgeInsets
                                                                               .all(
                                                                           8.0),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceEvenly,
-                                                                    children: [
-                                                                      Text(
-                                                                        'RECORD',
-                                                                        style: TextStyle(
+                                                                  child:
+                                                                      FittedBox(
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceEvenly,
+                                                                      children: [
+                                                                        Text(
+                                                                          'RECORD',
+                                                                          style:
+                                                                              TextStyle(color: Colors.white),
+                                                                        ),
+                                                                        Icon(
+                                                                            FlutterIcons
+                                                                                .pen_plus_mco,
                                                                             color:
                                                                                 Colors.white),
-                                                                      ),
-                                                                      Icon(
-                                                                          FlutterIcons
-                                                                              .pen_plus_mco,
-                                                                          color:
-                                                                              Colors.white),
-                                                                    ],
+                                                                      ],
+                                                                    ),
                                                                   ),
                                                                 ),
                                                                 onPressed: () {
@@ -2992,34 +3029,33 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
       bottom: vertical ? 0 : 25,
       child: Transform.rotate(
         angle: !vertical ? 0 : math.pi / 2,
-        child:  Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  bottomLeft: Radius.circular(15)),
-              color: Colors.lightBlueAccent.withAlpha(200),
-            ),
-            alignment: Alignment.center,
-            child: Transform.rotate(
-              angle: !vertical ? 0 : -math.pi / 2,
-              child: IconButton(
-                onPressed: () {
-                  if (_animationController.value == 0.0) {
-                    _animationController.forward();
-                  } else {
-                    _animationController.reverse();
-                  }
-                },
-                icon: Icon(
-                  FlutterIcons.notes_medical_faw5s,
-                  color: Colors.white,
-                ),
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
+            color: Colors.lightBlueAccent.withAlpha(200),
+          ),
+          alignment: Alignment.center,
+          child: Transform.rotate(
+            angle: !vertical ? 0 : -math.pi / 2,
+            child: IconButton(
+              onPressed: () {
+                if (_animationController.value == 0.0) {
+                  _animationController.forward();
+                } else {
+                  _animationController.reverse();
+                }
+              },
+              icon: Icon(
+                FlutterIcons.notes_medical_faw5s,
+                color: Colors.white,
               ),
             ),
           ),
         ),
+      ),
     );
   }
 
@@ -3065,7 +3101,7 @@ mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
     Scaffold s = Scaffold(
       endDrawerEnableOpenDragGesture: false,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       drawer: Drawer(
         child: Column(
           children: settingItems(),

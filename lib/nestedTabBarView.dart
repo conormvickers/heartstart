@@ -1388,7 +1388,8 @@ class PageTwoState extends State<PageTwo> {
               children: [
                 Expanded(
                   child: TextButton(
-                    child: Text('Nevermind', style: TextStyle(color: Colors.grey)),
+                    child:
+                        Text('Nevermind', style: TextStyle(color: Colors.grey)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -1402,14 +1403,13 @@ class PageTwoState extends State<PageTwo> {
                           Expanded(
                             child: ElevatedButton(
                               style: ButtonStyle(
-
-
                                   shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
+                                          RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18.0),
-                                      ))),
-                              child: Text('YES', style: TextStyle(color: Colors.white)),
+                                borderRadius: BorderRadius.circular(18.0),
+                              ))),
+                              child: Text('YES',
+                                  style: TextStyle(color: Colors.white)),
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 print('reset hit');
@@ -1425,17 +1425,18 @@ class PageTwoState extends State<PageTwo> {
                           Expanded(
                             child: ElevatedButton(
                               style: ButtonStyle(
-
-
                                   shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
+                                          RoundedRectangleBorder>(
                                       RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18.0),
-                                      ))),
+                                borderRadius: BorderRadius.circular(18.0),
+                              ))),
                               child: Column(
                                 children: [
-                                  Text('NO', style: TextStyle(color: Colors.white)),
-                                  Text('new patient', style: TextStyle(color: Colors.white, fontSize: 10))
+                                  Text('NO',
+                                      style: TextStyle(color: Colors.white)),
+                                  Text('new patient',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 10))
                                 ],
                               ),
                               onPressed: () {
@@ -1452,8 +1453,6 @@ class PageTwoState extends State<PageTwo> {
                 ),
               ],
             ),
-
-
           ],
         );
       },
@@ -2399,17 +2398,19 @@ class PageTwoState extends State<PageTwo> {
       Expanded(
         child: Container(),
       ),
-      kIsWeb ? Container() : Expanded(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 100),
-          child: FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage,
-            image:
-                'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
-            fit: BoxFit.fitWidth,
-          ),
-        ),
-      ),
+      kIsWeb
+          ? Container()
+          : Expanded(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 100),
+                child: FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image:
+                      'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            ),
       ElevatedButton(
         onPressed: () =>
             launch('https://recoverinitiative.org/veterinary-professionals/'),
@@ -2470,38 +2471,39 @@ class PageTwoState extends State<PageTwo> {
         ),
         appBar: AppBar(
             automaticallyImplyLeading: false,
-
             flexibleSpace: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(width: 8),
-                Container(
-                  child: ElevatedButton(
-
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.red),
-
-                        shape: MaterialStateProperty.all<
-                            RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(width: 8),
+                    Container(
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.red),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                             ))),
-                    child: Row(
-                      children: [
-                        Icon(FlutterIcons.chevron_left_ent, color: Colors.white,),
-                        Text('RE-ARREST', style: TextStyle(color: Colors.white)),
-                      ],
+                        child: Row(
+                          children: [
+                            Icon(
+                              FlutterIcons.chevron_left_ent,
+                              color: Colors.white,
+                            ),
+                            Text('RE-ARREST',
+                                style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                        onPressed: () => {askRearrest()},
+                      ),
                     ),
-                    onPressed: () => {askRearrest()},
-                  ),
+                  ],
                 ),
-          ],
-        ),
               ],
             ),
             title: Container(
@@ -4290,7 +4292,11 @@ class PageTwoState extends State<PageTwo> {
                       child: ButtonBar(
                         alignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          RaisedButton(
+                          ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.white),
+                            ),
                             child: Container(
                                 child: Column(
                               children: [
@@ -4303,7 +4309,11 @@ class PageTwoState extends State<PageTwo> {
                             )),
                             onPressed: sendText,
                           ),
-                          RaisedButton(
+                          ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.white),
+                            ),
                             child: Container(
                               child: Column(
                                 children: [
@@ -4318,34 +4328,34 @@ class PageTwoState extends State<PageTwo> {
                             ),
                             onPressed: sendData,
                           ),
-                          RaisedButton(
-                            child: Container(
-                                child: Column(
-                              children: [
-                                Icon(
-                                  FlutterIcons.cloud_upload_alt_faw5s,
-                                  color: Colors.blue,
-                                ),
-                                Text('Cloud'),
-                              ],
-                            )),
-                            onPressed: () => {},
-                          ),
-                          RaisedButton(
-                            child: Container(
-                                child: Column(
-                              children: [
-                                Icon(
-                                  FlutterIcons.handshake_faw5,
-                                  color: Colors.blue,
-                                ),
-                                Text('Blue-Pass'),
-                              ],
-                            )),
-                            onPressed: () => {
-                              moveToBluePass(),
-                            },
-                          ),
+                          // ElevatedButton(
+                          //   child: Container(
+                          //       child: Column(
+                          //     children: [
+                          //       Icon(
+                          //         FlutterIcons.cloud_upload_alt_faw5s,
+                          //         color: Colors.blue,
+                          //       ),
+                          //       Text('Cloud'),
+                          //     ],
+                          //   )),
+                          //   onPressed: () => {},
+                          // ),
+                          // ElevatedButton(
+                          //   child: Container(
+                          //       child: Column(
+                          //     children: [
+                          //       Icon(
+                          //         FlutterIcons.handshake_faw5,
+                          //         color: Colors.blue,
+                          //       ),
+                          //       Text('Blue-Pass'),
+                          //     ],
+                          //   )),
+                          //   onPressed: () => {
+                          //     moveToBluePass(),
+                          //   },
+                          // ),
                         ],
                       )),
                 ],
