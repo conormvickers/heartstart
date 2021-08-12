@@ -1384,74 +1384,79 @@ class PageTwoState extends State<PageTwo> {
             ),
           ),
           actions: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    child:
-                        Text('Nevermind', style: TextStyle(color: Colors.grey)),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      child: Text('Nevermind',
+                          style: TextStyle(color: Colors.grey)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.0),
-                              ))),
-                              child: Text('YES',
-                                  style: TextStyle(color: Colors.white)),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                print('reset hit');
-                                Navigator.pop(context, 'false');
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<
-                                          RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.0),
-                              ))),
-                              child: Column(
-                                children: [
-                                  Text('NO',
-                                      style: TextStyle(color: Colors.white)),
-                                  Text('new patient',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10))
-                                ],
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                    shape: MaterialStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ))),
+                                child: Text('YES',
+                                    style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  print('reset hit');
+                                  Navigator.pop(context, 'false');
+                                },
                               ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                print('rearrest hit');
-                                Navigator.pop(context, 'true');
-                              },
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        Container(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                    shape: MaterialStateProperty.all<
+                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ))),
+                                child: Column(
+                                  children: [
+                                    Text('NO',
+                                        style: TextStyle(color: Colors.white)),
+                                    Text('new patient',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 10))
+                                  ],
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  print('rearrest hit');
+                                  Navigator.pop(context, 'true');
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         );

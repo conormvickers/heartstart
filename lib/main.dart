@@ -28,6 +28,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'dart:math' as math;
 import 'package:customgauge/customgauge.dart';
+import 'package:flutterheart/chesttypes_icons.dart';
 
 void main() {
   runApp(MyApp());
@@ -40,15 +41,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Heart Start Vet',
-      builder: (BuildContext context, Widget child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: 1,
-            boldText: false,
-          ),
-          child: child,
-        );
-      },
       theme: ThemeData(
         primaryColor: Colors.white,
         accentColor: Colors.blue,
@@ -169,6 +161,10 @@ class MyHomePageState extends State<MyHomePage>
 
   @override
   void initState() {
+    chestTypeController = TabController(
+      length: 3,
+      vsync: this,
+    );
     _controllers = LinkedScrollControllerGroup();
     _letters = _controllers.addAndGet();
     _numbers = _controllers.addAndGet();
@@ -2053,28 +2049,32 @@ class MyHomePageState extends State<MyHomePage>
               ],
             ),
           ),
-          Column(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconButton(
-                tooltip: 'Toggle Metronome',
-                icon: soundIcon,
-                color: soundColor,
-                onPressed: () => {toggleSound()},
+              Expanded(
+                child: FittedBox(
+                  child: Column(
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: 'Toggle Metronome',
+                        icon: soundIcon,
+                        color: soundColor,
+                        onPressed: () => {toggleSound()},
+                      ),
+                      IconButton(
+                        tooltip: 'Toggle Voice',
+                        icon: voiceIcon,
+                        color: voiceColor,
+                        onPressed: () => {toggleVoice()},
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              IconButton(
-                tooltip: 'Toggle Voice',
-                icon: voiceIcon,
-                color: voiceColor,
-                onPressed: () => {toggleVoice()},
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(),
-                  )
-                ],
-              )
+              Expanded(flex: 6, child: Container())
             ],
           ),
           Column(
@@ -2293,7 +2293,7 @@ class MyHomePageState extends State<MyHomePage>
 
   List<Widget> logTiles() {
     List<Widget> toReturn = [];
-    List<String> retSplit = globals.log.split('\n');
+    List<String> retSplit = globals.log.split('\n').reversed.toList();
     List<Widget> minAgo = [];
 
     retSplit.asMap().forEach((key, value) {
@@ -2350,7 +2350,7 @@ class MyHomePageState extends State<MyHomePage>
   );
 
   String selected = '';
-  Widget helperOptions(TextEditingController controller) {
+  Widget helperOptions(TextEditingController controller, StateSetter build) {
     if (selected == 'medications') {
       return Stack(
         children: [
@@ -2449,10 +2449,154 @@ class MyHomePageState extends State<MyHomePage>
       );
     } else if (selected == 'pulse') {
       return pulseOptions(controller);
+    } else if (selected == 'co2') {
+    } else if (selected == 'info') {
+      return patientInfoWidget(build);
     }
     return Container();
   }
 
+  Widget patientInfoWidget(StateSetter build) {
+    return Container(
+      decoration:
+          BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+              flex: 1,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: Container()),
+                            Expanded(
+                              child: FittedBox(
+                                fit: BoxFit.fitWidth,
+                                child: Icon(
+                                  MaterialCommunityIcons.dog_side,
+                                ),
+                              ),
+                            ),
+                          ],
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 5,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        activeTrackColor: Colors.lightBlue,
+                        inactiveTrackColor: Colors.grey,
+                        // trackShape: RoundedRectSliderTrackShape(),
+                        trackHeight: 4.0,
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 12.0),
+                        thumbColor: Colors.lightBlue,
+                        overlayColor: Colors.blue,
+                        overlayShape:
+                            RoundSliderOverlayShape(overlayRadius: 28.0),
+                        tickMarkShape: RoundSliderTickMarkShape(),
+                        activeTickMarkColor: Colors.white,
+                        inactiveTickMarkColor: Colors.white,
+                        valueIndicatorShape:
+                            RectangularSliderValueIndicatorShape(), //PaddleSliderValueIndicatorShape(),
+                        valueIndicatorColor: Colors.red,
+                        valueIndicatorTextStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                        ),
+                      ),
+                      child: Slider(
+                        min: 0,
+                        max: 10,
+                        divisions: 10,
+                        value: _weightValue,
+                        label: weightOptions[_weightValue.round()],
+                        onChanged: (value) {
+                          build(
+                            () {
+                              _weightValue = value;
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.fitWidth,
+                            child: Icon(
+                              MaterialCommunityIcons.dog_side,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: TabBar(
+                    controller: chestTypeController,
+                    onTap: (tabby) {
+                      globals.weightKG = weightkgOptions[_weightValue.round()];
+                      globals.weightIndex = _weightValue.round();
+                      globals.chest = chestTypes[chestTypeController.index];
+
+                      centerIcon = chestIcons[chestTypeController.index];
+                      chestIcon = chestIcons[chestTypeController.index];
+
+                      print('set weight to: ' +
+                          weightkgOptions[_weightValue.round()].toString());
+                      for (MedListItem item in medItems) {
+                        item.buildSubtitle(context);
+                      }
+                      setState(() {});
+                    },
+                    tabs: [
+                      Tab(
+                        child: Text(chestTypes[0]),
+                      ),
+                      Tab(child: Text(chestTypes[1])),
+                      Tab(
+                        child: Text(chestTypes[2]),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<String> chestTypes = ['round', 'keel', 'flat'];
+  List<IconData> chestIcons = [
+    Chesttypes.flat,
+    Chesttypes.keel,
+    Chesttypes.round,
+  ];
+  double _weightValue = 5;
+  List<double> weightkgOptions = [2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+  TabController chestTypeController;
+  TextInputType keyboardType = TextInputType.name;
   bool showHelpers = true;
   Widget toolView(BuildContext context) {
     return Expanded(
@@ -2506,18 +2650,28 @@ class MyHomePageState extends State<MyHomePage>
                                   TextEditingController controller =
                                       TextEditingController();
                                   FocusNode focusHere = FocusNode();
+                                  keyboardType = TextInputType.name;
+                                  bool autoFocusOnBuild = false;
 
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return Dialog(
+                                        insetPadding:
+                                            EdgeInsets.symmetric(horizontal: 8),
                                         child: StatefulBuilder(builder:
                                             (context, StateSetter build) {
                                           focusHere.addListener(() {
                                             print('focused ' +
                                                 focusHere.hasFocus.toString());
+                                            print('building with ' +
+                                                keyboardType.toString());
                                             build(() {});
                                           });
+                                          if (autoFocusOnBuild) {
+                                            autoFocusOnBuild = false;
+                                            focusHere.requestFocus();
+                                          }
                                           return Container(
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
@@ -2525,69 +2679,34 @@ class MyHomePageState extends State<MyHomePage>
                                                 focusHere.hasFocus
                                                     ? Container()
                                                     : Container(
-                                                        height: 200,
+                                                        constraints: BoxConstraints(
+                                                            maxHeight: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height /
+                                                                4),
                                                         child: PageView(
                                                           physics:
                                                               NeverScrollableScrollPhysics(),
                                                           controller:
                                                               pageController,
                                                           children: [
-                                                            Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
+                                                            Column(
                                                               mainAxisAlignment:
                                                                   MainAxisAlignment
-                                                                      .spaceEvenly,
+                                                                      .center,
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
                                                               children: [
                                                                 Expanded(
-                                                                  child: Column(
-                                                                    children: [
-                                                                      Expanded(
-                                                                        child:
-                                                                            FittedBox(
-                                                                          child: IconButton(
-                                                                              tooltip: 'Medications',
-                                                                              icon: Icon(
-                                                                                FlutterIcons.pill_mco,
-                                                                                color: Colors.grey,
-                                                                              ),
-                                                                              onPressed: () {
-                                                                                build(() {
-                                                                                  selected = 'medications';
-                                                                                });
-                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-                                                                              }),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  child: Column(
-                                                                    children: [
-                                                                      Expanded(
-                                                                        child:
-                                                                            FittedBox(
-                                                                          child: IconButton(
-                                                                              tooltip: 'Pulse Check',
-                                                                              icon: Icon(
-                                                                                FlutterIcons.pulse_mco,
-                                                                                color: Colors.grey,
-                                                                              ),
-                                                                              onPressed: () {
-                                                                                build(() {
-                                                                                  selected = 'pulse';
-                                                                                });
-                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-                                                                              }),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  child: Column(
+                                                                  child: Row(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .max,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceEvenly,
                                                                     children: [
                                                                       Expanded(
                                                                         child:
@@ -2600,7 +2719,77 @@ class MyHomePageState extends State<MyHomePage>
                                                                               ),
                                                                               onPressed: () {
                                                                                 build(() {
+                                                                                  keyboardType = TextInputType.name;
                                                                                   selected = 'info';
+                                                                                });
+                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                              }),
+                                                                        ),
+                                                                      ),
+                                                                      Expanded(
+                                                                        child:
+                                                                            FittedBox(
+                                                                          child: IconButton(
+                                                                              tooltip: 'Carbon Dioxide',
+                                                                              icon: Text(
+                                                                                'CO2',
+                                                                                style: TextStyle(color: Colors.grey),
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                keyboardType = TextInputType.number;
+                                                                                build(() {
+                                                                                  selected = 'co2';
+                                                                                  controller.text = 'CO2  mmHg';
+                                                                                  controller.selection = TextSelection(baseOffset: 4, extentOffset: 4);
+                                                                                  autoFocusOnBuild = true;
+                                                                                });
+                                                                                // pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                              }),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  child: Row(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .max,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceEvenly,
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                            FittedBox(
+                                                                          child: IconButton(
+                                                                              tooltip: 'Medications',
+                                                                              icon: Icon(
+                                                                                FlutterIcons.pill_mco,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                build(() {
+                                                                                  keyboardType = TextInputType.name;
+                                                                                  selected = 'medications';
+                                                                                });
+                                                                                pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                                                                              }),
+                                                                        ),
+                                                                      ),
+                                                                      Expanded(
+                                                                        child:
+                                                                            FittedBox(
+                                                                          child: IconButton(
+                                                                              tooltip: 'Pulse Check',
+                                                                              icon: Icon(
+                                                                                FlutterIcons.pulse_mco,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                build(() {
+                                                                                  keyboardType = TextInputType.name;
+                                                                                  selected = 'pulse';
                                                                                 });
                                                                                 pageController.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
                                                                               }),
@@ -2614,11 +2803,17 @@ class MyHomePageState extends State<MyHomePage>
                                                             Stack(
                                                               children: [
                                                                 helperOptions(
-                                                                    controller),
+                                                                    controller,
+                                                                    build),
                                                                 IconButton(
+                                                                    color: Colors
+                                                                        .grey,
                                                                     icon: Icon(
-                                                                        FlutterIcons
-                                                                            .back_ant),
+                                                                      FlutterIcons
+                                                                          .left_ant,
+                                                                      color: Colors
+                                                                          .lightBlue,
+                                                                    ),
                                                                     onPressed:
                                                                         () {
                                                                       pageController.animateToPage(
@@ -2639,11 +2834,15 @@ class MyHomePageState extends State<MyHomePage>
                                                   padding:
                                                       const EdgeInsets.all(8.0),
                                                   child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
                                                             .spaceEvenly,
                                                     children: [
                                                       Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
                                                         children: [
                                                           Expanded(
                                                             child: Container(
@@ -2657,7 +2856,9 @@ class MyHomePageState extends State<MyHomePage>
                                                                 textFieldConfiguration:
                                                                     TextFieldConfiguration(
                                                                   autofocus:
-                                                                      true,
+                                                                      false,
+                                                                  keyboardType:
+                                                                      keyboardType,
                                                                   focusNode:
                                                                       focusHere,
                                                                   controller:
@@ -2681,7 +2882,7 @@ class MyHomePageState extends State<MyHomePage>
                                                                     hintText:
                                                                         'Start typing...',
                                                                     labelText:
-                                                                        'Record',
+                                                                        'Record Something',
                                                                     labelStyle:
                                                                         TextStyle(
                                                                             color:
@@ -2802,6 +3003,8 @@ class MyHomePageState extends State<MyHomePage>
                                                         ],
                                                       ),
                                                       Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
                                                         children: [
                                                           Expanded(
                                                             child: TextButton(
