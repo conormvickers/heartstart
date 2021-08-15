@@ -267,7 +267,6 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   resetEverything([bool resetlog = true]) {
-    return;
     fraction = 0;
     minPassed = 0;
     secPassed = 0;
@@ -285,6 +284,14 @@ class MyHomePageState extends State<MyHomePage>
     inst = "Continue Compressions";
 
     progressPulseCheck = true;
+
+    if (resetlog) {
+      globals.log = getTime() + ' Code Started';
+    } else {
+      addLog('Rearrest');
+    }
+
+    return;
   }
 
   _saveLog() async {
@@ -324,12 +331,18 @@ class MyHomePageState extends State<MyHomePage>
             });
   }
 
-  BuildContext askPulseContext;
+  checkIfNeedDismissPulseAsk() {
+    if (askingPulseCheck) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  bool askingPulseCheck = false;
   askPulseCheck() async {
-    showDialog<void>(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        askPulseContext = context;
+        askingPulseCheck = true;
         return AlertDialog(
           title: Text('See Rhythm Options?'),
           actions: <Widget>[
@@ -370,6 +383,7 @@ class MyHomePageState extends State<MyHomePage>
         );
       },
     );
+    askingPulseCheck = false;
   }
 
   updateCircle() {
@@ -377,7 +391,7 @@ class MyHomePageState extends State<MyHomePage>
       countDownFraction = 9;
       countDown = false;
       progressPulseCheck = true;
-      Navigator.of(context).pop(askPulseContext);
+      checkIfNeedDismissPulseAsk();
       autoRestartCycle();
     }
 
@@ -394,6 +408,9 @@ class MyHomePageState extends State<MyHomePage>
 
       if (fractionPulse == 120) {
         print('should open');
+        if (awaitingShock) {
+          Navigator.of(context).pop();
+        }
         askPulseCheck();
 
         _speechThis(
@@ -472,12 +489,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   stopAndGoToNextPage([String reason = '']) async {
-    print('sdf');
-    String formattedDate = getFormatedTime();
-    String combined = "\n" + formattedDate + "\tCode Stopped: " + reason;
-
-    globals.log = globals.log + combined;
-    print('added log');
+    addLog('Code Stopped');
 
     if (!kIsWeb) {
       player.setVolume(0);
@@ -499,7 +511,7 @@ class MyHomePageState extends State<MyHomePage>
       resetEverything();
     } else {
       print('rearest or continue');
-      addToLog('Patient Rearrested');
+
       resetEverything(false);
     }
   }
@@ -604,8 +616,7 @@ class MyHomePageState extends State<MyHomePage>
                 children: [
                   Expanded(
                     child: TextButton(
-                      child: Text('No resume code',
-                          style: TextStyle(color: Colors.grey)),
+                      child: Text('No', style: TextStyle(color: Colors.grey)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -749,12 +760,11 @@ class MyHomePageState extends State<MyHomePage>
     ],
   );
 
-  sendEmail() async {
+  sendEmail(String string) async {
     final Email email = Email(
-      body:
-          'Wow this app is awesome and the team behind it must be so smart!\n\nI was thinking...',
+      body: string,
       subject: 'RECOVER APP FEEDBACK/BUG REPORT',
-      recipients: ['conormvickers@gmail.com'],
+      recipients: ['recoverfeedback@gmail.com'],
     );
 
     await FlutterEmailSender.send(email);
@@ -825,7 +835,7 @@ class MyHomePageState extends State<MyHomePage>
               ),
             ),
       ElevatedButton(
-        onPressed: () => {sendEmail()},
+        onPressed: () => {sendEmail('Hello,\n\n')},
         child: Row(
           children: [
             Expanded(
@@ -2074,13 +2084,38 @@ class MyHomePageState extends State<MyHomePage>
                                 child: Column(
                                   children: [
                                     Text('pulse check in'),
-                                    Text(
-                                      '-' + pulseCheckCountdown,
-                                      textAlign: TextAlign.center,
-                                      key: GlobalObjectKey('timerCircle'),
-                                      style: new TextStyle(
-                                        fontSize: 40.0,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '-' + pulseCheckCountdown,
+                                          textAlign: TextAlign.right,
+                                          key: GlobalObjectKey('timerCircle'),
+                                          style: new TextStyle(
+                                            fontSize: 40.0,
+                                          ),
+                                        ),
+                                        Container(
+                                          child: IconButton(
+                                              icon: FittedBox(
+                                                child: Column(
+                                                  children: [
+                                                    Icon(FlutterIcons
+                                                        .rewind_fea),
+                                                    Text(
+                                                      'reset',
+                                                      style: TextStyle(
+                                                          fontSize: 8),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                addLog('Timer Manually Reset');
+                                                fractionPulse = 0;
+                                                updateCircle();
+                                              }),
+                                        ),
+                                      ],
                                     ),
                                     Text(
                                       'time elapsed ' + currentTime(),
@@ -2183,10 +2218,14 @@ class MyHomePageState extends State<MyHomePage>
               ),
             ],
           ),
-          sizeButton(vertical)
+          sizeButton(vertical),
         ],
       ),
     );
+  }
+
+  addLog(String string) {
+    globals.log = globals.log + '\n' + getTime() + ' ' + string;
   }
 
   bool warningDismissed = false;
@@ -2651,7 +2690,7 @@ class MyHomePageState extends State<MyHomePage>
   TabController chestTypeController;
   TextInputType keyboardType = TextInputType.name;
   bool showHelpers = true;
-  openRecorder([bool secondPage = false]) {
+  openRecorder([bool secondPage = false]) async {
     TextEditingController controller = TextEditingController();
     FocusNode focusHere = FocusNode();
     keyboardType = TextInputType.name;
@@ -3002,9 +3041,284 @@ class MyHomePageState extends State<MyHomePage>
         if (val == null) {
           return;
         }
+
         globals.log = globals.log + '\n' + getTime() + ' ' + val;
+        if (val.toString().toLowerCase().contains('v fib') ||
+            val.toString().toLowerCase().contains('v tach')) {
+          showWaitingForShock();
+        }
       });
     });
+  }
+
+  bool awaitingShock = false;
+  showWaitingForShock() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        awaitingShock = true;
+        return AlertDialog(
+          title: Container(
+            constraints:
+                BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text('Shock Indicated', style: TextStyle(color: Colors.black)),
+                Icon(FlutterIcons.wi_lightning_wea, color: Colors.grey),
+              ],
+            ),
+          ),
+          content: Text('Continue compressions while charging'),
+          actions: <Widget>[
+            Container(
+              constraints:
+                  BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      child:
+                          Text('Cancel', style: TextStyle(color: Colors.grey)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                      ))),
+                      child: FittedBox(
+                        child: Text('Shock Delivered',
+                            maxLines: 1, style: TextStyle(color: Colors.white)),
+                      ),
+                      onPressed: () {
+                        globals.log =
+                            globals.log + '\n' + getTime() + ' Shock Delivered';
+                        fractionPulse = 0;
+                        updateCircle();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    awaitingShock = false;
+  }
+
+  startFeedback() async {
+    TextEditingController cont = TextEditingController();
+    bool yes = false;
+    bool no = false;
+    int helpful = 0;
+    int easy = 0;
+    ScrollController _scrollController = new ScrollController(
+      initialScrollOffset: 400,
+    );
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Feedback'),
+          content: StatefulBuilder(builder: (context, StateSetter build) {
+            return SingleChildScrollView(
+              reverse: true,
+              controller: _scrollController,
+              child: Center(
+                child: Column(
+                  children: [
+                    Text('Have you used this during a real code event?'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Checkbox(
+                                value: yes,
+                                onChanged: (val) {
+                                  build(() {
+                                    yes = val;
+                                    if (val) {
+                                      no = false;
+                                    }
+                                  });
+                                },
+                              ),
+                              Text(
+                                'yes',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Checkbox(
+                                value: no,
+                                onChanged: (val) {
+                                  build(() {
+                                    no = val;
+                                    if (val) {
+                                      yes = false;
+                                    }
+                                  });
+                                },
+                              ),
+                              Text(
+                                'no',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(),
+                    Text('How helpful was it?'),
+                    Slider(
+                        min: 0,
+                        max: 5,
+                        divisions: 5,
+                        value: helpful.toDouble(),
+                        onChanged: (val) {
+                          build(() {
+                            print(val);
+                            helpful = val.toInt();
+                          });
+                        }),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'not helpful',
+                          style: TextStyle(
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          'helpful',
+                          style: TextStyle(
+                            fontSize: 10,
+                          ),
+                        )
+                      ],
+                    ),
+                    Divider(),
+                    Text('How easy was it?'),
+                    Slider(
+                        min: 0,
+                        max: 5,
+                        divisions: 5,
+                        value: easy.toDouble(),
+                        onChanged: (val) {
+                          build(() {
+                            print(val);
+                            easy = val.toInt();
+                          });
+                        }),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'easy',
+                          style: TextStyle(
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          'not easy',
+                          style: TextStyle(
+                            fontSize: 10,
+                          ),
+                        )
+                      ],
+                    ),
+                    Divider(),
+                    Text('Let us know any other thoughts!\n'),
+                    TextField(
+                      keyboardType: TextInputType.name,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        focusColor: Colors.lightBlue,
+                        hoverColor: Colors.lightBlue,
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue)),
+                        hintText: 'Start typing...',
+                        labelText: 'Feedback',
+                        labelStyle: TextStyle(color: Colors.lightBlue),
+                      ),
+                      controller: cont,
+                    )
+                  ],
+                ),
+              ),
+            );
+          }),
+          actions: <Widget>[
+            Container(
+              constraints:
+                  BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      child:
+                          Text('cancel', style: TextStyle(color: Colors.grey)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                      ))),
+                      child: Text('Email'),
+                      onPressed: () {
+                        String a = yes ? 'yes' : 'no';
+                        String b = helpful.toString();
+                        String c = helpful.toString();
+                        String d = cont.text ?? 'none';
+                        sendEmail('Used During Code?: ' +
+                            a +
+                            '\nHelpful: ' +
+                            b +
+                            '\nEasy: ' +
+                            c +
+                            '\nFeedback: ' +
+                            d);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget toolView(BuildContext context) {
@@ -3038,27 +3352,68 @@ class MyHomePageState extends State<MyHomePage>
                         Expanded(
                           child: Container(),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Tooltip(
-                            message: 'Record',
-                            child: ElevatedButton(
-                                style: ButtonStyle(
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
-                                ))),
-                                child: Container(
-                                    padding: EdgeInsets.all(20),
-                                    child: Icon(
-                                      FlutterIcons.pen_plus_mco,
-                                      color: Colors.white,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(15),
+                                child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      elevation:
+                                          MaterialStateProperty.all<double>(0),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.transparent),
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(18.0),
+                                      ))),
+                                  child: Row(
+                                    children: [
+                                      Text('Feedback'),
+                                      Expanded(
+                                        child: Container(),
+                                      ),
+                                      Icon(FlutterIcons.speech_sli),
+                                    ],
+                                  ),
+                                  onPressed: startFeedback,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(15),
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        shape: MaterialStateProperty.all<
+                                                RoundedRectangleBorder>(
+                                            RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                    ))),
+                                    child: Container(
+                                        child: Row(
+                                      children: [
+                                        Text('Record',
+                                            style:
+                                                TextStyle(color: Colors.white)),
+                                        Expanded(
+                                          child: Container(),
+                                        ),
+                                        Icon(
+                                          FlutterIcons.pen_plus_mco,
+                                          color: Colors.white,
+                                        ),
+                                      ],
                                     )),
-                                onPressed: () {
-                                  openRecorder();
-                                }),
-                          ),
+                                    onPressed: () {
+                                      openRecorder();
+                                    }),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

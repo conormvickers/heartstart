@@ -1900,7 +1900,7 @@ class PageTwoState extends State<PageTwo> {
   List<String> unsafe = [';', ':', ' ', '.', '/', '\n'];
   updateName() {
     if (globals.log.contains('Code Started')) {
-      currentDocPath = globals.log.substring(0, globals.log.indexOf('\t'));
+      currentDocPath = globals.log.substring(0, globals.log.indexOf(' '));
       if (currentDocPath.contains('\n')) {
         currentDocPath =
             currentDocPath.substring(currentDocPath.lastIndexOf('\n'));
@@ -3271,26 +3271,42 @@ class PageTwoState extends State<PageTwo> {
           ),
           appBar: AppBar(
               automaticallyImplyLeading: false,
-              leading: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+              flexibleSpace: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Container(
-                    child: IconButton(
-                      icon: Icon(
-                        FlutterIcons.alert_decagram_mco,
-                        color: Theme.of(context).splashColor,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(width: 8),
+                      Container(
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.red),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                              ))),
+                          child: Row(
+                            children: [
+                              Icon(
+                                FlutterIcons.chevron_left_ent,
+                                color: Colors.white,
+                              ),
+                              Text('RE-ARREST',
+                                  style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                          onPressed: () => {askRearrest()},
+                        ),
                       ),
-                      onPressed: () => {askRearrest()},
-                    ),
+                    ],
                   ),
                 ],
               ),
-              title: Container(
-                  height: 50,
-                  child: Image.asset(
-                    'assets/recover-logo-250.png',
-                    fit: BoxFit.fitHeight,
-                  )),
               elevation: 1.0,
               actions: [
                 Builder(
