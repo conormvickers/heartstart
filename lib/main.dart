@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
         splashColor: Colors.red,
         indicatorColor: Colors.lightBlueAccent,
         primarySwatch: Colors.lightBlue,
-        disabledColor: Colors.grey,
+        disabledColor: Colors.black,
         accentTextTheme: TextTheme(bodyText2: TextStyle(color: Colors.white)),
         visualDensity: VisualDensity.adaptivePlatformDensity,
         textTheme: GoogleFonts.montserratTextTheme(
@@ -339,6 +339,9 @@ class MyHomePageState extends State<MyHomePage>
 
   bool askingPulseCheck = false;
   askPulseCheck() async {
+    if (showingFeedback) {
+      return;
+    }
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -353,7 +356,7 @@ class MyHomePageState extends State<MyHomePage>
                 children: [
                   Expanded(
                     child: TextButton(
-                      child: Text('No', style: TextStyle(color: Colors.grey)),
+                      child: Text('No', style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -526,7 +529,7 @@ class MyHomePageState extends State<MyHomePage>
     if (!playCompressions) {
       setState(() {
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
-        soundColor = Colors.grey;
+        soundColor = Colors.black;
       });
     } else {
       startMetronome();
@@ -534,7 +537,7 @@ class MyHomePageState extends State<MyHomePage>
     if (!playVoice) {
       setState(() {
         voiceIcon = Icon(FlutterIcons.voice_off_mco);
-        voiceColor = Colors.grey;
+        voiceColor = Colors.black;
       });
     }
   }
@@ -616,7 +619,7 @@ class MyHomePageState extends State<MyHomePage>
                 children: [
                   Expanded(
                     child: TextButton(
-                      child: Text('No', style: TextStyle(color: Colors.grey)),
+                      child: Text('No', style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -835,7 +838,7 @@ class MyHomePageState extends State<MyHomePage>
               ),
             ),
       ElevatedButton(
-        onPressed: () => {sendEmail('Hello,\n\n')},
+        onPressed: () => {startFeedback()},
         child: Row(
           children: [
             Expanded(
@@ -848,8 +851,24 @@ class MyHomePageState extends State<MyHomePage>
           ],
         ),
       ),
-      Expanded(
-        child: Container(),
+      ElevatedButton(
+        style:
+            ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
+        onPressed: () {
+          resetEverything(true);
+          Navigator.of(context).pop();
+        },
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Reset Code',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Icon(FlutterIcons.new_box_mco, color: Colors.white),
+          ],
+        ),
       ),
       kIsWeb
           ? Container()
@@ -1520,7 +1539,7 @@ class MyHomePageState extends State<MyHomePage>
             flex: 1,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey,
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: FittedBox(
@@ -1840,7 +1859,7 @@ class MyHomePageState extends State<MyHomePage>
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.black.withOpacity(0.5),
                         spreadRadius: 5,
                         blurRadius: 7,
                         offset: Offset(0, 3), // changes position of shadow
@@ -2390,7 +2409,7 @@ class MyHomePageState extends State<MyHomePage>
 
     retSplit.asMap().forEach((key, value) {
       Color col = Colors.transparent;
-      Color textCol = Colors.grey;
+      Color textCol = Colors.black;
       medNames.forEach((element) {
         if (value.contains(element)) {
           col = Colors.red;
@@ -2457,7 +2476,8 @@ class MyHomePageState extends State<MyHomePage>
                   ...medNames
                       .map((e) => Container(
                           decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey, width: 1)),
+                              border:
+                                  Border.all(color: Colors.black, width: 1)),
                           height: 40,
                           width: 150,
                           child: Center(child: Text(e))))
@@ -2480,7 +2500,7 @@ class MyHomePageState extends State<MyHomePage>
                                 height: 40,
                                 decoration: BoxDecoration(
                                     border: Border.all(
-                                        color: Colors.grey, width: 1)),
+                                        color: Colors.black, width: 1)),
                                 child: Row(
                                   children: e
                                       .map((f) => Container(
@@ -2587,7 +2607,7 @@ class MyHomePageState extends State<MyHomePage>
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         activeTrackColor: Colors.lightBlue,
-                        inactiveTrackColor: Colors.grey,
+                        inactiveTrackColor: Colors.black,
                         // trackShape: RoundedRectSliderTrackShape(),
                         trackHeight: 4.0,
                         thumbShape:
@@ -2750,7 +2770,7 @@ class MyHomePageState extends State<MyHomePage>
                                                 tooltip: 'Patient Info',
                                                 icon: Icon(
                                                   FlutterIcons.dog_faw5s,
-                                                  color: Colors.grey,
+                                                  color: Colors.black,
                                                 ),
                                                 onPressed: () {
                                                   build(() {
@@ -2775,7 +2795,7 @@ class MyHomePageState extends State<MyHomePage>
                                                     'CO2',
                                                     maxLines: 1,
                                                     style: TextStyle(
-                                                        color: Colors.grey),
+                                                        color: Colors.black),
                                                   ),
                                                 ),
                                                 onPressed: () {
@@ -2810,7 +2830,7 @@ class MyHomePageState extends State<MyHomePage>
                                                 tooltip: 'Medications',
                                                 icon: Icon(
                                                   FlutterIcons.pill_mco,
-                                                  color: Colors.grey,
+                                                  color: Colors.black,
                                                 ),
                                                 onPressed: () {
                                                   build(() {
@@ -2832,7 +2852,7 @@ class MyHomePageState extends State<MyHomePage>
                                                 tooltip: 'Pulse Check',
                                                 icon: Icon(
                                                   FlutterIcons.pulse_mco,
-                                                  color: Colors.grey,
+                                                  color: Colors.black,
                                                 ),
                                                 onPressed: () {
                                                   build(() {
@@ -2857,7 +2877,7 @@ class MyHomePageState extends State<MyHomePage>
                                 children: [
                                   helperOptions(controller, build),
                                   IconButton(
-                                      color: Colors.grey,
+                                      color: Colors.black,
                                       icon: Icon(
                                         FlutterIcons.left_ant,
                                         color: Colors.lightBlue,
@@ -2969,7 +2989,7 @@ class MyHomePageState extends State<MyHomePage>
                             IconButton(
                               icon: Icon(
                                 FlutterIcons.backspace_faw5s,
-                                color: Colors.grey,
+                                color: Colors.black,
                               ),
                               onPressed: () {
                                 controller.text = '';
@@ -2984,7 +3004,7 @@ class MyHomePageState extends State<MyHomePage>
                               child: TextButton(
                                 child: Text(
                                   'cancel',
-                                  style: TextStyle(color: Colors.grey),
+                                  style: TextStyle(color: Colors.black),
                                 ),
                                 onPressed: () {
                                   Navigator.of(context).pop();
@@ -3066,7 +3086,7 @@ class MyHomePageState extends State<MyHomePage>
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text('Shock Indicated', style: TextStyle(color: Colors.black)),
-                Icon(FlutterIcons.wi_lightning_wea, color: Colors.grey),
+                Icon(FlutterIcons.wi_lightning_wea, color: Colors.black),
               ],
             ),
           ),
@@ -3080,7 +3100,7 @@ class MyHomePageState extends State<MyHomePage>
                   Expanded(
                     child: TextButton(
                       child:
-                          Text('Cancel', style: TextStyle(color: Colors.grey)),
+                          Text('Cancel', style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -3117,6 +3137,7 @@ class MyHomePageState extends State<MyHomePage>
     awaitingShock = false;
   }
 
+  bool showingFeedback = false;
   startFeedback() async {
     TextEditingController cont = TextEditingController();
     bool yes = false;
@@ -3129,6 +3150,7 @@ class MyHomePageState extends State<MyHomePage>
     await showDialog(
       context: context,
       builder: (BuildContext context) {
+        showingFeedback = true;
         return AlertDialog(
           title: Text('Feedback'),
           content: StatefulBuilder(builder: (context, StateSetter build) {
@@ -3281,7 +3303,7 @@ class MyHomePageState extends State<MyHomePage>
                   Expanded(
                     child: TextButton(
                       child:
-                          Text('cancel', style: TextStyle(color: Colors.grey)),
+                          Text('cancel', style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -3319,6 +3341,7 @@ class MyHomePageState extends State<MyHomePage>
         );
       },
     );
+    showingFeedback = false;
   }
 
   Widget toolView(BuildContext context) {
@@ -3370,14 +3393,22 @@ class MyHomePageState extends State<MyHomePage>
                                         borderRadius:
                                             BorderRadius.circular(18.0),
                                       ))),
-                                  child: Row(
-                                    children: [
-                                      Text('Feedback'),
-                                      Expanded(
-                                        child: Container(),
-                                      ),
-                                      Icon(FlutterIcons.speech_sli),
-                                    ],
+                                  child: FittedBox(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FittedBox(
+                                          child: Text(
+                                            'Feedback  ',
+                                            style:
+                                                TextStyle(color: Colors.black),
+                                          ),
+                                        ),
+                                        FittedBox(
+                                            child: Icon(FlutterIcons.speech_sli,
+                                                color: Colors.black)),
+                                      ],
+                                    ),
                                   ),
                                   onPressed: startFeedback,
                                 ),
@@ -3393,18 +3424,19 @@ class MyHomePageState extends State<MyHomePage>
                                             RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18.0),
                                     ))),
-                                    child: Container(
+                                    child: FittedBox(
                                         child: Row(
                                       children: [
-                                        Text('Record',
-                                            style:
-                                                TextStyle(color: Colors.white)),
-                                        Expanded(
-                                          child: Container(),
+                                        FittedBox(
+                                          child: Text('Record  ',
+                                              style: TextStyle(
+                                                  color: Colors.white)),
                                         ),
-                                        Icon(
-                                          FlutterIcons.pen_plus_mco,
-                                          color: Colors.white,
+                                        FittedBox(
+                                          child: Icon(
+                                            FlutterIcons.pen_plus_mco,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ],
                                     )),
