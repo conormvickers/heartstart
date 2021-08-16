@@ -2279,7 +2279,15 @@ class MyHomePageState extends State<MyHomePage>
     'CO2',
     'Carbon Dioxide',
     'Pulse Check',
-    'Shock Delivered'
+    'Shock Delivered',
+    'Super Ventricular Tachycardia',
+    'SVT',
+    'V fib',
+    'Ventricular Fibrillation',
+    'PEA',
+    'Pulseless Electrical Activity',
+    'V tach',
+    'Ventricular Tachycardia',
   ];
   List<List<String>> medDoses = [];
 
@@ -2940,7 +2948,7 @@ class MyHomePageState extends State<MyHomePage>
                                         print(medDoses[num]);
 
                                         ret = medDoses[num]
-                                            .map((e) => e + ' ml')
+                                            .map((e) => e + ' ml (' + weightOptions[medDoses[num].indexOf(e) ].replaceAll('\n', '/') + ')')
                                             .toList();
                                       }
                                     });
@@ -2955,10 +2963,14 @@ class MyHomePageState extends State<MyHomePage>
                                         element.length != pattern.length);
                                   },
                                   itemBuilder: (context, suggestion) {
+                                    Widget a = Icon(FlutterIcons.test_tube_mco);
+                                    if (medNames.contains(suggestion)) {
+                                      a = Icon(Icons.medical_services);
+                                    }else if (otherOptions.contains(suggestion)){
+                                      a = Icon(Icons.warning);
+                                    }
                                     return ListTile(
-                                      leading: medNames.contains(suggestion)
-                                          ? Icon(Icons.medical_services)
-                                          : Icon(Icons.warning),
+                                      leading:a,
                                       title: Text(suggestion),
                                     );
                                   },
@@ -2976,9 +2988,14 @@ class MyHomePageState extends State<MyHomePage>
                                         old = controller.text;
                                       }
                                     });
-                                    controller.text = old + suggestion;
-                                    print(suggestion);
+                                    String sug = suggestion;
+                                    if (sug.contains('(')) {
+                                      sug = sug.substring(0, sug.indexOf('('));
+                                    }
+                                    controller.text = old + sug;
+                                    print(sug);
                                     focusHere.requestFocus();
+
                                     controller.selection =
                                         TextSelection.fromPosition(TextPosition(
                                             offset: controller.text.length));
@@ -3381,6 +3398,7 @@ class MyHomePageState extends State<MyHomePage>
                               child: Container(
                                 padding: EdgeInsets.all(15),
                                 child: ElevatedButton(
+                                  onPressed: startFeedback,
                                   style: ButtonStyle(
                                       elevation:
                                           MaterialStateProperty.all<double>(0),
@@ -3393,7 +3411,9 @@ class MyHomePageState extends State<MyHomePage>
                                         borderRadius:
                                             BorderRadius.circular(18.0),
                                       ))),
-                                  child: FittedBox(
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    child: FittedBox(
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -3410,8 +3430,8 @@ class MyHomePageState extends State<MyHomePage>
                                       ],
                                     ),
                                   ),
-                                  onPressed: startFeedback,
                                 ),
+                              ),
                               ),
                             ),
                             Expanded(
@@ -3424,22 +3444,25 @@ class MyHomePageState extends State<MyHomePage>
                                             RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18.0),
                                     ))),
-                                    child: FittedBox(
-                                        child: Row(
-                                      children: [
-                                        FittedBox(
-                                          child: Text('Record  ',
-                                              style: TextStyle(
-                                                  color: Colors.white)),
-                                        ),
-                                        FittedBox(
-                                          child: Icon(
-                                            FlutterIcons.pen_plus_mco,
-                                            color: Colors.white,
+                                    child: Container(
+                                      padding: EdgeInsets.all(10),
+                                      child: FittedBox(
+                                          child: Row(
+                                        children: [
+                                          FittedBox(
+                                            child: Text('Record  ',
+                                                style: TextStyle(
+                                                    color: Colors.white)),
                                           ),
-                                        ),
-                                      ],
-                                    )),
+                                          FittedBox(
+                                            child: Icon(
+                                              FlutterIcons.pen_plus_mco,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      )),
+                                    ),
                                     onPressed: () {
                                       openRecorder();
                                     }),
@@ -3447,6 +3470,7 @@ class MyHomePageState extends State<MyHomePage>
                             ),
                           ],
                         ),
+                        Container(height: MediaQuery.of(context).padding.bottom,)
                       ],
                     ),
                   ),

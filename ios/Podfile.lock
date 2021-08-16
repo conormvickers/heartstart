@@ -48,6 +48,8 @@ PODS:
     - Protobuf (~> 3.11.4)
   - flutter_email_sender (0.0.1):
     - Flutter
+  - flutter_keyboard_visibility (0.0.1):
+    - Flutter
   - flutter_tts (0.0.1):
     - Flutter
   - fluttertoast (0.0.2):
@@ -82,6 +84,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_blue (from `.symlinks/plugins/flutter_blue/ios`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
+  - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/ios`)
@@ -116,6 +119,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_blue/ios"
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
+  flutter_keyboard_visibility:
+    :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
   flutter_tts:
     :path: ".symlinks/plugins/flutter_tts/ios"
   fluttertoast:
@@ -145,6 +150,7 @@ SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_blue: c82336391af501c2a18dcc042f18b53a74981651
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
+  flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
