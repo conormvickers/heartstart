@@ -163,8 +163,10 @@ class MyHomePageState extends State<MyHomePage>
       vsync: this,
     );
     _controllers = LinkedScrollControllerGroup();
+
     _letters = _controllers.addAndGet();
     _numbers = _controllers.addAndGet();
+
     Timer.periodic(
         Duration(milliseconds: 1000),
         (Timer timer) => {
@@ -529,7 +531,7 @@ class MyHomePageState extends State<MyHomePage>
     if (!playCompressions) {
       setState(() {
         soundIcon = Icon(FlutterIcons.metronome_tick_mco);
-        soundColor = Colors.black;
+        soundColor = Colors.grey;
       });
     } else {
       startMetronome();
@@ -537,7 +539,7 @@ class MyHomePageState extends State<MyHomePage>
     if (!playVoice) {
       setState(() {
         voiceIcon = Icon(FlutterIcons.voice_off_mco);
-        voiceColor = Colors.black;
+        voiceColor = Colors.grey;
       });
     }
   }
@@ -2282,11 +2284,11 @@ class MyHomePageState extends State<MyHomePage>
     'Shock Delivered',
     'Super Ventricular Tachycardia',
     'SVT',
-    'V fib',
+    'V Fib',
     'Ventricular Fibrillation',
     'PEA',
     'Pulseless Electrical Activity',
-    'V tach',
+    'V Tach',
     'Ventricular Tachycardia',
   ];
   List<List<String>> medDoses = [];
@@ -2469,8 +2471,11 @@ class MyHomePageState extends State<MyHomePage>
   );
 
   String selected = '';
+  double medOffset = 0;
   Widget helperOptions(TextEditingController controller, StateSetter build) {
+    madeMeds = false;
     if (selected == 'medications') {
+      madeMeds = true;
       return Stack(
         children: [
           SingleChildScrollView(
@@ -2615,7 +2620,7 @@ class MyHomePageState extends State<MyHomePage>
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         activeTrackColor: Colors.lightBlue,
-                        inactiveTrackColor: Colors.black,
+                        inactiveTrackColor: Colors.grey,
                         // trackShape: RoundedRectSliderTrackShape(),
                         trackHeight: 4.0,
                         thumbShape:
@@ -2645,6 +2650,7 @@ class MyHomePageState extends State<MyHomePage>
                           build(
                             () {
                               _weightValue = value;
+                              medOffset = 60 * _weightValue;
                             },
                           );
                         },
@@ -2707,6 +2713,15 @@ class MyHomePageState extends State<MyHomePage>
     );
   }
 
+  getMedOffset(StateSetter build) async {
+    Future.delayed(Duration(milliseconds: 400), () {
+      build(() {
+        _controllers.animateTo(medOffset,
+            curve: Curves.bounceOut, duration: Duration(milliseconds: 300));
+      });
+    });
+  }
+
   List<String> chestTypes = ['round', 'keel', 'flat'];
   List<IconData> chestIcons = [
     Chesttypes.flat,
@@ -2716,12 +2731,13 @@ class MyHomePageState extends State<MyHomePage>
   double _weightValue = 5;
   List<double> weightkgOptions = [2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   TabController chestTypeController;
-  TextInputType keyboardType = TextInputType.name;
+  TextInputType keyboardType = TextInputType.text;
   bool showHelpers = true;
+  bool madeMeds = false;
   openRecorder([bool secondPage = false]) async {
     TextEditingController controller = TextEditingController();
     FocusNode focusHere = FocusNode();
-    keyboardType = TextInputType.name;
+    keyboardType = TextInputType.text;
     bool autoFocusOnBuild = false;
     if (secondPage) {
       pageController = PageController(
@@ -2733,7 +2749,7 @@ class MyHomePageState extends State<MyHomePage>
       );
     }
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
@@ -2748,6 +2764,7 @@ class MyHomePageState extends State<MyHomePage>
               autoFocusOnBuild = false;
               focusHere.requestFocus();
             }
+
             return Container(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -2778,12 +2795,12 @@ class MyHomePageState extends State<MyHomePage>
                                                 tooltip: 'Patient Info',
                                                 icon: Icon(
                                                   FlutterIcons.dog_faw5s,
-                                                  color: Colors.black,
+                                                  color: Colors.grey,
                                                 ),
                                                 onPressed: () {
                                                   build(() {
                                                     keyboardType =
-                                                        TextInputType.name;
+                                                        TextInputType.text;
                                                     selected = 'info';
                                                   });
                                                   pageController.animateToPage(
@@ -2803,7 +2820,7 @@ class MyHomePageState extends State<MyHomePage>
                                                     'CO2',
                                                     maxLines: 1,
                                                     style: TextStyle(
-                                                        color: Colors.black),
+                                                        color: Colors.grey),
                                                   ),
                                                 ),
                                                 onPressed: () {
@@ -2838,12 +2855,12 @@ class MyHomePageState extends State<MyHomePage>
                                                 tooltip: 'Medications',
                                                 icon: Icon(
                                                   FlutterIcons.pill_mco,
-                                                  color: Colors.black,
+                                                  color: Colors.grey,
                                                 ),
                                                 onPressed: () {
                                                   build(() {
                                                     keyboardType =
-                                                        TextInputType.name;
+                                                        TextInputType.text;
                                                     selected = 'medications';
                                                   });
                                                   pageController.animateToPage(
@@ -2851,6 +2868,7 @@ class MyHomePageState extends State<MyHomePage>
                                                       duration: Duration(
                                                           milliseconds: 300),
                                                       curve: Curves.easeOut);
+                                                  getMedOffset(build);
                                                 }),
                                           ),
                                         ),
@@ -2860,12 +2878,12 @@ class MyHomePageState extends State<MyHomePage>
                                                 tooltip: 'Pulse Check',
                                                 icon: Icon(
                                                   FlutterIcons.pulse_mco,
-                                                  color: Colors.black,
+                                                  color: Colors.grey,
                                                 ),
                                                 onPressed: () {
                                                   build(() {
                                                     keyboardType =
-                                                        TextInputType.name;
+                                                        TextInputType.text;
                                                     selected = 'pulse';
                                                   });
                                                   pageController.animateToPage(
@@ -2885,12 +2903,17 @@ class MyHomePageState extends State<MyHomePage>
                                 children: [
                                   helperOptions(controller, build),
                                   IconButton(
-                                      color: Colors.black,
+                                      color: Colors.grey,
                                       icon: Icon(
                                         FlutterIcons.left_ant,
                                         color: Colors.lightBlue,
                                       ),
                                       onPressed: () {
+                                        if (selected == 'medications') {
+                                          medOffset = _controllers.offset;
+                                          print('saved offset ' +
+                                              medOffset.toString());
+                                        }
                                         pageController.animateToPage(0,
                                             duration:
                                                 Duration(milliseconds: 300),
@@ -2948,7 +2971,13 @@ class MyHomePageState extends State<MyHomePage>
                                         print(medDoses[num]);
 
                                         ret = medDoses[num]
-                                            .map((e) => e + ' ml (' + weightOptions[medDoses[num].indexOf(e) ].replaceAll('\n', '/') + ')')
+                                            .map((e) =>
+                                                e +
+                                                ' ml (' +
+                                                weightOptions[medDoses[num]
+                                                        .indexOf(e)]
+                                                    .replaceAll('\n', '/') +
+                                                ')')
                                             .toList();
                                       }
                                     });
@@ -2966,11 +2995,12 @@ class MyHomePageState extends State<MyHomePage>
                                     Widget a = Icon(FlutterIcons.test_tube_mco);
                                     if (medNames.contains(suggestion)) {
                                       a = Icon(Icons.medical_services);
-                                    }else if (otherOptions.contains(suggestion)){
+                                    } else if (otherOptions
+                                        .contains(suggestion)) {
                                       a = Icon(Icons.warning);
                                     }
                                     return ListTile(
-                                      leading:a,
+                                      leading: a,
                                       title: Text(suggestion),
                                     );
                                   },
@@ -3006,7 +3036,7 @@ class MyHomePageState extends State<MyHomePage>
                             IconButton(
                               icon: Icon(
                                 FlutterIcons.backspace_faw5s,
-                                color: Colors.black,
+                                color: Colors.grey,
                               ),
                               onPressed: () {
                                 controller.text = '';
@@ -3021,7 +3051,7 @@ class MyHomePageState extends State<MyHomePage>
                               child: TextButton(
                                 child: Text(
                                   'cancel',
-                                  style: TextStyle(color: Colors.black),
+                                  style: TextStyle(color: Colors.grey),
                                 ),
                                 onPressed: () {
                                   Navigator.of(context).pop();
@@ -3074,6 +3104,11 @@ class MyHomePageState extends State<MyHomePage>
         );
       },
     ).then((val) {
+      if (selected == 'medications' && pageController.page == 1) {
+        medOffset = _controllers.offset;
+        print('saved offset ' + medOffset.toString());
+      }
+
       setState(() {
         if (val == null) {
           return;
@@ -3275,23 +3310,23 @@ class MyHomePageState extends State<MyHomePage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'easy',
+                          'not easy',
                           style: TextStyle(
                             fontSize: 10,
                           ),
                         ),
                         Text(
-                          'not easy',
+                          'easy',
                           style: TextStyle(
                             fontSize: 10,
                           ),
-                        )
+                        ),
                       ],
                     ),
                     Divider(),
                     Text('Let us know any other thoughts!\n'),
                     TextField(
-                      keyboardType: TextInputType.name,
+                      keyboardType: TextInputType.text,
                       maxLines: null,
                       decoration: InputDecoration(
                         focusColor: Colors.lightBlue,
@@ -3414,24 +3449,25 @@ class MyHomePageState extends State<MyHomePage>
                                   child: Container(
                                     padding: EdgeInsets.all(10),
                                     child: FittedBox(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        FittedBox(
-                                          child: Text(
-                                            'Feedback  ',
-                                            style:
-                                                TextStyle(color: Colors.black),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          FittedBox(
+                                            child: Text(
+                                              'Feedback  ',
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
                                           ),
-                                        ),
-                                        FittedBox(
-                                            child: Icon(FlutterIcons.speech_sli,
-                                                color: Colors.black)),
-                                      ],
+                                          FittedBox(
+                                              child: Icon(
+                                                  FlutterIcons.speech_sli,
+                                                  color: Colors.black)),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
                               ),
                             ),
                             Expanded(
@@ -3470,7 +3506,9 @@ class MyHomePageState extends State<MyHomePage>
                             ),
                           ],
                         ),
-                        Container(height: MediaQuery.of(context).padding.bottom,)
+                        Container(
+                          height: MediaQuery.of(context).padding.bottom,
+                        )
                       ],
                     ),
                   ),
