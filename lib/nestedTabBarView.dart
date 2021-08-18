@@ -1626,8 +1626,7 @@ class PageTwoState extends State<PageTwo> {
     if (input.contains('T')) {
       return input.substring(0, input.indexOf('T')) +
           ' ' +
-          input.substring(input.indexOf('T') + 1, input.lastIndexOf(':')) +
-          input.substring(input.indexOf(' '));
+          input.substring(input.indexOf('T') + 1);
     }
     return input;
   }
@@ -1708,7 +1707,8 @@ class PageTwoState extends State<PageTwo> {
                   if (returned != null) {
                     eventSplit[i] = returned;
                     globals.log = eventSplit.join('\n');
-
+                    updateTextField();
+                    updateHistory();
                     updateTimeline();
                     setState(() {});
                   }

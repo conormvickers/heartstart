@@ -2461,7 +2461,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   String cutDisplay(String value) {
-    String a = value.substring(value.indexOf('T') + 1, value.indexOf('.') - 3);
+    String a = value.substring(value.indexOf('T') + 1, value.indexOf(' '));
     String b = value.substring(value.indexOf(' '));
     return a + ' ' + b;
   }
@@ -3520,7 +3520,10 @@ class MyHomePageState extends State<MyHomePage>
 
   String getTime() {
     String d = DateTime.now().toIso8601String();
-    return d; //.substring(d.indexOf('T') + 1, d.lastIndexOf(':') );
+    return d.substring(
+        0,
+        d.lastIndexOf(
+            ':')); //.substring(d.indexOf('T') + 1, d.lastIndexOf(':') );
   }
 
   Widget warning() {
@@ -3702,7 +3705,7 @@ class MyHomePageState extends State<MyHomePage>
     if (globals.reset) {
       print("reseting now");
 
-      globals.log = getTime() + " Code Started";
+      addLog("Code Started");
       minPassed = 0;
       secPassed = 0;
       dispSec = 0;
