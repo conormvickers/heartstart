@@ -1585,11 +1585,58 @@ class PageTwoState extends State<PageTwo> {
     puntAutosave();
   }
 
+  Future<String> popupEditor(String info, String current) async {
+    TextEditingController temp = TextEditingController();
+    temp.text = current;
+    temp.selection =
+        TextSelection(baseOffset: 0, extentOffset: temp.text.length);
+
+    String r;
+
+    var response = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(info),
+            content: TextField(
+              maxLines: null,
+              controller: temp,
+              autofocus: true,
+              onEditingComplete: () => {
+                Navigator.pop(context, temp.text),
+              },
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('done'),
+                onPressed: () => {Navigator.pop(context, temp.text)},
+              )
+            ],
+          );
+        });
+    print('response: ' + response.toString());
+    if (response is String) {
+      print('response is a string');
+      r = response;
+    }
+    return r;
+  }
+
+  getDisplayName(String input) {
+    if (input.contains('T')) {
+      return input.substring(0, input.indexOf('T')) +
+          ' ' +
+          input.substring(input.indexOf('T') + 1, input.lastIndexOf(':')) +
+          input.substring(input.indexOf(' '));
+    }
+    return input;
+  }
+
   updateTimeline() {
     setState(() {
       print('updating drawer');
       eventSplit = globals.log.split('\n');
-      timelineTiles = List<Widget>();
+      timelineTiles = [];
       for (int i = 0; i < eventSplit.length; i++) {
         if (eventSplit[i] != '') {
           bool first = false;
@@ -1641,34 +1688,8 @@ class PageTwoState extends State<PageTwo> {
               icon = Icons.check;
             }
           }
-          Widget endChild = Text(rest);
-          if (i == timelineEditing) {
-            TextField txt = TextField(
-              maxLines: null,
-              focusNode: focusEdit,
-              keyboardType: TextInputType.text,
-              controller: timelineEditingController,
-              onEditingComplete: () => {
-                setState(() => {
-                      eventSplit[i] = timelineEditingController.text,
-                      globals.log = eventSplit.join('\n'),
-                      print(globals.log),
-                      timelineEditing = null,
-                      FocusScope.of(context).unfocus(),
-                      updateTimeline(),
-                      updateTextField(),
-                      puntAutosave(),
-                      updateHistory()
-                    })
-              },
-            );
+          Widget endChild = Text(getDisplayName(rest));
 
-            endChild = Container(
-              child: Row(
-                children: [Expanded(child: txt)],
-              ),
-            );
-          }
           TimelineTile add = TimelineTile(
             key: Key(i.toString() + rest),
             alignment: TimelineAlign.manual,
@@ -1681,13 +1702,16 @@ class PageTwoState extends State<PageTwo> {
               height: height,
               alignment: Alignment.center,
               child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    print('tapped' + i.toString());
-                    timelineEditingController.text = eventSplit[i];
-                    editTimeline(i);
+                onTap: () async {
+                  print('tapped' + i.toString());
+                  String returned = await popupEditor("Edit event", rest);
+                  if (returned != null) {
+                    eventSplit[i] = returned;
+                    globals.log = eventSplit.join('\n');
+
                     updateTimeline();
-                  });
+                    setState(() {});
+                  }
                 },
                 child: Row(
                   children: [Expanded(child: endChild), _simplePopup(i)],
