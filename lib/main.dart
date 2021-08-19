@@ -109,18 +109,13 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   IconData chestIcon;
-  List<String> shockDoses = [
-    'EXTERNAL: 20 J mono, 6 J bi\nINTERNAL:l 2 J mono, 1 J bi',
-    'EXTERNAL: 30 J mono, 15 J bi\nINTERNAL: 3 J mono, 2 J bi',
-    'EXTERNAL: 50 J mono, 30 J bi\nINTERNAL: 5 J mono, 3 J bi',
-    'EXTERNAL: 100 J mono, 50 J bi\nINTERNAL: 10 J mono, 5 J bi',
-    'EXTERNAL: 200 J mono, 75 J bi\nINTERNAL: 20 J mono, 6 J bi',
-    'EXTERNAL: 200 J mono, 75 J bi\nINTERNAL: 20 J mono, 8 J bi',
-    'EXTERNAL: 200 J mono, 100 J bi\nINTERNAL: 20 J mono, 9 J bi',
-    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 10 J bi',
-    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
-    'EXTERNAL: 300 J mono, 150 J bi\nINTERNAL: 30 J mono, 15 J bi',
-    'EXTERNAL: 360 J mono, 150 J bi\nINTERNAL: 50 J mono, 15 J bi',
+  List<String> shockTypes = ['External mono', 'External bi', 'Internal mono', 'Internal bi'];
+  List<List<String>> shockDoses = [
+    ['20' ,'30', '50', '100', '200', '200', '200', '300', '300', '300', "300",],
+    ['6', '15' ,'30' ,'50' ,'75', '75' ,'100', '150' ,'150' ,'150', '150' ] ,
+    ['2' ,'3' ,'5' ,'10' ,'20' ,'20' ,'20', '30' ,'30', '30', '50',],
+    [ "1", '2' ,'3' ,'5' ,'6' ,'8' ,'9' ,'10', '15', '15', '15' ],
+
   ];
 
   IconData checkChestType() {
@@ -283,12 +278,15 @@ class MyHomePageState extends State<MyHomePage>
     }
 
     centerIcon = FlutterIcons.heart_ant;
+    chestIcon = FlutterIcons.heart_ant;
     inst = "Continue Compressions";
 
     progressPulseCheck = true;
 
     if (resetlog) {
       globals.log = getTime() + ' Code Started';
+      globals.weightKG = null;
+      globals.chest = null;
     } else {
       addLog('Rearrest');
     }
@@ -469,7 +467,7 @@ class MyHomePageState extends State<MyHomePage>
       } else if (selected == "vfib" || selected == "tors") {
         showShock = true;
         if (globals.weightIndex != null) {
-          _shockType = shockDoses[globals.weightIndex];
+          // _shockType = shockDoses[globals.weightIndex];
         }
         _speechThis(
             'Continue compressions while charging. Ensure clear before shock');
@@ -856,9 +854,13 @@ class MyHomePageState extends State<MyHomePage>
       ElevatedButton(
         style:
             ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
-        onPressed: () {
-          resetEverything(true);
-          Navigator.of(context).pop();
+        onPressed: () async {
+          String ret = await makeSure('start a new code?');
+          if (ret == 'yes') {
+            resetEverything(true);
+            Navigator.of(context).pop();
+          }
+
         },
         child: Row(
           children: [
@@ -910,6 +912,41 @@ class MyHomePageState extends State<MyHomePage>
       ),
       Divider()
     ];
+  }
+
+  Future<String> makeSure(String ask) async {
+    var a =  await showDialog<String>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Just checking'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to'),
+                Text(ask),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop('no');
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop('yes');
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return a;
   }
 
   presentPulseCheckOutcomes() {
@@ -2512,6 +2549,7 @@ class MyHomePageState extends State<MyHomePage>
                               (e) => Container(
                                 height: 40,
                                 decoration: BoxDecoration(
+
                                     border: Border.all(
                                         color: Colors.black, width: 1)),
                                 child: Row(
@@ -2519,6 +2557,7 @@ class MyHomePageState extends State<MyHomePage>
                                       .map((f) => Container(
                                           height: 40,
                                           width: 60,
+                                      color: e.indexOf(f) == _weightValue ? Colors.red.withAlpha(100) : Colors.white,
                                           child: Center(
                                               child: TextButton(
                                                   onPressed: () {
@@ -2577,6 +2616,8 @@ class MyHomePageState extends State<MyHomePage>
     } else if (selected == 'co2') {
     } else if (selected == 'info') {
       return patientInfoWidget(build);
+    }else if (selected == 'shock') {
+      return shockWidget(controller, build);
     }
     return Container();
   }
@@ -2644,8 +2685,8 @@ class MyHomePageState extends State<MyHomePage>
                         min: 0,
                         max: 10,
                         divisions: 10,
-                        value: _weightValue,
-                        label: weightOptions[_weightValue.round()],
+                        value: _weightValue ?? 5,
+                        label: _weightValue == null ? 'none' : weightOptions[_weightValue.round()],
                         onChanged: (value) {
                           build(
                             () {
@@ -2680,15 +2721,12 @@ class MyHomePageState extends State<MyHomePage>
                   child: TabBar(
                     controller: chestTypeController,
                     onTap: (tabby) {
-                      globals.weightKG = weightkgOptions[_weightValue.round()];
-                      globals.weightIndex = _weightValue.round();
+
                       globals.chest = chestTypes[chestTypeController.index];
 
                       centerIcon = chestIcons[chestTypeController.index];
                       chestIcon = chestIcons[chestTypeController.index];
 
-                      print('set weight to: ' +
-                          weightkgOptions[_weightValue.round()].toString());
                       for (MedListItem item in medItems) {
                         item.buildSubtitle(context);
                       }
@@ -2717,7 +2755,7 @@ class MyHomePageState extends State<MyHomePage>
     Future.delayed(Duration(milliseconds: 400), () {
       build(() {
         _controllers.animateTo(medOffset,
-            curve: Curves.bounceOut, duration: Duration(milliseconds: 300));
+            curve: Curves.easeOut, duration: Duration(milliseconds: 300));
       });
     });
   }
@@ -2728,13 +2766,17 @@ class MyHomePageState extends State<MyHomePage>
     Chesttypes.keel,
     Chesttypes.round,
   ];
-  double _weightValue = 5;
+  double _weightValue;
   List<double> weightkgOptions = [2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   TabController chestTypeController;
   TextInputType keyboardType = TextInputType.text;
   bool showHelpers = true;
   bool madeMeds = false;
+  bool showingRecorder = false;
   openRecorder([bool secondPage = false]) async {
+    if (showingRecorder) {
+      Navigator.of(context).pop();
+    }
     TextEditingController controller = TextEditingController();
     FocusNode focusHere = FocusNode();
     keyboardType = TextInputType.text;
@@ -2752,6 +2794,7 @@ class MyHomePageState extends State<MyHomePage>
     await showDialog(
       context: context,
       builder: (BuildContext context) {
+        showingRecorder = true;
         return Dialog(
           insetPadding: EdgeInsets.symmetric(horizontal: 8),
           child: StatefulBuilder(builder: (context, StateSetter build) {
@@ -2849,49 +2892,69 @@ class MyHomePageState extends State<MyHomePage>
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
+
                                         Expanded(
                                           child: FittedBox(
-                                            child: IconButton(
-                                                tooltip: 'Medications',
-                                                icon: Icon(
-                                                  FlutterIcons.pill_mco,
-                                                  color: Colors.grey,
-                                                ),
-                                                onPressed: () {
-                                                  build(() {
-                                                    keyboardType =
-                                                        TextInputType.text;
-                                                    selected = 'medications';
-                                                  });
-                                                  pageController.animateToPage(
-                                                      1,
-                                                      duration: Duration(
-                                                          milliseconds: 300),
-                                                      curve: Curves.easeOut);
-                                                  getMedOffset(build);
-                                                }),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: FittedBox(
-                                            child: IconButton(
-                                                tooltip: 'Pulse Check',
-                                                icon: Icon(
-                                                  FlutterIcons.pulse_mco,
-                                                  color: Colors.grey,
-                                                ),
-                                                onPressed: () {
-                                                  build(() {
-                                                    keyboardType =
-                                                        TextInputType.text;
-                                                    selected = 'pulse';
-                                                  });
-                                                  pageController.animateToPage(
-                                                      1,
-                                                      duration: Duration(
-                                                          milliseconds: 300),
-                                                      curve: Curves.easeOut);
-                                                }),
+                                            child: Row(
+                                              children: [
+                                                IconButton(
+                                                    tooltip: 'Medications',
+                                                    icon: Icon(
+                                                      FlutterIcons.pill_mco,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    onPressed: () {
+                                                      build(() {
+                                                        keyboardType =
+                                                            TextInputType.text;
+                                                        selected = 'medications';
+                                                      });
+                                                      pageController.animateToPage(
+                                                          1,
+                                                          duration: Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeOut);
+                                                      getMedOffset(build);
+                                                    }),
+                                                IconButton(
+                                                    tooltip: 'Pulse Check',
+                                                    icon: Icon(
+                                                      FlutterIcons.pulse_mco,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    onPressed: () {
+                                                      build(() {
+                                                        keyboardType =
+                                                            TextInputType.text;
+                                                        selected = 'pulse';
+                                                      });
+                                                      pageController.animateToPage(
+                                                          1,
+                                                          duration: Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeOut);
+                                                    }),
+                                                IconButton(
+                                                    tooltip: 'Shock',
+                                                    icon: Icon(
+                                                      FlutterIcons.wi_lightning_wea,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    onPressed: () {
+                                                      build(() {
+                                                        keyboardType =
+                                                            TextInputType.text;
+                                                        selected = 'shock';
+                                                      });
+                                                      pageController.animateToPage(
+                                                          1,
+                                                          duration: Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeOut);
+                                                      getMedOffset(build);
+                                                    }),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -3104,6 +3167,7 @@ class MyHomePageState extends State<MyHomePage>
         );
       },
     ).then((val) {
+      showingRecorder = false;
       if (selected == 'medications' && pageController.page == 1) {
         medOffset = _controllers.offset;
         print('saved offset ' + medOffset.toString());
@@ -3123,6 +3187,103 @@ class MyHomePageState extends State<MyHomePage>
     });
   }
 
+  Widget shockWidget(TextEditingController controller, StateSetter build) {
+    getMedOffset(build);
+    return Stack(
+      children: [
+        SingleChildScrollView(
+            child: Row(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      height: 40,
+                    ),
+                    ...shockTypes
+                        .map((e) => Container(
+                        decoration: BoxDecoration(
+                            border:
+                            Border.all(color: Colors.black, width: 1)),
+                        height: 40,
+                        width: 150,
+                        child: Center(child: Text(e))))
+                        .toList(),
+                  ],
+                ),
+                Expanded(
+                  child: Container(
+                    child: SingleChildScrollView(
+                      controller: _letters,
+                      scrollDirection: Axis.horizontal,
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 40,
+                          ),
+                          ...shockDoses
+                              .map(
+                                (e) => Container(
+                              height: 40,
+                              decoration: BoxDecoration(
+
+                                  border: Border.all(
+                                      color: Colors.black, width: 1)),
+                              child: Row(
+                                children: e.asMap().map((i, f) => MapEntry(i, Container(
+                                    height: 40,
+                                    width: 60,
+                                    color: i == _weightValue ? Colors.red.withAlpha(100) : Colors.white,
+                                    child: Center(
+                                        child: TextButton(
+                                            onPressed: () {
+                                              if (controller != null) {
+                                                controller.text = f + ' J';
+                                              }
+                                            },
+                                            child: Text(f))))))
+                                    .values.toList(),
+                              ),
+                            ),
+                          )
+                              .toList(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+        Row(
+          children: [
+            Container(
+              width: 150,
+              height: 40,
+              color: Colors.white,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: _numbers,
+                child: Row(
+                  children: weightOptions
+                      .map((e) => Container(
+                      width: 60,
+                      height: 40,
+                      decoration: BoxDecoration(color: Colors.lightBlue),
+                      child: Center(
+                          child: Text(
+                            e,
+                            style: TextStyle(color: Colors.white),
+                          ))))
+                      .toList(),
+                ),
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
   bool awaitingShock = false;
   showWaitingForShock() async {
     await showDialog(
@@ -3142,7 +3303,13 @@ class MyHomePageState extends State<MyHomePage>
               ],
             ),
           ),
-          content: Text('Continue compressions while charging'),
+          content: StatefulBuilder(builder: (context, StateSetter build) { return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(child: Text('Continue compressions while charging')),
+              shockWidget(null, build)
+            ],
+          );}),
           actions: <Widget>[
             Container(
               constraints:

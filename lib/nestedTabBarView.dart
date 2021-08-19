@@ -3437,24 +3437,24 @@ class PageTwoState extends State<PageTwo> {
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () => filePickerFunction(),
-                          child: Container(
-                              padding: EdgeInsets.all(15),
-                              child: Container(
-                                  padding: EdgeInsets.all(15),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    color: Colors.lightBlue,
-                                  ),
-                                  child: Icon(
-                                    FlutterIcons.folder_search_outline_mco,
-                                    color: Colors.white,
-                                    size: 40,
-                                  )
-                                  //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
-                                  )),
-                        ),
+                        // GestureDetector(
+                        //   onTap: () => filePickerFunction(),
+                        //   child: Container(
+                        //       padding: EdgeInsets.all(15),
+                        //       child: Container(
+                        //           padding: EdgeInsets.all(15),
+                        //           decoration: BoxDecoration(
+                        //             borderRadius: BorderRadius.circular(30),
+                        //             color: Colors.lightBlue,
+                        //           ),
+                        //           child: Icon(
+                        //             FlutterIcons.folder_search_outline_mco,
+                        //             color: Colors.white,
+                        //             size: 40,
+                        //           )
+                        //           //Text('Load', style: TextStyle(color: Colors.white, fontSize: 30),),
+                        //           )),
+                        // ),
                       ],
                     ),
                   )
