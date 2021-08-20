@@ -2379,7 +2379,7 @@ class PageTwoState extends State<PageTwo> {
                 textAlign: TextAlign.center,
               ),
             ),
-            Expanded(child: Icon(FlutterIcons.md_options_ion))
+            Expanded(child: Icon(FlutterIcons.settings_mco))
           ],
         ),
       ),

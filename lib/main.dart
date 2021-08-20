@@ -109,13 +109,41 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   IconData chestIcon;
-  List<String> shockTypes = ['External mono', 'External bi', 'Internal mono', 'Internal bi'];
+  List<String> shockTypes = [
+    'External mono',
+    'External bi',
+    'Internal mono',
+    'Internal bi'
+  ];
   List<List<String>> shockDoses = [
-    ['20' ,'30', '50', '100', '200', '200', '200', '300', '300', '300', "300",],
-    ['6', '15' ,'30' ,'50' ,'75', '75' ,'100', '150' ,'150' ,'150', '150' ] ,
-    ['2' ,'3' ,'5' ,'10' ,'20' ,'20' ,'20', '30' ,'30', '30', '50',],
-    [ "1", '2' ,'3' ,'5' ,'6' ,'8' ,'9' ,'10', '15', '15', '15' ],
-
+    [
+      '20',
+      '30',
+      '50',
+      '100',
+      '200',
+      '200',
+      '200',
+      '300',
+      '300',
+      '300',
+      "300",
+    ],
+    ['6', '15', '30', '50', '75', '75', '100', '150', '150', '150', '150'],
+    [
+      '2',
+      '3',
+      '5',
+      '10',
+      '20',
+      '20',
+      '20',
+      '30',
+      '30',
+      '30',
+      '50',
+    ],
+    ["1", '2', '3', '5', '6', '8', '9', '10', '15', '15', '15'],
   ];
 
   IconData checkChestType() {
@@ -860,7 +888,6 @@ class MyHomePageState extends State<MyHomePage>
             resetEverything(true);
             Navigator.of(context).pop();
           }
-
         },
         child: Row(
           children: [
@@ -915,7 +942,7 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   Future<String> makeSure(String ask) async {
-    var a =  await showDialog<String>(
+    var a = await showDialog<String>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
@@ -2549,7 +2576,6 @@ class MyHomePageState extends State<MyHomePage>
                               (e) => Container(
                                 height: 40,
                                 decoration: BoxDecoration(
-
                                     border: Border.all(
                                         color: Colors.black, width: 1)),
                                 child: Row(
@@ -2557,7 +2583,9 @@ class MyHomePageState extends State<MyHomePage>
                                       .map((f) => Container(
                                           height: 40,
                                           width: 60,
-                                      color: e.indexOf(f) == _weightValue ? Colors.red.withAlpha(100) : Colors.white,
+                                          color: e.indexOf(f) == _weightValue
+                                              ? Colors.red.withAlpha(100)
+                                              : Colors.white,
                                           child: Center(
                                               child: TextButton(
                                                   onPressed: () {
@@ -2616,7 +2644,7 @@ class MyHomePageState extends State<MyHomePage>
     } else if (selected == 'co2') {
     } else if (selected == 'info') {
       return patientInfoWidget(build);
-    }else if (selected == 'shock') {
+    } else if (selected == 'shock') {
       return shockWidget(controller, build);
     }
     return Container();
@@ -2686,7 +2714,9 @@ class MyHomePageState extends State<MyHomePage>
                         max: 10,
                         divisions: 10,
                         value: _weightValue ?? 5,
-                        label: _weightValue == null ? 'none' : weightOptions[_weightValue.round()],
+                        label: _weightValue == null
+                            ? 'none'
+                            : weightOptions[_weightValue.round()],
                         onChanged: (value) {
                           build(
                             () {
@@ -2721,7 +2751,6 @@ class MyHomePageState extends State<MyHomePage>
                   child: TabBar(
                     controller: chestTypeController,
                     onTap: (tabby) {
-
                       globals.chest = chestTypes[chestTypeController.index];
 
                       centerIcon = chestIcons[chestTypeController.index];
@@ -2892,7 +2921,6 @@ class MyHomePageState extends State<MyHomePage>
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-
                                         Expanded(
                                           child: FittedBox(
                                             child: Row(
@@ -2907,13 +2935,16 @@ class MyHomePageState extends State<MyHomePage>
                                                       build(() {
                                                         keyboardType =
                                                             TextInputType.text;
-                                                        selected = 'medications';
+                                                        selected =
+                                                            'medications';
                                                       });
-                                                      pageController.animateToPage(
-                                                          1,
-                                                          duration: Duration(
-                                                              milliseconds: 300),
-                                                          curve: Curves.easeOut);
+                                                      pageController
+                                                          .animateToPage(1,
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      300),
+                                                              curve: Curves
+                                                                  .easeOut);
                                                       getMedOffset(build);
                                                     }),
                                                 IconButton(
@@ -2928,16 +2959,19 @@ class MyHomePageState extends State<MyHomePage>
                                                             TextInputType.text;
                                                         selected = 'pulse';
                                                       });
-                                                      pageController.animateToPage(
-                                                          1,
-                                                          duration: Duration(
-                                                              milliseconds: 300),
-                                                          curve: Curves.easeOut);
+                                                      pageController
+                                                          .animateToPage(1,
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      300),
+                                                              curve: Curves
+                                                                  .easeOut);
                                                     }),
                                                 IconButton(
                                                     tooltip: 'Shock',
                                                     icon: Icon(
-                                                      FlutterIcons.wi_lightning_wea,
+                                                      FlutterIcons
+                                                          .wi_lightning_wea,
                                                       color: Colors.grey,
                                                     ),
                                                     onPressed: () {
@@ -2946,11 +2980,13 @@ class MyHomePageState extends State<MyHomePage>
                                                             TextInputType.text;
                                                         selected = 'shock';
                                                       });
-                                                      pageController.animateToPage(
-                                                          1,
-                                                          duration: Duration(
-                                                              milliseconds: 300),
-                                                          curve: Curves.easeOut);
+                                                      pageController
+                                                          .animateToPage(1,
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      300),
+                                                              curve: Curves
+                                                                  .easeOut);
                                                       getMedOffset(build);
                                                     }),
                                               ],
@@ -3188,71 +3224,85 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   Widget shockWidget(TextEditingController controller, StateSetter build) {
-    getMedOffset(build);
     return Stack(
       children: [
         SingleChildScrollView(
             child: Row(
+          children: [
+            Column(
               children: [
-                Column(
-                  children: [
-                    Container(
-                      height: 40,
-                    ),
-                    ...shockTypes
-                        .map((e) => Container(
+                Container(
+                  height: 40,
+                ),
+                ...shockTypes
+                    .map((e) => Container(
                         decoration: BoxDecoration(
-                            border:
-                            Border.all(color: Colors.black, width: 1)),
+                            border: Border.all(color: Colors.black, width: 1)),
                         height: 40,
                         width: 150,
                         child: Center(child: Text(e))))
-                        .toList(),
-                  ],
-                ),
-                Expanded(
-                  child: Container(
-                    child: SingleChildScrollView(
-                      controller: _letters,
-                      scrollDirection: Axis.horizontal,
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 40,
-                          ),
-                          ...shockDoses
-                              .map(
-                                (e) => Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-
-                                  border: Border.all(
-                                      color: Colors.black, width: 1)),
-                              child: Row(
-                                children: e.asMap().map((i, f) => MapEntry(i, Container(
-                                    height: 40,
-                                    width: 60,
-                                    color: i == _weightValue ? Colors.red.withAlpha(100) : Colors.white,
-                                    child: Center(
-                                        child: TextButton(
-                                            onPressed: () {
-                                              if (controller != null) {
-                                                controller.text = f + ' J';
-                                              }
-                                            },
-                                            child: Text(f))))))
-                                    .values.toList(),
-                              ),
-                            ),
-                          )
-                              .toList(),
-                        ],
+                    .toList(),
+              ],
+            ),
+            Expanded(
+              child: Container(
+                child: SingleChildScrollView(
+                  controller: _letters,
+                  scrollDirection: Axis.horizontal,
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 40,
                       ),
-                    ),
+                      ...shockDoses
+                          .asMap()
+                          .map((j, e) => MapEntry(
+                                j,
+                                Container(
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.black, width: 1)),
+                                  child: Row(
+                                    children: e
+                                        .asMap()
+                                        .map((i, f) => MapEntry(
+                                            i,
+                                            Container(
+                                                height: 40,
+                                                width: 60,
+                                                color: i == _weightValue
+                                                    ? Colors.red.withAlpha(100)
+                                                    : Colors.white,
+                                                child: Center(
+                                                    child: TextButton(
+                                                        onPressed: () {
+                                                          if (controller !=
+                                                              null) {
+                                                            controller.text =
+                                                                'Shock: ' +
+                                                                    shockTypes[
+                                                                        j] +
+                                                                    ' ' +
+                                                                    f +
+                                                                    ' J';
+                                                          }
+                                                        },
+                                                        child: Text(f))))))
+                                        .values
+                                        .toList(),
+                                  ),
+                                ),
+                              ))
+                          .values
+                          .toList(),
+                    ],
                   ),
                 ),
-              ],
-            )),
+              ),
+            ),
+          ],
+        )),
         Row(
           children: [
             Container(
@@ -3267,11 +3317,11 @@ class MyHomePageState extends State<MyHomePage>
                 child: Row(
                   children: weightOptions
                       .map((e) => Container(
-                      width: 60,
-                      height: 40,
-                      decoration: BoxDecoration(color: Colors.lightBlue),
-                      child: Center(
-                          child: Text(
+                          width: 60,
+                          height: 40,
+                          decoration: BoxDecoration(color: Colors.lightBlue),
+                          child: Center(
+                              child: Text(
                             e,
                             style: TextStyle(color: Colors.white),
                           ))))
@@ -3284,13 +3334,18 @@ class MyHomePageState extends State<MyHomePage>
       ],
     );
   }
+
   bool awaitingShock = false;
+
   showWaitingForShock() async {
+    bool first = true;
+    TextEditingController displayCont = TextEditingController();
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         awaitingShock = true;
         return AlertDialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 8),
           title: Container(
             constraints:
                 BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
@@ -3298,18 +3353,31 @@ class MyHomePageState extends State<MyHomePage>
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Icon(FlutterIcons.wi_lightning_wea, color: Colors.black),
                 Text('Shock Indicated', style: TextStyle(color: Colors.black)),
                 Icon(FlutterIcons.wi_lightning_wea, color: Colors.black),
               ],
             ),
           ),
-          content: StatefulBuilder(builder: (context, StateSetter build) { return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(child: Text('Continue compressions while charging')),
-              shockWidget(null, build)
-            ],
-          );}),
+          content: StatefulBuilder(builder: (context, StateSetter build) {
+            if (first) {
+              first = false;
+              getMedOffset(build);
+            }
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(child: Text('Continue compressions while charging')),
+                shockWidget(displayCont, build),
+                TextField(
+                  controller: displayCont,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 10),
+                  enabled: false,
+                )
+              ],
+            );
+          }),
           actions: <Widget>[
             Container(
               constraints:
@@ -3338,8 +3406,7 @@ class MyHomePageState extends State<MyHomePage>
                             maxLines: 1, style: TextStyle(color: Colors.white)),
                       ),
                       onPressed: () {
-                        globals.log =
-                            globals.log + '\n' + getTime() + ' Shock Delivered';
+                        addLog(displayCont.text);
                         fractionPulse = 0;
                         updateCircle();
                         Navigator.of(context).pop();
@@ -3931,26 +3998,17 @@ class MyHomePageState extends State<MyHomePage>
             width: 100,
           )
         ],
-        title: Row(
+        flexibleSpace: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Expanded(
-              child: Container(
-                  height: 50,
-                  child: Image.asset(
-                    kIsWeb
-                        ? 'recover-logo-250.png'
-                        : 'assets/recover-logo-250.png',
-                    fit: BoxFit.fitHeight,
-                  )),
-            )
-            // Text(
-            //   "RECOVER",
-            //   style: TextStyle(color: Colors.lightBlue),
-            // ),
-            // Icon(
-            //   FlutterIcons.ios_medical_ion,
-            //   color: Theme.of(context).splashColor,
-            // )
+            Container(
+                height: 50,
+                child: Image.asset(
+                  kIsWeb
+                      ? 'recover-logo-250.png'
+                      : 'assets/recover-logo-250.png',
+                  fit: BoxFit.fitHeight,
+                )),
           ],
         ),
         leading: Container(
@@ -3958,7 +4016,7 @@ class MyHomePageState extends State<MyHomePage>
           child: Builder(
             builder: (context) => IconButton(
               icon: Icon(
-                FlutterIcons.ios_options_ion,
+                FlutterIcons.settings_mco,
                 color: Colors.lightBlue,
               ),
               onPressed: () =>
