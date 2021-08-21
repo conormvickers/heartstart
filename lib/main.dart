@@ -314,6 +314,7 @@ class MyHomePageState extends State<MyHomePage>
     if (resetlog) {
       globals.log = getTime() + ' Code Started';
       globals.weightKG = null;
+      globals.weightIndex = null;
       globals.chest = null;
     } else {
       addLog('Rearrest');
@@ -997,7 +998,7 @@ class MyHomePageState extends State<MyHomePage>
                     ),
                     height: 100,
                     child: AutoSizeText(
-                      'GOT A PULSE',
+                      'GOT PULSE',
                       style: TextStyle(
                         fontSize: 40,
                         color: Colors.white,
@@ -1990,22 +1991,30 @@ class MyHomePageState extends State<MyHomePage>
                           child: ElevatedButton(
                             child: Container(
                               padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: FittedBox(
-                                      child: Center(
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: FittedBox(
                                         child: Text(
                                           'Tap With Compressions',
+                                          textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: Colors.white,
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    Expanded(
+                                      child: FittedBox(
+                                        child: Icon(
+                                          FlutterIcons.hand_pointer_faw5s,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                             onPressed: _handleTap,
@@ -2580,23 +2589,34 @@ class MyHomePageState extends State<MyHomePage>
                                         color: Colors.black, width: 1)),
                                 child: Row(
                                   children: e
-                                      .map((f) => Container(
-                                          height: 40,
-                                          width: 60,
-                                          color: e.indexOf(f) == _weightValue
-                                              ? Colors.red.withAlpha(100)
-                                              : Colors.white,
-                                          child: Center(
-                                              child: TextButton(
-                                                  onPressed: () {
-                                                    controller.text = _kOptions[
-                                                            medDoses
-                                                                .indexOf(e)] +
-                                                        ' ' +
-                                                        f +
-                                                        'mL';
-                                                  },
-                                                  child: Text(f)))))
+                                      .asMap()
+                                      .map((i, f) => MapEntry(
+                                          i,
+                                          Container(
+                                              height: 40,
+                                              width: 60,
+                                              color: e.indexOf(f) ==
+                                                      globals.weightIndex
+                                                  ? Colors.red.withAlpha(100)
+                                                  : Colors.white,
+                                              child: Center(
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        if (globals.weightKG ==
+                                                            null) {
+                                                          setWeight(
+                                                              i.toDouble());
+                                                        }
+                                                        controller.text =
+                                                            _kOptions[medDoses
+                                                                    .indexOf(
+                                                                        e)] +
+                                                                ' ' +
+                                                                f +
+                                                                'mL';
+                                                      },
+                                                      child: Text(f))))))
+                                      .values
                                       .toList(),
                                 ),
                               ),
@@ -2651,6 +2671,14 @@ class MyHomePageState extends State<MyHomePage>
   }
 
   Widget patientInfoWidget(StateSetter build) {
+    print('building with ' +
+        globals.weightKG.toString() +
+        globals.weightIndex.toString());
+    double valueWeight = 5;
+    if (globals.weightIndex != null) {
+      valueWeight = globals.weightIndex.toDouble();
+    }
+
     return Container(
       decoration:
           BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
@@ -2713,15 +2741,14 @@ class MyHomePageState extends State<MyHomePage>
                         min: 0,
                         max: 10,
                         divisions: 10,
-                        value: _weightValue ?? 5,
-                        label: _weightValue == null
+                        value: valueWeight,
+                        label: globals.weightKG == null
                             ? 'none'
-                            : weightOptions[_weightValue.round()],
+                            : weightOptions[globals.weightIndex],
                         onChanged: (value) {
                           build(
                             () {
-                              _weightValue = value;
-                              medOffset = 60 * _weightValue;
+                              setWeight(value);
                             },
                           );
                         },
@@ -2780,6 +2807,12 @@ class MyHomePageState extends State<MyHomePage>
     );
   }
 
+  setWeight(double value) {
+    globals.weightIndex = value.toInt();
+    globals.weightKG = weightkgOptions[value.toInt()];
+    medOffset = 60 * globals.weightIndex.toDouble();
+  }
+
   getMedOffset(StateSetter build) async {
     Future.delayed(Duration(milliseconds: 400), () {
       build(() {
@@ -2795,7 +2828,7 @@ class MyHomePageState extends State<MyHomePage>
     Chesttypes.keel,
     Chesttypes.round,
   ];
-  double _weightValue;
+
   List<double> weightkgOptions = [2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   TabController chestTypeController;
   TextInputType keyboardType = TextInputType.text;
@@ -3213,11 +3246,13 @@ class MyHomePageState extends State<MyHomePage>
         if (val == null) {
           return;
         }
-
-        globals.log = globals.log + '\n' + getTime() + ' ' + val;
+        addLog(val);
         if (val.toString().toLowerCase().contains('v fib') ||
             val.toString().toLowerCase().contains('v tach')) {
           showWaitingForShock();
+        }
+        if (val.toString().toLowerCase().contains('got pulse')) {
+          _ensureStopCode();
         }
       });
     });
@@ -3271,12 +3306,18 @@ class MyHomePageState extends State<MyHomePage>
                                             Container(
                                                 height: 40,
                                                 width: 60,
-                                                color: i == _weightValue
+                                                color: i == globals.weightIndex
                                                     ? Colors.red.withAlpha(100)
                                                     : Colors.white,
                                                 child: Center(
                                                     child: TextButton(
                                                         onPressed: () {
+                                                          if (globals
+                                                                  .weightKG ==
+                                                              null) {
+                                                            setWeight(
+                                                                i.toDouble());
+                                                          }
                                                           if (controller !=
                                                               null) {
                                                             controller.text =
@@ -3673,7 +3714,7 @@ class MyHomePageState extends State<MyHomePage>
                                           MaterialStateProperty.all<double>(0),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.transparent),
+                                              Colors.white),
                                       shape: MaterialStateProperty.all<
                                               RoundedRectangleBorder>(
                                           RoundedRectangleBorder(

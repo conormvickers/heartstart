@@ -1035,11 +1035,18 @@ class NestedTabBarState extends State<NestedTabBar>
                               ),
                               Padding(
                                 padding: EdgeInsets.all(15),
-                                child: AutoSizeText(
-                                  'Tap With Compressions',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 40),
-                                  maxLines: 1,
+                                child: FittedBox(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Tap With Compressions',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 40),
+                                        maxLines: 1,
+                                      ),
+                                      Icon(FlutterIcons.pointer_evi)
+                                    ],
+                                  ),
                                 ),
                               ),
                               Material(
@@ -2549,7 +2556,7 @@ class PageTwoState extends State<PageTwo> {
                     children: [
                       IconButton(
                         icon: Icon(
-                          FlutterIcons.ios_options_ion,
+                          FlutterIcons.setting_ant,
                           color: Colors.lightBlue,
                         ),
                         onPressed: () => {Scaffold.of(context).openDrawer()},
@@ -3339,7 +3346,7 @@ class PageTwoState extends State<PageTwo> {
                       children: [
                         IconButton(
                           icon: Icon(
-                            FlutterIcons.ios_options_ion,
+                            FlutterIcons.settings_mco,
                             color: Colors.lightBlue,
                           ),
                           onPressed: () => {Scaffold.of(context).openDrawer()},

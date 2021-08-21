@@ -19,6 +19,16 @@ String dob;
 String breed;
 double weightKG;
 List<String> info = [
-  '','','','','','','','','','','',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
 ];
 //Event data, Doctor, Patient name, mrn, client name, sex, DOB, weight, chest, breed
