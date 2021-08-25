@@ -1472,6 +1472,7 @@ class PageTwoState extends State<PageTwo> {
   }
 
   Widget _simplePopup(int i) => PopupMenuButton<int>(
+    icon: Container(),//Icon(FlutterIcons.menu_mco),
         itemBuilder: (context) => [
           PopupMenuItem(
             value: 1,
@@ -2439,12 +2440,7 @@ class PageTwoState extends State<PageTwo> {
           : Expanded(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: 100),
-                child: FadeInImage.memoryNetwork(
-                  placeholder: kTransparentImage,
-                  image:
-                      'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
-                  fit: BoxFit.fitWidth,
-                ),
+                child: Image.asset('ad.jpeg'),
               ),
             ),
       ElevatedButton(
@@ -2492,6 +2488,67 @@ class PageTwoState extends State<PageTwo> {
   Widget anesthesiaOpener;
   Widget euthanasiaOpener;
 
+  Widget appBar() {
+    return AppBar(
+        automaticallyImplyLeading: false,
+        flexibleSpace: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(width: 8),
+                Container(
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                        MaterialStateProperty.all(Colors.red),
+                        shape: MaterialStateProperty.all<
+                            RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                            ))),
+                    child: Row(
+                      children: [
+                        Icon(
+                          FlutterIcons.chevron_left_ent,
+                          color: Colors.white,
+                        ),
+                        Text('RE-ARREST',
+                            style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                    onPressed: () => {askRearrest()},
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        elevation: 1.0,
+        actions: [
+          Builder(
+            builder: (context) => Container(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      FlutterIcons.settings_mco,
+                      color: Colors.lightBlue,
+                    ),
+                    onPressed: () => {Scaffold.of(context).openDrawer()},
+                  ),
+                  ...undoButtons(),
+                  closeButton()
+                ],
+              ),
+            ),
+          )
+        ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     print('build starting');
@@ -2505,69 +2562,7 @@ class PageTwoState extends State<PageTwo> {
             children: settingItems(),
           ),
         ),
-        appBar: AppBar(
-            automaticallyImplyLeading: false,
-            flexibleSpace: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(width: 8),
-                    Container(
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(Colors.red),
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                            ))),
-                        child: Row(
-                          children: [
-                            Icon(
-                              FlutterIcons.chevron_left_ent,
-                              color: Colors.white,
-                            ),
-                            Text('RE-ARREST',
-                                style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                        onPressed: () => {askRearrest()},
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            title: Container(
-                height: 50,
-                child: Image.asset(
-                  'assets/recover-logo-250.png',
-                  fit: BoxFit.fitHeight,
-                )),
-            elevation: 1.0,
-            actions: [
-              Builder(
-                builder: (context) => Container(
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          FlutterIcons.setting_ant,
-                          color: Colors.lightBlue,
-                        ),
-                        onPressed: () => {Scaffold.of(context).openDrawer()},
-                      ),
-                      ...undoButtons(),
-                      closeButton()
-                    ],
-                  ),
-                ),
-              )
-            ]),
+        appBar: appBar(),
         body: Stack(
           children: [
             Column(
@@ -3300,64 +3295,7 @@ class PageTwoState extends State<PageTwo> {
               children: settingItems(),
             ),
           ),
-          appBar: AppBar(
-              automaticallyImplyLeading: false,
-              flexibleSpace: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(width: 8),
-                      Container(
-                        child: ElevatedButton(
-                          style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.red),
-                              shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.0),
-                              ))),
-                          child: Row(
-                            children: [
-                              Icon(
-                                FlutterIcons.chevron_left_ent,
-                                color: Colors.white,
-                              ),
-                              Text('RE-ARREST',
-                                  style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          onPressed: () => {askRearrest()},
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              elevation: 1.0,
-              actions: [
-                Builder(
-                  builder: (context) => Container(
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            FlutterIcons.settings_mco,
-                            color: Colors.lightBlue,
-                          ),
-                          onPressed: () => {Scaffold.of(context).openDrawer()},
-                        ),
-                        ...undoButtons(),
-                        closeButton()
-                      ],
-                    ),
-                  ),
-                )
-              ]),
+          appBar: appBar(),
           bottomNavigationBar: ConvexAppBar.badge(
             const <int, dynamic>{3: '2'},
             style: TabStyle.reactCircle,
@@ -3404,12 +3342,7 @@ class PageTwoState extends State<PageTwo> {
                                   child: Row(
                                     children: [
                                       Expanded(
-                                        child: FadeInImage.memoryNetwork(
-                                          placeholder: kTransparentImage,
-                                          image:
-                                              'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
-                                          fit: BoxFit.fitWidth,
-                                        ),
+                                        child: Image.asset('ad.jpeg'),
                                       ),
                                       Container(
                                         padding: EdgeInsets.symmetric(

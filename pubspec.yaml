@@ -64,6 +64,8 @@ dependencies:
   modal_bottom_sheet: ^2.0.0
   flutter_typeahead: ^2.0.0
   linked_scroll_controller: ^0.2.0
+  flutter_svg: ^0.19.3
+  mailto: ^2.0.0
 
 
 

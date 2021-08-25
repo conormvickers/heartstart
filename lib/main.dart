@@ -29,6 +29,8 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'dart:math' as math;
 import 'package:customgauge/customgauge.dart';
 import 'package:flutterheart/chesttypes_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mailto/mailto.dart';
 
 void main() {
   runApp(MyApp());
@@ -455,12 +457,12 @@ class MyHomePageState extends State<MyHomePage>
         player.setVolume(0);
         playerB.setVolume(0);
         vibrate();
-        if (handsFree) {
-          print('starting auto reset timer');
-          Future.delayed(Duration(seconds: 10), () {
-            autoRestartCycle();
-          });
-        }
+        // if (handsFree) {
+        //   print('starting auto reset timer');
+        //   Future.delayed(Duration(seconds: 10), () {
+        //     autoRestartCycle();
+        //   });
+        // }
       } else {
         barColor = Theme.of(context).splashColor;
         inst = "Continue Compressions";
@@ -793,13 +795,24 @@ class MyHomePageState extends State<MyHomePage>
   );
 
   sendEmail(String string) async {
-    final Email email = Email(
-      body: string,
-      subject: 'RECOVER APP FEEDBACK/BUG REPORT',
-      recipients: ['recoverfeedback@gmail.com'],
-    );
 
-    await FlutterEmailSender.send(email);
+    if (kIsWeb) {
+      final mailtoLink = Mailto(
+        to: ['recoverfeedback@gmail.com'],
+        subject: 'RECOVER APP FEEDBACK/BUG REPORT',
+        body: string,
+      );
+      await launch('$mailtoLink');
+    }else{
+      final Email email = Email(
+        body: string,
+        subject: 'RECOVER APP FEEDBACK/BUG REPORT',
+        recipients: ['recoverfeedback@gmail.com'],
+      );
+
+      await FlutterEmailSender.send(email);
+    }
+
   }
 
   List<Widget> settingItems() {
@@ -902,17 +915,10 @@ class MyHomePageState extends State<MyHomePage>
           ],
         ),
       ),
-      kIsWeb
-          ? Container()
-          : Expanded(
+     Expanded(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: 100),
-                child: FadeInImage.memoryNetwork(
-                  placeholder: kTransparentImage,
-                  image:
-                      'https://recoverinitiative.org/wp-content/uploads/2018/11/intubating_dog_compressions.jpg',
-                  fit: BoxFit.fitWidth,
-                ),
+                child: Image.asset('ad.jpeg'),
               ),
             ),
       ElevatedButton(
@@ -977,261 +983,261 @@ class MyHomePageState extends State<MyHomePage>
     return a;
   }
 
-  presentPulseCheckOutcomes() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15), topRight: Radius.circular(15))),
-        child: ListView(
-          children: [
-            Column(
-              children: <Widget>[
-                ListTile(
-                  title: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).accentColor,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    height: 100,
-                    child: AutoSizeText(
-                      'GOT PULSE',
-                      style: TextStyle(
-                        fontSize: 40,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    alignment: Alignment.center,
-                  ),
-                  onTap: () => {_selectedPulse('pulse')},
-                ),
-                ListTile(
-                  title: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      height: 100,
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            flex: 5,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 4,
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: Container(),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                                top: BorderSide(
-                                                    width: 2,
-                                                    color: Colors.white)),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FittedBox(
-                                    fit: BoxFit.fitWidth,
-                                    child: Container(
-                                      width: 1000,
-                                      alignment: Alignment.center,
-                                      child: AutoSizeText(
-                                        'Asystole - no shock',
-                                        style: TextStyle(
-                                            fontSize: 40, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )),
-                  onTap: () => {_selectedPulse('asystole')},
-                ),
-                ListTile(
-                  title: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      height: 100,
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            flex: 5,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 4,
-                                  child: Container(
-                                    width: 1000,
-                                    child: Image.asset(
-                                      ('assets/pea.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FittedBox(
-                                    fit: BoxFit.fitWidth,
-                                    child: Container(
-                                      width: 1000,
-                                      alignment: Alignment.center,
-                                      child: AutoSizeText(
-                                        'PEA - no shock',
-                                        style: TextStyle(
-                                            fontSize: 40, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )),
-                  onTap: () => {_selectedPulse('pea')},
-                ),
-                ListTile(
-                  title: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      height: 100,
-                      child: Row(
-                        children: <Widget>[
-                          Flexible(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  FontAwesome.bolt,
-                                  size: 50,
-                                  color: Theme.of(context).splashColor,
-                                ),
-                              )),
-                          Expanded(
-                            flex: 5,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 4,
-                                  child: Container(
-                                    width: 1000,
-                                    child: Image.asset(
-                                      ('assets/vfib.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: AutoSizeText(
-                                    'Ventricular Fibrillation',
-                                    style: TextStyle(
-                                        fontSize: 40, color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Flexible(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  FontAwesome.bolt,
-                                  size: 50,
-                                  color: Theme.of(context).splashColor,
-                                ),
-                              )),
-                        ],
-                      )),
-                  onTap: () => {_selectedPulse('vfib')},
-                ),
-                ListTile(
-                  title: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      height: 100,
-                      child: Row(
-                        children: <Widget>[
-                          Flexible(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  FontAwesome.bolt,
-                                  size: 50,
-                                  color: Theme.of(context).splashColor,
-                                ),
-                              )),
-                          Expanded(
-                            flex: 5,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 4,
-                                  child: Container(
-                                    width: 1000,
-                                    child: Image.asset(
-                                      ('assets/vtach.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: AutoSizeText(
-                                    'Pulseless Ventricular Tachycardia',
-                                    style: TextStyle(
-                                        fontSize: 40, color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Flexible(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  FontAwesome.bolt,
-                                  size: 50,
-                                  color: Theme.of(context).splashColor,
-                                ),
-                              )),
-                        ],
-                      )),
-                  onTap: () => {_selectedPulse('vtach')},
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // presentPulseCheckOutcomes() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (context) => Container(
+  //       decoration: BoxDecoration(
+  //           color: Colors.white,
+  //           borderRadius: BorderRadius.only(
+  //               topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+  //       child: ListView(
+  //         children: [
+  //           Column(
+  //             children: <Widget>[
+  //               ListTile(
+  //                 title: Container(
+  //                   decoration: BoxDecoration(
+  //                     color: Theme.of(context).accentColor,
+  //                     borderRadius: BorderRadius.circular(8.0),
+  //                   ),
+  //                   height: 100,
+  //                   child: AutoSizeText(
+  //                     'GOT PULSE',
+  //                     style: TextStyle(
+  //                       fontSize: 40,
+  //                       color: Colors.white,
+  //                     ),
+  //                     textAlign: TextAlign.center,
+  //                   ),
+  //                   alignment: Alignment.center,
+  //                 ),
+  //                 onTap: () => {_selectedPulse('pulse')},
+  //               ),
+  //               ListTile(
+  //                 title: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.black54,
+  //                       borderRadius: BorderRadius.circular(8.0),
+  //                     ),
+  //                     height: 100,
+  //                     child: Row(
+  //                       children: <Widget>[
+  //                         Expanded(
+  //                           flex: 5,
+  //                           child: Column(
+  //                             mainAxisAlignment: MainAxisAlignment.center,
+  //                             children: <Widget>[
+  //                               Expanded(
+  //                                 flex: 4,
+  //                                 child: Column(
+  //                                   children: [
+  //                                     Expanded(
+  //                                       child: Container(),
+  //                                     ),
+  //                                     Expanded(
+  //                                       child: Container(
+  //                                         decoration: BoxDecoration(
+  //                                           border: Border(
+  //                                               top: BorderSide(
+  //                                                   width: 2,
+  //                                                   color: Colors.white)),
+  //                                         ),
+  //                                       ),
+  //                                     ),
+  //                                   ],
+  //                                 ),
+  //                               ),
+  //                               Expanded(
+  //                                 child: FittedBox(
+  //                                   fit: BoxFit.fitWidth,
+  //                                   child: Container(
+  //                                     width: 1000,
+  //                                     alignment: Alignment.center,
+  //                                     child: AutoSizeText(
+  //                                       'Asystole - no shock',
+  //                                       style: TextStyle(
+  //                                           fontSize: 40, color: Colors.white),
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     )),
+  //                 onTap: () => {_selectedPulse('asystole')},
+  //               ),
+  //               ListTile(
+  //                 title: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.black54,
+  //                       borderRadius: BorderRadius.circular(8.0),
+  //                     ),
+  //                     height: 100,
+  //                     child: Row(
+  //                       children: <Widget>[
+  //                         Expanded(
+  //                           flex: 5,
+  //                           child: Column(
+  //                             mainAxisAlignment: MainAxisAlignment.center,
+  //                             children: <Widget>[
+  //                               Expanded(
+  //                                 flex: 4,
+  //                                 child: Container(
+  //                                   width: 1000,
+  //                                   child: SvgPicture.asset(
+  //                                     ('assets/pea.png'),
+  //                                     fit: BoxFit.fill,
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                               Expanded(
+  //                                 child: FittedBox(
+  //                                   fit: BoxFit.fitWidth,
+  //                                   child: Container(
+  //                                     width: 1000,
+  //                                     alignment: Alignment.center,
+  //                                     child: AutoSizeText(
+  //                                       'PEA - no shock',
+  //                                       style: TextStyle(
+  //                                           fontSize: 40, color: Colors.white),
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     )),
+  //                 onTap: () => {_selectedPulse('pea')},
+  //               ),
+  //               ListTile(
+  //                 title: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.black54,
+  //                       borderRadius: BorderRadius.circular(8.0),
+  //                     ),
+  //                     height: 100,
+  //                     child: Row(
+  //                       children: <Widget>[
+  //                         Flexible(
+  //                             flex: 1,
+  //                             child: Container(
+  //                               alignment: Alignment.center,
+  //                               child: Icon(
+  //                                 FontAwesome.bolt,
+  //                                 size: 50,
+  //                                 color: Theme.of(context).splashColor,
+  //                               ),
+  //                             )),
+  //                         Expanded(
+  //                           flex: 5,
+  //                           child: Column(
+  //                             mainAxisAlignment: MainAxisAlignment.center,
+  //                             children: <Widget>[
+  //                               Expanded(
+  //                                 flex: 4,
+  //                                 child: Container(
+  //                                   width: 1000,
+  //                                   child: Image.asset(
+  //                                     ('assets/vfib.png'),
+  //                                     fit: BoxFit.fill,
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                               Expanded(
+  //                                 child: AutoSizeText(
+  //                                   'Ventricular Fibrillation',
+  //                                   style: TextStyle(
+  //                                       fontSize: 40, color: Colors.white),
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                         Flexible(
+  //                             flex: 1,
+  //                             child: Container(
+  //                               alignment: Alignment.center,
+  //                               child: Icon(
+  //                                 FontAwesome.bolt,
+  //                                 size: 50,
+  //                                 color: Theme.of(context).splashColor,
+  //                               ),
+  //                             )),
+  //                       ],
+  //                     )),
+  //                 onTap: () => {_selectedPulse('vfib')},
+  //               ),
+  //               ListTile(
+  //                 title: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.black54,
+  //                       borderRadius: BorderRadius.circular(8.0),
+  //                     ),
+  //                     height: 100,
+  //                     child: Row(
+  //                       children: <Widget>[
+  //                         Flexible(
+  //                             flex: 1,
+  //                             child: Container(
+  //                               alignment: Alignment.center,
+  //                               child: Icon(
+  //                                 FontAwesome.bolt,
+  //                                 size: 50,
+  //                                 color: Theme.of(context).splashColor,
+  //                               ),
+  //                             )),
+  //                         Expanded(
+  //                           flex: 5,
+  //                           child: Column(
+  //                             mainAxisAlignment: MainAxisAlignment.center,
+  //                             children: <Widget>[
+  //                               Expanded(
+  //                                 flex: 4,
+  //                                 child: Container(
+  //                                   width: 1000,
+  //                                   child: Image.asset(
+  //                                     ('assets/vtach.png'),
+  //                                     fit: BoxFit.fill,
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                               Expanded(
+  //                                 child: AutoSizeText(
+  //                                   'Pulseless Ventricular Tachycardia',
+  //                                   style: TextStyle(
+  //                                       fontSize: 40, color: Colors.white),
+  //                                 ),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                         Flexible(
+  //                             flex: 1,
+  //                             child: Container(
+  //                               alignment: Alignment.center,
+  //                               child: Icon(
+  //                                 FontAwesome.bolt,
+  //                                 size: 50,
+  //                                 color: Theme.of(context).splashColor,
+  //                               ),
+  //                             )),
+  //                       ],
+  //                     )),
+  //                 onTap: () => {_selectedPulse('vtach')},
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget pulseOptions(TextEditingController controller) {
     return Container(
@@ -1339,9 +1345,10 @@ class MyHomePageState extends State<MyHomePage>
                                 flex: 4,
                                 child: Container(
                                   width: 1000,
-                                  child: Image.asset(
-                                    (kIsWeb ? 'pea.png' : 'assets/pea.png'),
+                                  child: SvgPicture.asset(
+                                    (kIsWeb ? 'pea.svg' : 'assets/pea.svg'),
                                     fit: BoxFit.fill,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -1396,9 +1403,10 @@ class MyHomePageState extends State<MyHomePage>
                                 flex: 4,
                                 child: Container(
                                   width: 1000,
-                                  child: Image.asset(
-                                    (kIsWeb ? 'vfib.png' : 'assets/vfib.png'),
+                                  child: SvgPicture.asset(
+                                    (kIsWeb ? 'vfib.svg' : 'assets/vfib.svg'),
                                     fit: BoxFit.fill,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -1454,9 +1462,10 @@ class MyHomePageState extends State<MyHomePage>
                                 flex: 4,
                                 child: Container(
                                   width: 1000,
-                                  child: Image.asset(
-                                    (kIsWeb ? 'vtach.png' : 'assets/vtach.png'),
+                                  child: SvgPicture.asset(
+                                    (kIsWeb ? 'vtach.svg' : 'assets/vtach.svg'),
                                     fit: BoxFit.fill,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -1536,7 +1545,7 @@ class MyHomePageState extends State<MyHomePage>
           ),
           onPressed: () => setState(() {
             print('yes pcheck');
-            presentPulseCheckOutcomes();
+            // presentPulseCheckOutcomes();
           }),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -3388,6 +3397,7 @@ class MyHomePageState extends State<MyHomePage>
         return AlertDialog(
           insetPadding: EdgeInsets.symmetric(horizontal: 8),
           title: Container(
+            decoration: BoxDecoration(border: Border.all(color: Colors.red, width: 3, ), borderRadius: BorderRadius.circular(15)),
             constraints:
                 BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
             child: Row(
