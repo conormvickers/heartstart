@@ -532,6 +532,7 @@ class MyHomePageState extends State<MyHomePage>
 
       nested.show = false;
     }
+    progressPulseCheck = false;
 
     final reset = await Navigator.push(
         context,
@@ -540,6 +541,7 @@ class MyHomePageState extends State<MyHomePage>
                   key: pageTwoKey,
                 )));
     print('returned ' + reset.toString());
+    progressPulseCheck = true;
     if (reset == 'true') {
       print('returned reset');
       resetEverything();
@@ -795,7 +797,6 @@ class MyHomePageState extends State<MyHomePage>
   );
 
   sendEmail(String string) async {
-
     if (kIsWeb) {
       final mailtoLink = Mailto(
         to: ['recoverfeedback@gmail.com'],
@@ -803,7 +804,7 @@ class MyHomePageState extends State<MyHomePage>
         body: string,
       );
       await launch('$mailtoLink');
-    }else{
+    } else {
       final Email email = Email(
         body: string,
         subject: 'RECOVER APP FEEDBACK/BUG REPORT',
@@ -812,7 +813,6 @@ class MyHomePageState extends State<MyHomePage>
 
       await FlutterEmailSender.send(email);
     }
-
   }
 
   List<Widget> settingItems() {
@@ -915,12 +915,12 @@ class MyHomePageState extends State<MyHomePage>
           ],
         ),
       ),
-     Expanded(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 100),
-                child: Image.asset('ad.jpeg'),
-              ),
-            ),
+      Expanded(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 100),
+          child: Image.asset('ad.jpeg'),
+        ),
+      ),
       ElevatedButton(
         onPressed: () =>
             launch('https://recoverinitiative.org/veterinary-professionals/'),
@@ -2046,8 +2046,7 @@ class MyHomePageState extends State<MyHomePage>
 
   _handleTap() {
     print('tap');
-    tap
-    mes.add(DateTime.now());
+    tapTimes.add(DateTime.now());
     if (tapTimes.length > 4) {
       tapTimes.removeAt(0);
     }
@@ -3398,7 +3397,12 @@ class MyHomePageState extends State<MyHomePage>
         return AlertDialog(
           insetPadding: EdgeInsets.symmetric(horizontal: 8),
           title: Container(
-            decoration: BoxDecoration(border: Border.all(color: Colors.red, width: 3, ), borderRadius: BorderRadius.circular(15)),
+            decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.red,
+                  width: 3,
+                ),
+                borderRadius: BorderRadius.circular(15)),
             constraints:
                 BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
             child: Row(
