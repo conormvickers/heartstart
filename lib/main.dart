@@ -2046,7 +2046,8 @@ class MyHomePageState extends State<MyHomePage>
 
   _handleTap() {
     print('tap');
-    tapTimes.add(DateTime.now());
+    tap
+    mes.add(DateTime.now());
     if (tapTimes.length > 4) {
       tapTimes.removeAt(0);
     }
