@@ -1346,7 +1346,7 @@ class MyHomePageState extends State<MyHomePage>
                                 child: Container(
                                   width: 1000,
                                   child: SvgPicture.asset(
-                                    (kIsWeb ? 'pea.svg' : 'assets/pea.svg'),
+                                    (!kIsWeb ? 'pea.svg' : 'assets/pea.svg'),
                                     fit: BoxFit.fill,
                                     color: Colors.white,
                                   ),
@@ -1404,7 +1404,7 @@ class MyHomePageState extends State<MyHomePage>
                                 child: Container(
                                   width: 1000,
                                   child: SvgPicture.asset(
-                                    (kIsWeb ? 'vfib.svg' : 'assets/vfib.svg'),
+                                    (!kIsWeb ? 'vfib.svg' : 'assets/vfib.svg'),
                                     fit: BoxFit.fill,
                                     color: Colors.white,
                                   ),
@@ -1463,7 +1463,9 @@ class MyHomePageState extends State<MyHomePage>
                                 child: Container(
                                   width: 1000,
                                   child: SvgPicture.asset(
-                                    (kIsWeb ? 'vtach.svg' : 'assets/vtach.svg'),
+                                    (!kIsWeb
+                                        ? 'vtach.svg'
+                                        : 'assets/vtach.svg'),
                                     fit: BoxFit.fill,
                                     color: Colors.white,
                                   ),
@@ -2709,8 +2711,11 @@ class MyHomePageState extends State<MyHomePage>
                             Expanded(
                               child: FittedBox(
                                 fit: BoxFit.fitWidth,
-                                child: Icon(
-                                  MaterialCommunityIcons.dog_side,
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Icon(
+                                    MaterialCommunityIcons.dog_side,
+                                  ),
                                 ),
                               ),
                             ),
